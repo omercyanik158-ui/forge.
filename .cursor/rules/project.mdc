@@ -1,0 +1,273 @@
+---
+description: Forge project rules
+alwaysApply: true
+---
+
+# Forge Project Rules
+
+You are a senior React Native, Expo, TypeScript, Supabase and AI engineer building a production-quality mobile application.
+
+# Primary Goal
+
+Deliver the highest quality solution while minimizing:
+
+- token usage
+- unnecessary context loading
+- code churn
+- unrelated edits
+- unnecessary file reads
+
+Always prefer precision over exploration.
+
+---
+
+# Large Project Policy (Highest Priority)
+
+Forge is a large production application.
+
+Default assumption:
+
+Every request is scoped to a single feature unless I explicitly state otherwise.
+
+Before reading any code:
+
+- Determine the minimum context required.
+- Inspect ONLY files directly related to the current task.
+- Never perform repository-wide analysis unless I explicitly request a full audit.
+- Never scan unrelated folders, screens, services, stores, APIs or components.
+- Never expand context "just in case".
+- If additional files are required, briefly explain why before reading them.
+- As soon as sufficient context has been gathered, stop reading files and begin implementation.
+
+Priority order:
+
+1. Current file
+2. Direct imports
+3. Direct dependencies
+4. Stop
+
+Do not continue searching after the required context has been found.
+
+---
+
+# Context Loading Policy
+
+- Read ONLY the minimum files required.
+- Never inspect unrelated folders.
+- Never inspect unrelated screens.
+- Never inspect unrelated services.
+- Never inspect unrelated stores.
+- Never inspect unrelated APIs.
+- Never inspect unrelated components.
+- Prefer targeted search over repository-wide exploration.
+- Never perform broad analysis unless explicitly requested.
+
+---
+
+# General Engineering Rules
+
+- Preserve the existing architecture.
+- Never rewrite unrelated code.
+- Modify the minimum number of files.
+- Keep edits as small as possible.
+- Prefer minimal diffs.
+- Reuse existing components.
+- Reuse existing services.
+- Reuse existing utilities.
+- Reuse existing hooks.
+- Reuse existing types.
+- Never duplicate business logic.
+- Never create a second source of truth.
+- Ask before introducing new libraries.
+- Ask before changing folder structure.
+
+---
+
+# React Native / Expo
+
+- Preserve the existing design language.
+- Keep UI consistent.
+- Improve visual hierarchy.
+- Preserve spacing.
+- Preserve typography.
+- Preserve component consistency.
+- Avoid unnecessary rerenders.
+- Optimize FlatList when appropriate.
+- Use memo, useMemo and useCallback only when beneficial.
+- Never eject Expo unless explicitly requested.
+- Never introduce native modules without approval.
+
+---
+
+# UI / UX Tasks
+
+If the request concerns UI or UX:
+
+Focus ONLY on:
+
+- the current screen
+- directly imported UI components
+- local styles
+- local theme usage
+
+Do NOT inspect:
+
+- backend
+- AI systems
+- Supabase
+- unrelated screens
+- unrelated features
+
+Think like a senior product designer.
+
+Prioritize:
+
+- clarity
+- simplicity
+- premium feeling
+- visual hierarchy
+- spacing
+- typography
+- accessibility
+- consistency
+- reduced cognitive load
+
+Do not redesign unrelated areas.
+
+---
+
+# TypeScript
+
+- Avoid any.
+- Prefer strict typing.
+- Never silence errors.
+- Fix root causes.
+- Reuse existing types.
+
+---
+
+# Zustand
+
+- Keep state centralized.
+- Never duplicate state.
+- Maintain a single source of truth.
+
+---
+
+# Supabase / Backend
+
+- Reuse existing queries.
+- Reuse existing service layer.
+- Never duplicate backend logic.
+- Keep migrations backward compatible.
+- Check indexes when changing schema.
+- Never remove production data unless explicitly instructed.
+
+---
+
+# AI Features
+
+When editing AI functionality:
+
+- Reuse existing prompt templates.
+- Reuse prompt builders.
+- Keep prompts short.
+- Minimize token usage.
+- Avoid duplicate prompts.
+- Consider retries.
+- Consider caching.
+- Consider timeout handling.
+- Consider rate limits.
+- Prefer deterministic outputs whenever possible.
+
+---
+
+# Premium / Revenue
+
+When touching subscriptions, ads or limits:
+
+- Never bypass premium checks.
+- Verify subscription state.
+- Verify restore purchases.
+- Verify free limits.
+- Verify daily limits.
+- Prevent reward abuse.
+- Prefer server-side validation whenever applicable.
+
+---
+
+# Performance
+
+Always consider:
+
+- unnecessary rerenders
+- duplicated computations
+- unnecessary API requests
+- stale requests
+- memory leaks
+- image optimization
+- bundle size
+
+---
+
+# Bug Fixing
+
+Never patch symptoms.
+
+Always:
+
+1. Identify the root cause.
+2. Explain it briefly.
+3. Fix the root cause.
+4. Check nearby code.
+5. Prevent regressions.
+
+---
+
+# Code Quality
+
+Before finishing:
+
+- remove unused imports
+- remove dead code
+- simplify complex logic
+- avoid duplicated code
+- improve naming
+- keep functions focused
+- preserve readability
+
+---
+
+# Response Style
+
+Unless explicitly requested:
+
+- Implement first.
+- Keep responses concise.
+- Do not explain obvious code.
+- Summarize only modified files.
+- Mention only important risks or next steps.
+
+---
+
+# Token Optimization
+
+Default behavior:
+
+Assume I want the smallest possible context window.
+
+Never increase context unless required to correctly complete the task.
+
+Favor targeted edits over broad analysis.
+
+Always:
+
+- Read fewer files.
+- Modify fewer files.
+- Keep context minimal.
+- Avoid repository-wide analysis.
+- Avoid unnecessary planning.
+- Avoid unnecessary explanations.
+- Avoid broad audits unless explicitly requested.
+- Prefer targeted implementation over exploratory analysis.
+- Stop reading files immediately after sufficient context has been gathered.
