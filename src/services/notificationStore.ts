@@ -112,6 +112,22 @@ function clampReminderTime(hour: number, minute: number): { hour: number; minute
   };
 }
 
+function readPermissionFlags(value: unknown): {
+  granted: boolean;
+  canAskAgain: boolean;
+} {
+  if (!value || typeof value !== 'object') {
+    return { granted: false, canAskAgain: true };
+  }
+
+  const record = value as Record<string, unknown>;
+
+  return {
+    granted: record.granted === true,
+    canAskAgain: record.canAskAgain !== false,
+  };
+}
+
 export function isNotificationRuntimeAvailable(): boolean {
   return Platform.OS !== 'web' && !isExpoGo();
 }
@@ -154,14 +170,10 @@ export async function getNotificationPermissionState(): Promise<NotificationPerm
 
   await prepareNotificationChannel();
   const current = await Notifications.getPermissionsAsync();
+  const permission = readPermissionFlags(current);
 
-  if (
-    current.status === 'granted' ||
-    current.status === 'denied' ||
-    current.status === 'undetermined'
-  ) {
-    return current.status;
-  }
+  if (permission.granted) return 'granted';
+  if (!permission.canAskAgain) return 'denied';
 
   return 'undetermined';
 }
@@ -173,14 +185,14 @@ export async function requestNotificationPermission(): Promise<boolean> {
   await prepareNotificationChannel();
 
   const current = await Notifications.getPermissionsAsync();
-  let status = current.status;
+  let { granted } = readPermissionFlags(current);
 
-  if (status !== 'granted') {
+  if (!granted) {
     const requested = await Notifications.requestPermissionsAsync();
-    status = requested.status;
+    granted = readPermissionFlags(requested).granted;
   }
 
-  return status === 'granted';
+  return granted;
 }
 
 async function cancelReminderIdentifier(identifier?: string): Promise<void> {

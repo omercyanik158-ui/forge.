@@ -1,120 +1,120 @@
 {
-"expo": {
-"name": "FORGE",
-"slug": "forge",
-"version": "1.0.0",
-"orientation": "portrait",
-"icon": "./assets/icon.png",
-"userInterfaceStyle": "automatic",
-"scheme": "forge",
-"newArchEnabled": true,
-"ios": {
-"supportsTablet": false,
-"bundleIdentifier": "com.yenispor.forge",
-"buildNumber": "1",
-"infoPlist": {
-"CFBundleDevelopmentRegion": "en",
-"CFBundleLocalizations": [
-"tr",
-"en"
-]
-},
-"privacyManifests": {
-"NSPrivacyTracking": false,
-"NSPrivacyTrackingDomains": [],
-"NSPrivacyCollectedDataTypes": [
-{
-"NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePhotosorVideos",
-"NSPrivacyCollectedDataTypeLinked": false,
-"NSPrivacyCollectedDataTypeTracking": false,
-"NSPrivacyCollectedDataTypePurposes": [
-"NSPrivacyCollectedDataTypePurposeAppFunctionality"
-]
-}
-],
-"NSPrivacyAccessedAPITypes": [
-{
-"NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-"NSPrivacyAccessedAPITypeReasons": [
-"CA92.1"
-]
-},
-{
-"NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
-"NSPrivacyAccessedAPITypeReasons": [
-"C617.1"
-]
-},
-{
-"NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
-"NSPrivacyAccessedAPITypeReasons": [
-"E174.1"
-]
-},
-{
-"NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
-"NSPrivacyAccessedAPITypeReasons": [
-"35F9.1"
-]
-}
-]
-}
-},
-"android": {
-"package": "com.yenispor.forge",
-"versionCode": 1,
-"adaptiveIcon": {
-"backgroundColor": "#0b1326",
-"foregroundImage": "./assets/android-icon-foreground.png",
-"backgroundImage": "./assets/android-icon-background.png",
-"monochromeImage": "./assets/android-icon-monochrome.png"
-},
-"predictiveBackGestureEnabled": true
-},
-"web": {
-"favicon": "./assets/favicon.png",
-"bundler": "metro",
-"output": "server"
-},
-"plugins": [
-"expo-router",
-"expo-font",
-"expo-notifications",
-[
-"expo-system-ui",
-{
-"backgroundColor": "#0b1326"
-}
-],
-"@react-native-community/datetimepicker",
-"expo-localization",
-[
-"expo-image-picker",
-{
-"photosPermission": "FORGE, analiz etmek istediginiz fotograflari secebilmeniz icin fotograf arsivinize erisir.",
-"cameraPermission": "FORGE, yemek ve fizik analizi icin fotograf cekebilmeniz adina kameraniza erisir.",
-"microphonePermission": false
-}
-],
-[
-"expo-camera",
-{
-"cameraPermission": "FORGE, paketli besinlerin barkodunu tarayabilmeniz icin kameraniza erisir.",
-"barcodeScannerEnabled": true
-}
-],
-[
-"react-native-google-mobile-ads",
-{
-"androidAppId": "ca-app-pub-3940256099942544~3347511713"
-}
-]
-],
-"extra": {
-"router": {},
-"eas": {
-"projectId": "f5c9dc35-7828-41e2-878c-1a6b4d77c8b4"
-}
-}
-}
+  "expo": {
+    "name": "FORGE",
+    "slug": "forge",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "forge",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.yenispor.forge",
+      "buildNumber": "1",
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleLocalizations": [
+          "tr",
+          "en"
+        ]
+      },
+      "privacyManifests": {
+        "NSPrivacyTracking": false,
+        "NSPrivacyTrackingDomains": [],
+        "NSPrivacyCollectedDataTypes": [
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePhotosorVideos",
+            "NSPrivacyCollectedDataTypeLinked": false,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          }
+        ],
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
+          }
+        ]
+      }
+    },
+    "android": {
+      "package": "com.yenispor.forge",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#0b1326",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "server"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-notifications",
+      [
+        "expo-system-ui",
+        {
+          "backgroundColor": "#0b1326"
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-localization",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "FORGE, analiz etmek istediginiz fotograflari secebilmeniz icin fotograf arsivinize erisir.",
+          "cameraPermission": "FORGE, yemek ve fizik analizi icin fotograf cekebilmeniz adina kameraniza erisir.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "FORGE, paketli besinlerin barkodunu tarayabilmeniz icin kameraniza erisir.",
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a52f440e-0402-41a3-909c-0c5ea7581832"
+      }
+    },
+    "owner": "omercyanik158"
+  }
 }
