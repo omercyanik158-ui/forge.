@@ -116,7 +116,31 @@ export function useAiQuotaGate(params: {
   creditType: RewardedCreditType;
   rewardedAdAvailable: boolean;
 }): AIQuotaDecision {
-  return useMemo(() => getAIQuotaDecision(params), [params]);
+  const {
+    accessState,
+    creditType,
+    profile,
+    rewardedAdAvailable,
+    rewardedState,
+  } = params;
+
+  return useMemo(
+    () =>
+      getAIQuotaDecision({
+        accessState,
+        creditType,
+        profile,
+        rewardedAdAvailable,
+        rewardedState,
+      }),
+    [
+      accessState,
+      creditType,
+      profile,
+      rewardedAdAvailable,
+      rewardedState,
+    ],
+  );
 }
 
 export async function consumeAiQuotaAfterSuccess({

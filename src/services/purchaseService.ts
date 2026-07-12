@@ -1,8 +1,9 @@
 import { Platform } from 'react-native';
-import { getInstallIdentity } from './installIdentity';
+import { getCurrentAppUserId, toRevenueCatAppUserId } from './accountIdentity';
 import { formatMessage } from './localization';
 import { setSubscriptionTier } from './subscription';
 import { PREMIUM_ENTITLEMENT_ID, PREMIUM_OFFERING_ID, premiumPackagePriority } from '@/config/premium';
+import type { SubscriptionSummary } from '@/types/auth';
 
 export type PurchaseResult =
   | { status: 'success'; message: string }
@@ -36,6 +37,7 @@ type RevenueCatModule = {
   LOG_LEVEL: { DEBUG: unknown };
   setLogLevel?: (level: unknown) => Promise<void> | void;
   configure: (config: { apiKey: string; appUserID?: string }) => Promise<void> | void;
+  logIn?: (appUserID: string) => Promise<{ customerInfo?: RevenueCatCustomerInfo }>;
   getOfferings: () => Promise<{
     current?: {
       availablePackages: {
@@ -62,12 +64,16 @@ type RevenueCatModule = {
 
 type RevenueCatCustomerInfo = {
   entitlements?: {
-    active?: Record<string, unknown>;
+    active?: Record<string, {
+      productIdentifier?: string;
+      expiresDate?: string | null;
+    }>;
   };
 };
 
 let purchasesModulePromise: Promise<RevenueCatModule | null> | null = null;
 let configurePromise: Promise<boolean> | null = null;
+let configuredAppUserId: string | null = null;
 
 function configuredApiKey(): string | null {
   if (Platform.OS === 'ios') return process.env.EXPO_PUBLIC_RC_IOS_API_KEY ?? null;
@@ -119,6 +125,13 @@ async function syncTierFromCustomerInfo(customerInfo: RevenueCatCustomerInfo | n
   await setSubscriptionTier(hasActivePremiumEntitlement(customerInfo) ? 'premium' : 'free');
 }
 
+function activeEntitlementEntry(customerInfo: RevenueCatCustomerInfo | null | undefined): [string, { productIdentifier?: string; expiresDate?: string | null }] | null {
+  const active = customerInfo?.entitlements?.active;
+  if (!active) return null;
+  const entry = Object.entries(active)[0];
+  return entry ?? null;
+}
+
 function unavailableMessage(): string {
   return formatMessage({
     tr: 'Mağaza bağlantısı bu build için henüz hazır değil. API anahtarları ve RevenueCat kurulumu tamamlanınca satın alma aktif olacak.',
@@ -140,11 +153,12 @@ export async function initializePurchases(): Promise<boolean> {
           await purchases.setLogLevel?.(purchases.LOG_LEVEL.DEBUG);
         }
 
-        const installIdentity = await getInstallIdentity();
+        const appUserID = await getCurrentAppUserId();
         await purchases.configure({
           apiKey,
-          appUserID: installIdentity,
+          appUserID,
         });
+        configuredAppUserId = appUserID;
         return true;
       } catch {
         return false;
@@ -153,6 +167,28 @@ export async function initializePurchases(): Promise<boolean> {
   }
 
   return configurePromise;
+}
+
+export async function linkPurchasesToAccount(userId: string): Promise<void> {
+  if (!isStorePurchaseConfigured()) return;
+
+  const initialized = await initializePurchases();
+  const purchases = await loadPurchasesModule();
+  if (!initialized || !purchases) return;
+
+  const authenticatedAppUserId = toRevenueCatAppUserId(userId);
+  if (configuredAppUserId === authenticatedAppUserId) return;
+
+  try {
+    if (purchases.logIn) {
+      const result = await purchases.logIn(authenticatedAppUserId);
+      configuredAppUserId = authenticatedAppUserId;
+      await syncTierFromCustomerInfo(result.customerInfo);
+      return;
+    }
+  } catch {
+    // Fall back to keeping the existing identity if account linking is unavailable.
+  }
 }
 
 function packagePlan(pkg: RevenueCatPackage): PremiumPackageOption['plan'] {
@@ -234,6 +270,47 @@ export async function syncStoreSubscriptionStatus(): Promise<void> {
     await syncTierFromCustomerInfo(customerInfo);
   } catch {
     // Keep the local tier unchanged when store status cannot be fetched.
+  }
+}
+
+export async function getCurrentSubscriptionSummary(): Promise<SubscriptionSummary | null> {
+  const appUserId = await getCurrentAppUserId();
+
+  if (!isStorePurchaseConfigured()) {
+    return {
+      tier: 'free',
+      appUserId,
+      entitlementActive: false,
+    };
+  }
+
+  const initialized = await initializePurchases();
+  const purchases = await loadPurchasesModule();
+  if (!initialized || !purchases) {
+    return {
+      tier: 'free',
+      appUserId,
+      entitlementActive: false,
+    };
+  }
+
+  try {
+    const customerInfo = await purchases.getCustomerInfo();
+    const activeEntry = activeEntitlementEntry(customerInfo);
+    return {
+      tier: hasActivePremiumEntitlement(customerInfo) ? 'premium' : 'free',
+      appUserId,
+      entitlementActive: hasActivePremiumEntitlement(customerInfo),
+      entitlementId: activeEntry?.[0],
+      productId: activeEntry?.[1]?.productIdentifier,
+      expiresAt: activeEntry?.[1]?.expiresDate ?? undefined,
+    };
+  } catch {
+    return {
+      tier: 'free',
+      appUserId,
+      entitlementActive: false,
+    };
   }
 }
 

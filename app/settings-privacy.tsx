@@ -7,6 +7,7 @@ import {
   typography,
 } from "@/theme";
 import {
+  Alert,
   Linking,
   ScrollView,
   Text,
@@ -15,21 +16,25 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { loadDataHealth, type DataHealthItem } from "@/services/dataHealth";
 import { useAppLocalization } from "@/providers/localization-context";
 import { formatDate as formatLocalizedDate } from "@/services/localization";
+import { resetAnalytics } from "@/services/analyticsService";
+import { clearAllAppData } from "@/services/appReset";
+import { setReportingUser } from "@/services/errorReporting";
 
 const SUPPORT_EMAIL = process.env.EXPO_PUBLIC_SUPPORT_EMAIL;
 const HAS_SUPPORT_EMAIL =
   typeof SUPPORT_EMAIL === "string" && SUPPORT_EMAIL.trim().length > 0;
 
 export default function PrivacySettingsScreen() {
-  useAppTheme();
+  const { setMode } = useAppTheme();
   const { t } = useAppLocalization();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [items, setItems] = useState<DataHealthItem[]>([]);
   const [healthyCount, setHealthyCount] = useState(0);
@@ -48,6 +53,34 @@ export default function PrivacySettingsScreen() {
       `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("FORGE Support")}`,
     );
   }, []);
+
+  const handleReset = useCallback(() => {
+    Alert.alert(
+      t("profile.reset_confirm_title"),
+      t("profile.reset_confirm_body"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("profile.reset_action"),
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await clearAllAppData();
+              await resetAnalytics();
+              setReportingUser(null);
+              await setMode("light");
+              router.replace("/onboarding");
+            } catch {
+              Alert.alert(
+                t("profile.reset_failed_title"),
+                t("profile.reset_failed_body"),
+              );
+            }
+          },
+        },
+      ],
+    );
+  }, [router, setMode, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -188,6 +221,23 @@ export default function PrivacySettingsScreen() {
             <Ionicons name="chevron-forward" size={19} color={colors.outline} />
           </TouchableOpacity>
         ) : null}
+
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={t("profile.reset_all_label")}
+          activeOpacity={0.82}
+          onPress={handleReset}
+          style={styles.resetCard}
+        >
+          <View style={styles.resetIcon}>
+            <Ionicons name="trash-outline" size={21} color={colors.error} />
+          </View>
+          <View style={styles.supportCopy}>
+            <Text style={styles.resetTitle}>{t("profile.reset_action")}</Text>
+            <Text style={styles.supportSub}>{t("profile.reset_body")}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={19} color={colors.outline} />
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -330,4 +380,24 @@ const styles = createDynamicStyles(() => ({
   supportCopy: { flex: 1, gap: 3 },
   supportTitle: { ...typography.labelMd, color: colors.onSurface },
   supportSub: { ...typography.bodySm, color: colors.onSurfaceVariant },
+  resetCard: {
+    minHeight: 76,
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: `${colors.error}26`,
+    backgroundColor: `${colors.error}08`,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  resetIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: `${colors.error}12`,
+  },
+  resetTitle: { ...typography.labelMd, color: colors.error },
 }));

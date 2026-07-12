@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { startTransition, useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import Constants from 'expo-constants';
-import { Platform } from 'react-native';
+import { InteractionManager, Platform } from 'react-native';
 import {
   useFonts,
   Montserrat_400Regular,
@@ -18,6 +18,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { AppThemeProvider, useAppTheme } from '@/theme';
 import { LocalizationProvider } from '@/providers/localization-context';
+import { AuthProvider, useAuth } from '@/providers/auth-context';
 import {
   syncReminderSchedules,
   prepareNotificationChannel,
@@ -41,7 +42,8 @@ import {
   identifyAnalyticsUser,
   setAnalyticsContext,
 } from '@/services/analyticsService';
-import { resolveLocalization } from '@/services/localization';
+import { resolveLocalization, type ResolvedLocalization } from '@/services/localization';
+import type { UserProfile } from '@/types';
 import '@/theme/accessibility-defaults';
 
 let splashScreenControlEnabled = false;
@@ -89,6 +91,7 @@ if (errorUtils.setGlobalHandler && !__DEV__) {
  * sırasında başlangıç işlemlerinin tekrar tekrar tetiklenmesini engeller.
  */
 let bootstrapPromise: Promise<BootstrapResult> | null = null;
+let deferredStartupPromise: Promise<void> | null = null;
 
 function isExpoGo(): boolean {
   return Constants.appOwnership === 'expo';
@@ -103,13 +106,12 @@ async function runBootstrap(): Promise<BootstrapResult> {
 
   configureErrorReporting();
 
-  const [themeMode, profile, installIdentity] = await Promise.all([
+  const [themeMode, profile] = await Promise.all([
     loadThemeMode(),
     loadProfile(),
-    getInstallIdentity(),
   ]);
 
-  console.log('[Boot] Tema, profil ve kurulum kimliği yüklendi.');
+  console.log('[Boot] Tema ve profil yüklendi.');
 
   setThemeMode(themeMode);
 
@@ -125,32 +127,78 @@ async function runBootstrap(): Promise<BootstrapResult> {
     market: localization.market,
   });
 
-  void configureAnalytics(localization)
-    .then(() =>
-      identifyAnalyticsUser({
-        id: installIdentity,
-        name: profile?.name,
-        premium: profile?.subscription === 'premium',
-        language: localization.language,
-        market: localization.market,
-      }),
-    )
-    .catch((error: unknown) => {
-      console.warn('[Boot] Analytics başlatılamadı:', error);
-    });
-
-  setReportingUser({
-    id: installIdentity,
-    username: profile?.name,
-    isPremium: profile?.subscription === 'premium',
-  });
-
   console.log('[Boot] Ana başlangıç işlemleri tamamlandı.');
 
   return {
     themeMode,
     status: profile ? 'ready' : 'onboarding',
   };
+}
+
+async function runDeferredStartupServices({
+  profile,
+  localization,
+}: {
+  profile: UserProfile | null;
+  localization: ResolvedLocalization;
+}): Promise<void> {
+  if (deferredStartupPromise) {
+    return deferredStartupPromise;
+  }
+
+  deferredStartupPromise = (async () => {
+    const installIdentity = await getInstallIdentity();
+
+    setReportingUser({
+      id: installIdentity,
+      username: profile?.name,
+      isPremium: profile?.subscription === 'premium',
+    });
+
+    await configureAnalytics(localization)
+      .then(() =>
+        identifyAnalyticsUser({
+          id: installIdentity,
+          name: profile?.name,
+          premium: profile?.subscription === 'premium',
+          language: localization.language,
+          market: localization.market,
+        }),
+      )
+      .catch((error: unknown) => {
+        console.warn('[Boot] Analytics başlatılamadı:', error);
+      });
+
+    if (canUseNativeNotifications()) {
+      const results = await Promise.allSettled([
+        prepareNotificationChannel(),
+        syncReminderSchedules(),
+      ]);
+
+      results.forEach((result) => {
+        if (result.status === 'rejected') {
+          console.warn(
+            '[Boot] Bildirim servisi başlatılamadı:',
+            result.reason,
+          );
+        }
+      });
+    }
+
+    if (Platform.OS !== 'web') {
+      await initializePurchases()
+        .then(async (initialized) => {
+          if (initialized) {
+            await syncStoreSubscriptionStatus();
+          }
+        })
+        .catch((error: unknown) => {
+          console.warn('[Boot] Store başlatılamadı:', error);
+        });
+    }
+  })();
+
+  return deferredStartupPromise;
 }
 
 function getBootstrapPromise(): Promise<BootstrapResult> {
@@ -173,9 +221,6 @@ export function ErrorBoundary({ retry }: { retry: () => void }) {
 }
 
 export default function RootLayout() {
-  const router = useRouter();
-  const segments = useSegments();
-
   const [fontsLoaded, fontError] = useFonts({
     Montserrat_400Regular,
     Montserrat_500Medium,
@@ -235,38 +280,6 @@ export default function RootLayout() {
         }
       });
 
-    /*
-     * Bildirimler Expo Go'da yüklenmez. Development build, APK veya
-     * production build içinde arka planda hazırlanır.
-     */
-    if (canUseNativeNotifications()) {
-      void Promise.allSettled([
-        prepareNotificationChannel(),
-        syncReminderSchedules(),
-      ]).then((results) => {
-        results.forEach((result) => {
-          if (result.status === 'rejected') {
-            console.warn(
-              '[Boot] Bildirim servisi başlatılamadı:',
-              result.reason,
-            );
-          }
-        });
-      });
-    }
-
-    if (Platform.OS !== 'web') {
-      void initializePurchases()
-        .then(async (initialized) => {
-          if (initialized) {
-            await syncStoreSubscriptionStatus();
-          }
-        })
-        .catch((error: unknown) => {
-          console.warn('[Boot] Store başlatılamadı:', error);
-        });
-    }
-
     return () => {
       mounted = false;
       clearTimeout(bootTimeout);
@@ -294,28 +307,110 @@ export default function RootLayout() {
       });
     }
 
-    const firstSegment = segments[0];
+  }, [splashHidden, status]);
 
-    if (status === 'onboarding') {
-      if (firstSegment !== 'onboarding') {
-        void loadProfile().then((profile) => {
-          if (profile) {
-            setStatus('ready');
-          } else {
-            router.replace('/onboarding');
-          }
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
+  if (status === 'loading') {
+    return null;
+  }
+
+  return (
+    <AppThemeProvider initialMode={initialThemeMode}>
+      <LocalizationProvider>
+        <AuthProvider>
+          <AppShell bootstrapStatus={status} />
+        </AuthProvider>
+      </LocalizationProvider>
+    </AppThemeProvider>
+  );
+}
+
+function AppShell({ bootstrapStatus }: { bootstrapStatus: Exclude<GateStatus, 'loading'> }) {
+  const router = useRouter();
+  const segments = useSegments();
+  const { loading: authLoading, guestAccess, session, user } = useAuth();
+  const [localProfileReady, setLocalProfileReady] = useState(
+    bootstrapStatus === 'ready',
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    const task = InteractionManager.runAfterInteractions(() => {
+      if (cancelled) {
+        return;
+      }
+
+      const localization = resolveLocalization({
+        language: 'auto',
+        units: 'auto',
+      });
+
+      void loadProfile()
+        .then((profile) => {
+          setLocalProfileReady(Boolean(profile));
+          return runDeferredStartupServices({
+            profile,
+            localization,
+          });
+        })
+        .catch((error: unknown) => {
+          console.warn('[Boot] Ertelenmiş servisler başlatılamadı:', error);
         });
+    });
+
+    return () => {
+      cancelled = true;
+      task.cancel();
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    void loadProfile().then((profile) => {
+      setLocalProfileReady(Boolean(profile));
+    });
+  }, [segments, user?.id]);
+
+  useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
+    const firstSegment = segments[0];
+    const hasAuthenticatedSession = Boolean(session?.user);
+    const canUseApp = hasAuthenticatedSession || guestAccess;
+    const isWelcomeRoute = firstSegment === 'welcome';
+
+    if (!canUseApp) {
+      if (!isWelcomeRoute) {
+        router.replace('/welcome');
+      }
+      return;
+    }
+
+    if (isWelcomeRoute) {
+      if (hasAuthenticatedSession && localProfileReady) {
+        router.replace('/(tabs)' as never);
+      }
+      return;
+    }
+
+    if (!localProfileReady) {
+      if (firstSegment !== 'onboarding') {
+        router.replace('/onboarding');
       }
       return;
     }
 
     if (
-      status === 'ready' &&
-      (firstSegment === 'onboarding' || firstSegment === undefined)
+      firstSegment === 'onboarding'
+      || firstSegment === undefined
     ) {
       router.replace('/(tabs)' as never);
     }
-  }, [router, segments, splashHidden, status]);
+  }, [authLoading, guestAccess, localProfileReady, router, segments, session?.user]);
 
   useEffect(() => {
     if (!canUseNativeNotifications()) {
@@ -376,21 +471,11 @@ export default function RootLayout() {
     };
   }, [router]);
 
-  if (!fontsLoaded && !fontError) {
+  if (authLoading) {
     return null;
   }
 
-  if (status === 'loading') {
-    return null;
-  }
-
-  return (
-    <AppThemeProvider initialMode={initialThemeMode}>
-      <LocalizationProvider>
-        <RootStack />
-      </LocalizationProvider>
-    </AppThemeProvider>
-  );
+  return <RootStack />;
 }
 
 function RootStack() {

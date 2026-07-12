@@ -165,4 +165,5 @@ export type UserProfile = {
   streak?: StreakData;
   achievements?: string[];
   createdAt: string;
+  updatedAt?: string;
 };

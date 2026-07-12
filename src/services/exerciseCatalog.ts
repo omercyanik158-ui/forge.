@@ -10,29 +10,44 @@ export type SearchableExercise = {
   targets: string;
 };
 
-const EXERCISE_BY_ID = new Map(EXERCISES.map((exercise) => [exercise.id, exercise]));
+let exerciseById: Map<string, ExerciseLibraryItem> | null = null;
+let searchableExercises: SearchableExercise[] | null = null;
 
-export const SEARCHABLE_EXERCISES: SearchableExercise[] = EXERCISES.map((exercise) => ({
-  exercise,
-  name: normalizedText(exercise.displayName),
-  group: normalizedText(exercise.muscleGroup),
-  equipment: normalizedText(exercise.equipment),
-  targets: normalizedText(exercise.targetMuscles.join(' ')),
-}));
+function getExerciseByIdIndex(): Map<string, ExerciseLibraryItem> {
+  if (!exerciseById) {
+    exerciseById = new Map(EXERCISES.map((exercise) => [exercise.id, exercise]));
+  }
+
+  return exerciseById;
+}
+
+export function getSearchableExercises(): SearchableExercise[] {
+  if (!searchableExercises) {
+    searchableExercises = EXERCISES.map((exercise) => ({
+      exercise,
+      name: normalizedText(exercise.displayName),
+      group: normalizedText(exercise.muscleGroup),
+      equipment: normalizedText(exercise.equipment),
+      targets: normalizedText(exercise.targetMuscles.join(' ')),
+    }));
+  }
+
+  return searchableExercises;
+}
 
 export function getExerciseById(id: string | null | undefined): ExerciseLibraryItem | undefined {
-  return id ? EXERCISE_BY_ID.get(id) : undefined;
+  return id ? getExerciseByIdIndex().get(id) : undefined;
 }
 
 export function hasExercise(id: string): boolean {
-  return EXERCISE_BY_ID.has(id);
+  return getExerciseByIdIndex().has(id);
 }
 
 export function searchExercises(query: string): ExerciseLibraryItem[] {
   const normalizedQuery = normalizedText(query).trim();
   if (!normalizedQuery) return EXERCISES;
 
-  return SEARCHABLE_EXERCISES
+  return getSearchableExercises()
     .filter((entry) =>
       entry.name.includes(normalizedQuery)
       || entry.group.includes(normalizedQuery)

@@ -15,7 +15,12 @@ export async function loadProfile(): Promise<UserProfile | null> {
 }
 
 export async function saveProfile(profile: UserProfile): Promise<void> {
-  await saveStoredValue(STORAGE_KEYS.profile, profile);
+  const now = new Date().toISOString();
+  await saveStoredValue(STORAGE_KEYS.profile, {
+    ...profile,
+    updatedAt: now,
+    createdAt: profile.createdAt || now,
+  });
 }
 
 export async function isOnboarded(): Promise<boolean> {

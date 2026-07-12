@@ -1,7 +1,7 @@
 import type { ViewStyle } from 'react-native';
 import { colors } from './colors';
 
-export type ShadowLevel = 'sm' | 'md' | 'lg' | 'floating';
+export type ShadowLevel = 'sm' | 'md' | 'lg' | 'floating' | 'authCard';
 
 export function shadowStyle(level: ShadowLevel = 'md'): ViewStyle {
   const shadowColor = colors.shadow;
@@ -33,6 +33,16 @@ export function shadowStyle(level: ShadowLevel = 'md'): ViewStyle {
       shadowRadius: 18,
       shadowOffset: { width: 0, height: 10 },
       elevation: 6,
+    };
+  }
+
+  if (level === 'authCard') {
+    return {
+      shadowColor,
+      shadowOpacity: 0.11,
+      shadowRadius: 24,
+      shadowOffset: { width: 0, height: 12 },
+      elevation: 7,
     };
   }
 

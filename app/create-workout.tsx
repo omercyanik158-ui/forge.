@@ -27,7 +27,7 @@ import { ExerciseImageModal } from "@/components/ExerciseImageModal";
 import { useAppLocalization } from "@/providers/localization-context";
 import {
   getExerciseById,
-  SEARCHABLE_EXERCISES,
+  getSearchableExercises,
 } from "@/services/exerciseCatalog";
 import { processEngagement } from "@/services/achievementStore";
 import { safeGoBack } from "@/services/navigation";
@@ -146,7 +146,7 @@ export default function CreateWorkoutScreen() {
     const normalizedQuery = normalizedText(query);
     const selectedGroup = normalizedText(selectedFilter);
 
-    return SEARCHABLE_EXERCISES.filter(
+    return getSearchableExercises().filter(
       ({ exercise, name, group, equipment, targets }) => {
         const matchesFavorites =
           selectedFilter !== FILTER_FAVORITES || favoriteIdSet.has(exercise.id);

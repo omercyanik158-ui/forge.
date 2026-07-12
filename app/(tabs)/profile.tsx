@@ -3,14 +3,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter, useScrollToTop } from "expo-router";
 import { useCallback, useRef, useState } from "react";
+import { Button } from "@/components/Button";
 import { GlassCard } from "@/components/GlassCard";
 import { PremiumFeatureCard } from "@/components/PremiumFeatureCard";
 import { TopBar } from "@/components/TopBar";
+import { useAuth } from "@/providers/auth-context";
 import { useAppLocalization } from "@/providers/localization-context";
-import { resetAnalytics } from "@/services/analyticsService";
 import { ACHIEVEMENT_DEFS, getStreakCount } from "@/services/achievementStore";
-import { clearAllAppData } from "@/services/appReset";
-import { setReportingUser } from "@/services/errorReporting";
 import { goalProgress } from "@/services/calculations";
 import {
   formatHeightValue,
@@ -20,6 +19,7 @@ import {
 import { getPremiumMarketSnapshot } from "@/services/market";
 import { loadNutritionSummary } from "@/services/mealInsights";
 import { loadProfile } from "@/services/profileStore";
+import { restorePremiumPurchases } from "@/services/purchaseService";
 import { isPremium } from "@/services/subscription";
 import { formatPersonName } from "@/services/textUtils";
 import { weeklyWorkoutSummary } from "@/services/workoutStore";
@@ -51,8 +51,9 @@ export default function ProfileScreen() {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
   const router = useRouter();
-  const { colors: themeColors, setMode } = useAppTheme();
+  const { colors: themeColors } = useAppTheme();
   const { t, resolved } = useAppLocalization();
+  const { guestAccess, session, signOut, sync, syncNow } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [snapshot, setSnapshot] = useState<WeeklySnapshot>({
     workouts: 0,
@@ -86,34 +87,6 @@ export default function ProfileScreen() {
   const goalProgressPct = profile ? (goalProgress(profile)?.pct ?? null) : null;
   const premium = isPremium(profile);
   const premiumOffer = getPremiumMarketSnapshot(resolved);
-
-  const handleReset = () => {
-    Alert.alert(
-      t("profile.reset_confirm_title"),
-      t("profile.reset_confirm_body"),
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("profile.reset_action"),
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await clearAllAppData();
-              await resetAnalytics();
-              setReportingUser(null);
-              await setMode("light");
-              router.replace("/onboarding");
-            } catch {
-              Alert.alert(
-                t("profile.reset_failed_title"),
-                t("profile.reset_failed_body"),
-              );
-            }
-          },
-        },
-      ],
-    );
-  };
 
   const stats: StatItem[] = profile
     ? [
@@ -299,6 +272,26 @@ export default function ProfileScreen() {
           premium={premium}
           freeLabel={t("profile.free_plan")}
         />
+        <AccountSyncCard
+          signedIn={Boolean(session?.user)}
+          guestAccess={guestAccess}
+          email={session?.user?.email ?? null}
+          syncing={sync.status === "syncing"}
+          syncError={sync.status === "error" ? sync.errorMessage : undefined}
+          lastSyncAt={sync.lastSuccessfulAt}
+          onSync={() => void syncNow()}
+          onRestore={async () => {
+            const result = await restorePremiumPurchases();
+            Alert.alert(t("profile.account_restore"), result.message || t("profile.account_restore_done"));
+            await refresh();
+          }}
+          onSignOut={async () => {
+            await signOut();
+            Alert.alert(t("profile.account_sign_out"), t("profile.account_signed_out"));
+            router.replace("/welcome");
+          }}
+          onUpgradeAccount={() => router.push("/welcome")}
+        />
         <StatsGrid stats={stats} />
         <WeeklySnapshotCard
           streak={streakCount}
@@ -323,18 +316,128 @@ export default function ProfileScreen() {
         ))}
         <TouchableOpacity
           accessibilityRole="button"
-          accessibilityLabel={t("profile.reset_all_label")}
-          style={styles.logoutButton}
+          accessibilityLabel={
+            session?.user ? t("profile.account_sign_out") : t("profile.account_add")
+          }
+          style={[
+            styles.accountFooterButton,
+            {
+              borderColor: session?.user ? `${colors.error}20` : `${colors.primary}24`,
+              backgroundColor: session?.user ? `${colors.error}08` : `${colors.primary}0F`,
+            },
+          ]}
           activeOpacity={0.7}
-          onPress={handleReset}
+          onPress={async () => {
+            if (session?.user) {
+              await signOut();
+            }
+            router.replace("/welcome");
+          }}
         >
-          <Ionicons name="log-out-outline" size={20} color={colors.error} />
-          <Text style={[typography.labelMd, { color: colors.error }]}>
-            {t("profile.reset_title")}
+          <Ionicons
+            name={session?.user ? "log-out-outline" : "person-add-outline"}
+            size={20}
+            color={session?.user ? colors.error : colors.primary}
+          />
+          <Text
+            style={[
+              typography.labelMd,
+              { color: session?.user ? colors.error : colors.primary },
+            ]}
+          >
+            {session?.user ? t("profile.account_sign_out") : t("profile.account_add")}
           </Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
+  );
+}
+
+function AccountSyncCard({
+  signedIn,
+  guestAccess,
+  email,
+  syncing,
+  syncError,
+  lastSyncAt,
+  onSync,
+  onRestore,
+  onSignOut,
+  onUpgradeAccount,
+}: {
+  signedIn: boolean;
+  guestAccess: boolean;
+  email: string | null;
+  syncing: boolean;
+  syncError?: string;
+  lastSyncAt?: string;
+  onSync: () => void;
+  onRestore: () => void;
+  onSignOut: () => void;
+  onUpgradeAccount: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const { t } = useAppLocalization();
+
+  return (
+    <GlassCard variant="panel" style={styles.accountCard}>
+      <View style={styles.accountHeader}>
+        <View style={[styles.accountBadge, { backgroundColor: colors.secondaryContainer }]}>
+          <Ionicons name="cloud-upload-outline" size={18} color={colors.secondary} />
+        </View>
+        <View style={styles.accountCopy}>
+          <Text style={[styles.accountTitle, { color: colors.onSurface }]}>
+            {signedIn ? t("profile.account_signed_in") : t("profile.account_guest_title")}
+          </Text>
+          <Text style={[styles.accountBody, { color: colors.onSurfaceVariant }]}>
+            {signedIn
+              ? email ?? t("profile.account_signed_in_body")
+              : guestAccess
+                ? t("profile.account_guest_body")
+                : t("profile.account_sync_sub")}
+          </Text>
+        </View>
+      </View>
+
+      <Text style={[styles.accountMeta, { color: syncError ? colors.error : colors.onSurfaceVariant }]}>
+        {syncing
+          ? t("profile.account_syncing")
+          : syncError
+            ? `${t("profile.account_sync_error")}: ${syncError}`
+            : `${t("profile.account_last_sync")}: ${lastSyncAt ?? t("profile.account_never_synced")}`}
+      </Text>
+
+      <View style={styles.accountActions}>
+        {signedIn ? (
+          <>
+            <Button
+              label={t("profile.account_sync_now")}
+              onPress={onSync}
+              loading={syncing}
+              icon="sync"
+            />
+            <Button
+              label={t("profile.account_restore")}
+              onPress={onRestore}
+              variant="secondary"
+              icon="refresh"
+            />
+            <Button
+              label={t("profile.account_sign_out")}
+              onPress={onSignOut}
+              variant="tertiary"
+              icon="log-out-outline"
+            />
+          </>
+        ) : (
+          <Button
+            label={t("profile.account_add")}
+            onPress={onUpgradeAccount}
+            icon="cloud-upload-outline"
+          />
+        )}
+      </View>
+    </GlassCard>
   );
 }
 
@@ -651,6 +754,24 @@ const styles = createDynamicStyles(() => ({
     minHeight: 84,
   },
   snapshotCard: { padding: spacing.lg, gap: spacing.md },
+  accountCard: { padding: spacing.lg, gap: spacing.md },
+  accountHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.md,
+  },
+  accountBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.xl,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  accountCopy: { flex: 1, gap: spacing.xs },
+  accountTitle: { ...typography.cardTitle },
+  accountBody: { ...typography.bodySm, lineHeight: 20 },
+  accountMeta: { ...typography.bodyXs, lineHeight: 18 },
+  accountActions: { gap: spacing.sm },
   snapshotTitle: { ...typography.sectionTitle, color: colors.onSurface },
   snapshotGrid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
   snapshotItem: {
@@ -713,7 +834,7 @@ const styles = createDynamicStyles(() => ({
     justifyContent: "center",
   },
   settingCopy: { flex: 1, gap: 2 },
-  logoutButton: {
+  accountFooterButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

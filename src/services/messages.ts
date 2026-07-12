@@ -1006,6 +1006,81 @@ export const messages = {
     en: "Premium programs, advanced food search, and a smoother tracking experience are active on this profile.",
   },
   "profile.view_details": { tr: "Ayrıntıları gör", en: "View details" },
+  "profile.account_sync": {
+    tr: "Hesap ve senkronizasyon",
+    en: "Account and sync",
+  },
+  "profile.account_sync_sub": {
+    tr: "Giriş durumu, cihazlar arası senkron ve üyelik",
+    en: "Sign-in status, cross-device sync, and membership",
+  },
+  "profile.account_guest_title": { tr: "Misafir modunda", en: "Guest mode" },
+  "profile.account_guest_body": {
+    tr: "Google veya Apple ile giriş yaparak verilerini cihazlar arasında taşı.",
+    en: "Sign in with Google or Apple to carry your data across devices.",
+  },
+  "profile.account_add": {
+    tr: "Hesap ekle",
+    en: "Add account",
+  },
+  "profile.account_signed_in": { tr: "Hesap bağlı", en: "Account connected" },
+  "profile.account_signed_in_body": {
+    tr: "Bu profil hesabınla eşitleniyor ve üyelik durumun korunuyor.",
+    en: "This profile syncs with your account and keeps your membership intact.",
+  },
+  "profile.account_sync_now": { tr: "Şimdi senkronize et", en: "Sync now" },
+  "profile.account_restore": {
+    tr: "Satın almaları geri yükle",
+    en: "Restore purchases",
+  },
+  "profile.account_sign_out": { tr: "Hesaptan çık", en: "Sign out" },
+  "profile.account_last_sync": { tr: "Son senkron", en: "Last sync" },
+  "profile.account_never_synced": {
+    tr: "Henüz senkron yapılmadı",
+    en: "Not synced yet",
+  },
+  "profile.account_syncing": { tr: "Senkron sürüyor", en: "Syncing" },
+  "profile.account_sync_error": { tr: "Senkron uyarısı", en: "Sync warning" },
+  "profile.account_restore_done": {
+    tr: "Satın almalar kontrol edildi.",
+    en: "Purchases were checked.",
+  },
+  "profile.account_signed_out": {
+    tr: "Hesaptan çıkıldı.",
+    en: "Signed out.",
+  },
+
+  "auth.hero_badge": { tr: "FORGE hesabı", en: "FORGE account" },
+  "auth.title": {
+    tr: "İlerlemeni tüm cihazlarında yanında tut.",
+    en: "Keep your progress with you on every device.",
+  },
+  "auth.subtitle": {
+    tr: "Google veya Apple ile giriş yap, üyeliğini ve tüm kayıtlarını güvenle eşitle.",
+    en: "Sign in with Google or Apple to safely sync your membership and all records.",
+  },
+  "auth.card_title": {
+    tr: "Devam etmek için giriş yap",
+    en: "Sign in to continue",
+  },
+  "auth.card_body": {
+    tr: "Misafir olarak da devam edebilirsin. Daha sonra hesap eklediğinde yerel verilerin buluta taşınır.",
+    en: "You can continue as a guest too. When you add an account later, your local data moves to the cloud.",
+  },
+  "auth.google_cta": { tr: "Google ile devam et", en: "Continue with Google" },
+  "auth.apple_cta": { tr: "Apple ile devam et", en: "Continue with Apple" },
+  "auth.guest_cta": {
+    tr: "Şimdilik misafir devam et",
+    en: "Continue as guest for now",
+  },
+  "auth.error_title": {
+    tr: "Giriş tamamlanamadı",
+    en: "Sign-in could not be completed",
+  },
+  "auth.error_body": {
+    tr: "Bağlantını kontrol edip tekrar deneyebilirsin.",
+    en: "Check your connection and try again.",
+  },
 
   "profile.week_title": { tr: "Bu hafta", en: "This week" },
   "profile.week_streak": { tr: "Seri", en: "Streak" },

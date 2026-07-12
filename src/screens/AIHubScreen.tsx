@@ -45,7 +45,10 @@ import {
   analyzePhysique,
   AIHubApiError,
 } from "@/services/geminiService";
-import { getInstallIdentity } from "@/services/installIdentity";
+import {
+  getCurrentAppUserId,
+  getCurrentDeviceId,
+} from "@/services/accountIdentity";
 import { successFeedback } from "@/services/interactionFeedback";
 import { saveMeal } from "@/services/mealStore";
 import { loadProfile } from "@/services/profileStore";
@@ -135,7 +138,8 @@ export default function AIHubScreen() {
   useScrollToTop(listRef);
   const [mode, setMode] = useState<AIHubMode>("food");
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [installIdentity, setInstallIdentity] = useState<string | null>(null);
+  const [appUserId, setAppUserId] = useState<string | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
   const [logs, setLogs] = useState<AIHubLog[]>([]);
   const [accessState, setAccessState] =
     useState<AIHubAccessState>(DEFAULT_ACCESS_STATE);
@@ -203,7 +207,8 @@ export default function AIHubScreen() {
       nextProfile,
       nextLogs,
       nextAccessState,
-      nextInstallIdentity,
+      nextAppUserId,
+      nextDeviceId,
       nextSavedPrograms,
       nextRewardedState,
       mealAdAvailable,
@@ -212,14 +217,15 @@ export default function AIHubScreen() {
       loadProfile(),
       getLogs().catch(() => []),
       loadAIHubAccessState(),
-      getInstallIdentity(),
+      getCurrentAppUserId(),
+      getCurrentDeviceId(),
       loadAIProgramInstances(),
       loadRewardedCreditState(),
       loadRewardedAd(REWARDED_AD_TYPES.mealAnalysis),
       loadRewardedAd(REWARDED_AD_TYPES.physiqueAnalysis),
     ]);
-    const rewardedSnapshot = nextInstallIdentity
-      ? await fetchRewardedCreditSnapshot(nextInstallIdentity).catch(() => null)
+    const rewardedSnapshot = nextAppUserId
+      ? await fetchRewardedCreditSnapshot(nextAppUserId).catch(() => null)
       : null;
     const resolvedRewardedState = rewardedSnapshot
       ? await syncRewardedCreditStateFromSnapshot(rewardedSnapshot)
@@ -228,7 +234,8 @@ export default function AIHubScreen() {
     setLogs(nextLogs);
     setAccessState(nextAccessState);
     setRewardedState(resolvedRewardedState);
-    setInstallIdentity(nextInstallIdentity);
+    setAppUserId(nextAppUserId);
+    setDeviceId(nextDeviceId);
     setSavedProgramId(nextSavedPrograms[0]?.id ?? null);
     setRewardedAvailability({
       [REWARDED_AD_TYPES.mealAnalysis]: mealAdAvailable,
@@ -366,15 +373,15 @@ export default function AIHubScreen() {
     });
 
     if (outcome === "completed") {
-      if (!installIdentity) {
+      if (!appUserId || !deviceId) {
         setRewardedFeedback(t("rewarded_ads.unavailable_feedback"));
         setRewardedLoading(false);
         return;
       }
       const serverGrant = await claimRewardedCredit({
         creditType: limitModalType,
-        appUserId: installIdentity,
-        deviceId: installIdentity,
+        appUserId,
+        deviceId,
         premium,
         idempotencyKey: createRewardedClaimId(limitModalType),
       });
@@ -441,7 +448,8 @@ export default function AIHubScreen() {
     setRewardedLoading(false);
   }, [
     closeLimitModal,
-    installIdentity,
+    appUserId,
+    deviceId,
     limitModalType,
     premium,
     rewardedLoading,
@@ -520,7 +528,7 @@ export default function AIHubScreen() {
           const response = await analyzeFood(variant.base64, {
             language: resolved.language,
             premium,
-            appUserId: installIdentity ?? undefined,
+            appUserId: appUserId ?? undefined,
             requestId,
             signal: controller.signal,
           });
@@ -626,7 +634,7 @@ export default function AIHubScreen() {
             {
               language: resolved.language,
               premium,
-              appUserId: installIdentity ?? undefined,
+              appUserId: appUserId ?? undefined,
               age: profile.age,
               requestId,
               signal: controller.signal,

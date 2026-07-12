@@ -43,7 +43,4 @@ yarn-error.*
 
 Expo-Go-*.tar.app/
 .env.production
-
-Expo-Go-*.tar.app/
-.env.production
 *.apk
