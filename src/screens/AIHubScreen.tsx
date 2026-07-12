@@ -1,7 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
-import { useScrollToTop } from "@react-navigation/native";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter, useScrollToTop } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
@@ -169,8 +168,6 @@ export default function AIHubScreen() {
   const [savedProgramId, setSavedProgramId] = useState<string | null>(null);
 
   const premium = isPremium(profile);
-  focusedModeRef.current = mode;
-  focusedPremiumRef.current = premium;
   const remainingPhysiqueAnalyses = premium
     ? Number.POSITIVE_INFINITY
     : getRemainingFreePhysiqueAnalyses(accessState);
@@ -194,6 +191,11 @@ export default function AIHubScreen() {
     [logs, mode, premium],
   );
   const hasSavedAnalyses = logs.length > 0;
+
+  useEffect(() => {
+    focusedModeRef.current = mode;
+    focusedPremiumRef.current = premium;
+  }, [mode, premium]);
 
   const refresh = useCallback(async () => {
     await initializeRewardedAds();

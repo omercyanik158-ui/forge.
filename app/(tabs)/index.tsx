@@ -14,10 +14,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useScrollToTop } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useRouter, useScrollToTop } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { TopBar } from "@/components/TopBar";
 import { GlassCard } from "@/components/GlassCard";

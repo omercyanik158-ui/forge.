@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, TextInput, View } from "react-native";
 import { GlassCard } from "@/components/GlassCard";
@@ -47,9 +47,11 @@ export function FoodResultCard({ result, labels, onChange }: Props) {
 
   useEffect(() => {
     const detectedGrams = extractGramsFromPortion(result.porsiyon);
-    setGramsInput(
-      detectedGrams != null ? normalizeEditableNumber(detectedGrams) : "",
-    );
+    startTransition(() => {
+      setGramsInput(
+        detectedGrams != null ? normalizeEditableNumber(detectedGrams) : "",
+      );
+    });
   }, [result.porsiyon]);
 
   const updateNumber = (field: NumericField, value: string) => {

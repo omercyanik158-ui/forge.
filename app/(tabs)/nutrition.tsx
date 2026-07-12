@@ -16,13 +16,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useScrollToTop } from "@react-navigation/native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { Image as ExpoImage } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useRouter, useScrollToTop } from "expo-router";
 import { TopBar } from "@/components/TopBar";
 import { GlassCard } from "@/components/GlassCard";
 import { HydrationBottle } from "@/components/HydrationBottle";

@@ -1,6 +1,6 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
@@ -284,10 +284,14 @@ export default function RootLayout() {
           splashScreenControlEnabled = false;
         })
         .finally(() => {
-          setSplashHidden(true);
+          startTransition(() => {
+            setSplashHidden(true);
+          });
         });
     } else if (!splashHidden) {
-      setSplashHidden(true);
+      startTransition(() => {
+        setSplashHidden(true);
+      });
     }
 
     const firstSegment = segments[0];

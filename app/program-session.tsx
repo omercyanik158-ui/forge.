@@ -2354,7 +2354,7 @@ const styles = createDynamicStyles(() => ({
     justifyContent: "flex-end",
   },
   exitSheetScrim: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(4, 9, 14, 0.42)",
   },
   exitSheet: {
@@ -2413,7 +2413,7 @@ const styles = createDynamicStyles(() => ({
     justifyContent: "flex-end",
   },
   swapSheetScrim: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(4, 9, 14, 0.48)",
   },
   swapSheet: {
