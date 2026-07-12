@@ -44,7 +44,15 @@ import {
 import { resolveLocalization } from '@/services/localization';
 import '@/theme/accessibility-defaults';
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+let splashScreenControlEnabled = false;
+
+void SplashScreen.preventAutoHideAsync()
+  .then((result) => {
+    splashScreenControlEnabled = result;
+  })
+  .catch(() => {
+    splashScreenControlEnabled = false;
+  });
 
 type ErrorUtilsLike = {
   setGlobalHandler?: (
@@ -181,6 +189,7 @@ export default function RootLayout() {
   const [status, setStatus] = useState<GateStatus>('loading');
   const [initialThemeMode, setInitialThemeMode] =
     useState<ThemeMode>('light');
+  const [splashHidden, setSplashHidden] = useState(false);
 
   useEffect(() => {
     if (!fontsLoaded && !fontError) {
@@ -269,7 +278,17 @@ export default function RootLayout() {
       return;
     }
 
-    SplashScreen.hideAsync().catch(() => {});
+    if (splashScreenControlEnabled && !splashHidden) {
+      void SplashScreen.hideAsync()
+        .catch(() => {
+          splashScreenControlEnabled = false;
+        })
+        .finally(() => {
+          setSplashHidden(true);
+        });
+    } else if (!splashHidden) {
+      setSplashHidden(true);
+    }
 
     const firstSegment = segments[0];
 
@@ -292,7 +311,7 @@ export default function RootLayout() {
     ) {
       router.replace('/(tabs)' as never);
     }
-  }, [router, segments, status]);
+  }, [router, segments, splashHidden, status]);
 
   useEffect(() => {
     if (!canUseNativeNotifications()) {
