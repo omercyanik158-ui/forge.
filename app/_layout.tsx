@@ -393,6 +393,11 @@ function AppShell({ bootstrapStatus }: { bootstrapStatus: Exclude<GateStatus, 'l
     if (isWelcomeRoute) {
       if (hasAuthenticatedSession && localProfileReady) {
         router.replace('/(tabs)' as never);
+        return;
+      }
+
+      if (hasAuthenticatedSession && !localProfileReady) {
+        router.replace('/onboarding');
       }
       return;
     }

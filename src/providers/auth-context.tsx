@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { Platform } from 'react-native';
 import { clearGuestAccess, loadGuestAccess, saveGuestAccess, loadSyncMetadata } from '@/services/authStorage';
 import { syncUserData, upsertSubscriptionState } from '@/services/cloudSync';
 import { getCurrentAppUserId, toRevenueCatAppUserId } from '@/services/accountIdentity';
@@ -27,6 +28,7 @@ WebBrowser.maybeCompleteAuthSession();
 type AuthContextValue = SessionState & {
   guestAccess: boolean;
   sessionRefreshing: boolean;
+  appleAuthAvailable: boolean;
   sync: SyncStatusSnapshot;
   continueAsGuest: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -47,6 +49,18 @@ function toAuthUser(user: { id: string; email?: string | null; app_metadata?: Re
   };
 }
 
+function createNonce(length = 32): string {
+  const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  return Array.from({ length }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+}
+
+function formatAppleFullName(credential: AppleAuthentication.AppleAuthenticationCredential): string | null {
+  const givenName = credential.fullName?.givenName?.trim();
+  const familyName = credential.fullName?.familyName?.trim();
+  const fullName = [givenName, familyName].filter(Boolean).join(' ').trim();
+  return fullName.length > 0 ? fullName : null;
+}
+
 async function persistSubscriptionState(userId: string): Promise<SubscriptionSummary | null> {
   const summary = await getCurrentSubscriptionSummary();
   if (!summary) return null;
@@ -60,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [sessionRefreshing, setSessionRefreshing] = useState(false);
   const [guestAccess, setGuestAccess] = useState(false);
+  const [appleAuthAvailable, setAppleAuthAvailable] = useState(false);
   const [sync, setSync] = useState<SyncStatusSnapshot>({ status: 'idle' });
 
   const hydrateSyncState = useCallback(async () => {
@@ -142,6 +157,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [hydrateSyncState]);
 
   useEffect(() => {
+    let mounted = true;
+
+    if (Platform.OS !== 'ios') {
+      setAppleAuthAvailable(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    AppleAuthentication.isAvailableAsync()
+      .then((available) => {
+        if (mounted) {
+          setAppleAuthAvailable(available);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setAppleAuthAvailable(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!session?.user) {
       setSync((current) => ({
         ...current,
@@ -198,15 +240,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [signInWithOAuth]);
 
   const signInWithApple = useCallback(async () => {
-    if (AppleAuthentication.isAvailableAsync) {
-      try {
-        await AppleAuthentication.isAvailableAsync();
-      } catch {
-        // Browser-based OAuth remains the fallback even if the native check fails.
-      }
+    if (!supabase) {
+      throw supabaseConfigurationError();
     }
-    await signInWithOAuth('apple');
-  }, [signInWithOAuth]);
+
+    if (Platform.OS !== 'ios') {
+      throw new Error('Apple ile giris yalnizca iOS buildlerinde kullanilabilir.');
+    }
+
+    const available = await AppleAuthentication.isAvailableAsync();
+    if (!available) {
+      throw new Error('Bu cihazda Apple ile giris su anda kullanilamiyor. iOS development build ile tekrar dene.');
+    }
+
+    const rawNonce = createNonce();
+
+    setSessionRefreshing(true);
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+        nonce: rawNonce,
+      });
+
+      if (!credential.identityToken) {
+        throw new Error('Apple kimlik dogrulamasi tamamlandi ancak identity token donmedi.');
+      }
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken,
+        nonce: rawNonce,
+      });
+
+      if (error) throw error;
+
+      if (credential.email || credential.fullName) {
+        const fullName = formatAppleFullName(credential);
+        const nextUserMetadata: Record<string, string> = {};
+        if (credential.email) {
+          nextUserMetadata.email = credential.email;
+        }
+        if (fullName) {
+          nextUserMetadata.full_name = fullName;
+          if (credential.fullName?.givenName) {
+            nextUserMetadata.given_name = credential.fullName.givenName;
+          }
+          if (credential.fullName?.familyName) {
+            nextUserMetadata.family_name = credential.fullName.familyName;
+          }
+        }
+
+        if (Object.keys(nextUserMetadata).length > 0) {
+          await supabase.auth.updateUser({
+            data: nextUserMetadata,
+          });
+        }
+      }
+
+      setSession(data.session);
+      setUser(toAuthUser(data.session?.user ?? null));
+      await clearGuestAccess();
+      setGuestAccess(false);
+    } catch (error) {
+      if (
+        error instanceof Error
+        && (error.message.includes('canceled') || error.message.includes('cancelled'))
+      ) {
+        throw new Error('Apple ile giris iptal edildi.');
+      }
+      throw error;
+    } finally {
+      setSessionRefreshing(false);
+    }
+  }, []);
 
   const continueAsGuest = useCallback(async () => {
     await saveGuestAccess(true);
@@ -229,6 +338,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     guestAccess,
     sessionRefreshing,
+    appleAuthAvailable,
     sync,
     continueAsGuest,
     signInWithGoogle,
@@ -241,6 +351,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     session,
     sessionRefreshing,
+    appleAuthAvailable,
     signInWithApple,
     signInWithGoogle,
     signOut,

@@ -3,6 +3,7 @@ import {
   Alert,
   Animated,
   Easing,
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -28,6 +29,7 @@ export default function WelcomeScreen() {
   const { colors, mode } = useAppTheme();
   const { t } = useAppLocalization();
   const {
+    appleAuthAvailable,
     continueAsGuest,
     signInWithApple,
     signInWithGoogle,
@@ -145,18 +147,6 @@ export default function WelcomeScreen() {
             },
           ]}
         >
-          <Animated.View
-            style={[
-              styles.heroGlow,
-              {
-                backgroundColor:
-                  mode === 'dark' ? `${colors.secondary}14` : `${colors.secondary}10`,
-                borderColor:
-                  mode === 'dark' ? `${colors.secondary}24` : `${colors.secondary}18`,
-                transform: [{ scale: glowScale }],
-              },
-            ]}
-          />
           <View
             style={[
               styles.badge,
@@ -177,6 +167,53 @@ export default function WelcomeScreen() {
           </View>
 
           <View style={styles.hero}>
+            <Animated.View
+              style={[
+                styles.heroAccent,
+                {
+                  backgroundColor:
+                    mode === 'dark'
+                      ? `${colors.primary}12`
+                      : `${colors.primary}10`,
+                  transform: [{ scale: glowScale }],
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.heroAccentWarm,
+                  {
+                    backgroundColor:
+                      mode === 'dark'
+                        ? `${colors.tertiary}26`
+                        : `${colors.tertiary}18`,
+                  },
+                ]}
+              />
+            </Animated.View>
+            <View style={styles.heroHeading}>
+              <View
+                style={[
+                  styles.brandToken,
+                  {
+                    backgroundColor:
+                      mode === 'dark'
+                        ? colors.surfaceContainerHigh
+                        : colors.surface,
+                    borderColor:
+                      mode === 'dark'
+                        ? `${colors.outlineVariant}A8`
+                        : `${colors.outlineVariant}D8`,
+                  },
+                ]}
+              >
+                <Image
+                  source={require('../assets/icon.png')}
+                  style={styles.brandTokenImage}
+                  resizeMode="contain"
+                />
+              </View>
+            </View>
             <Text style={[styles.kicker, { color: colors.onSurfaceVariant }]}>
               CLOUD SYNC · PREMIUM ACCESS
             </Text>
@@ -234,12 +271,47 @@ export default function WelcomeScreen() {
               loading={sessionRefreshing}
               variant="primary"
             />
-            <AuthButton
-              label={t('auth.apple_cta')}
-              icon="logo-apple"
-              onPress={handleApple}
-              loading={sessionRefreshing}
-              variant="secondary"
+            {appleAuthAvailable ? (
+              <AuthButton
+                label={t('auth.apple_cta')}
+                icon="logo-apple"
+                onPress={handleApple}
+                loading={sessionRefreshing}
+                variant="secondary"
+              />
+            ) : null}
+          </View>
+
+          <View style={styles.dividerRow}>
+            <View
+              style={[
+                styles.dividerLine,
+                {
+                  backgroundColor:
+                    mode === 'dark'
+                      ? `${colors.outlineVariant}D2`
+                      : colors.outlineVariant,
+                },
+              ]}
+            />
+            <Text
+              style={[
+                styles.dividerText,
+                { color: colors.onSurfaceVariant },
+              ]}
+            >
+              secure local mode
+            </Text>
+            <View
+              style={[
+                styles.dividerLine,
+                {
+                  backgroundColor:
+                    mode === 'dark'
+                      ? `${colors.outlineVariant}D2`
+                      : colors.outlineVariant,
+                },
+              ]}
             />
           </View>
 
@@ -339,23 +411,15 @@ const styles = createDynamicStyles(() => ({
     width: '100%',
     maxWidth: 430,
     alignSelf: 'center',
-    gap: 34,
+    gap: 18,
   },
   heroWrap: {
-    gap: 18,
-    paddingTop: 8,
-  },
-  heroGlow: {
-    position: 'absolute',
-    top: 14,
-    right: 8,
-    width: 168,
-    height: 168,
-    borderRadius: radius.full,
-    borderWidth: 1,
+    gap: 10,
+    paddingTop: 6,
+    alignItems: 'center',
   },
   badge: {
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
     minHeight: 34,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -371,26 +435,61 @@ const styles = createDynamicStyles(() => ({
     lineHeight: 16,
   },
   hero: {
-    gap: 14,
-    maxWidth: 360,
+    gap: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  heroAccent: {
+    width: 134,
+    height: 16,
+    borderRadius: radius.full,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  heroAccentWarm: {
+    width: 52,
+    height: 16,
+    borderRadius: radius.full,
+  },
+  heroHeading: {
+    marginTop: 2,
+  },
+  brandToken: {
+    width: 50,
+    height: 50,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 7,
+    ...shadowStyle('sm'),
+  },
+  brandTokenImage: {
+    width: 30,
+    height: 30,
   },
   kicker: {
     ...typography.labelCaps,
     fontSize: 11,
     lineHeight: 14,
     letterSpacing: 1,
+    textAlign: 'center',
   },
   title: {
     ...typography.displayLgMobile,
-    fontSize: 36,
-    lineHeight: 40,
+    fontSize: 31,
+    lineHeight: 35,
     letterSpacing: -0.75,
+    textAlign: 'center',
+    maxWidth: 300,
   },
   subtitle: {
     ...typography.bodyLg,
-    fontSize: 16,
-    lineHeight: 24,
-    maxWidth: 336,
+    fontSize: 15,
+    lineHeight: 21,
+    maxWidth: 300,
+    textAlign: 'center',
   },
   card: {
     position: 'relative',
@@ -398,9 +497,10 @@ const styles = createDynamicStyles(() => ({
     borderWidth: 1,
     borderRadius: radius['4xl'],
     paddingHorizontal: 22,
-    paddingTop: 24,
-    paddingBottom: 16,
-    gap: 24,
+    paddingTop: 22,
+    paddingBottom: 18,
+    gap: 20,
+    marginTop: 2,
     ...shadowStyle('authCard'),
   },
   cardAccent: {
@@ -411,30 +511,33 @@ const styles = createDynamicStyles(() => ({
     height: 1,
   },
   cardHeader: {
-    gap: 10,
+    gap: 8,
+    alignItems: 'center',
   },
   cardTitle: {
     ...typography.cardTitle,
-    fontSize: 20,
-    lineHeight: 25,
+    fontSize: 19,
+    lineHeight: 24,
+    textAlign: 'center',
   },
   cardBody: {
     ...typography.bodyMd,
-    lineHeight: 22,
-    maxWidth: 332,
+    lineHeight: 21,
+    maxWidth: 296,
+    textAlign: 'center',
   },
   actions: {
-    gap: 12,
+    gap: 10,
   },
   authButton: {
-    minHeight: 58,
-    borderRadius: 18,
+    minHeight: 56,
+    borderRadius: 17,
     borderWidth: 1,
     paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 11,
   },
   authButtonPrimary: {
     ...shadowStyle('sm'),
@@ -448,6 +551,22 @@ const styles = createDynamicStyles(() => ({
     fontSize: 15,
     lineHeight: 19,
   },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    ...typography.labelMd,
+    fontSize: 11,
+    lineHeight: 14,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+  },
   authButtonPressed: {
     transform: [{ scale: 0.992 }],
     opacity: 0.96,
@@ -459,8 +578,7 @@ const styles = createDynamicStyles(() => ({
     alignSelf: 'center',
     paddingHorizontal: 12,
     paddingTop: 2,
-    paddingBottom: 6,
-    marginTop: 2,
+    paddingBottom: 2,
   },
   guestButtonPressed: {
     opacity: 0.72,

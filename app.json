@@ -9,6 +9,7 @@
     "scheme": "forge",
     "ios": {
       "supportsTablet": false,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.yenispor.forge",
       "buildNumber": "1",
       "infoPlist": {
@@ -77,6 +78,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-apple-authentication",
       "expo-web-browser",
       "expo-font",
       "expo-image",
