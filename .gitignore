@@ -46,3 +46,4 @@ Expo-Go-*.tar.app/
 
 Expo-Go-*.tar.app/
 .env.production
+*.apk

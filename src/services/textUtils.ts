@@ -1,8 +1,7 @@
-import { getRuntimeLocalization } from './localization';
-
 // Decode only known legacy UTF-8 artifacts. Decoding every string corrupts
 // valid Turkish characters such as dotless i and s with cedilla.
 const MOJIBAKE_MARKER = /(?:\u00c3|\u00c4|\u00c5|\u00c2|\u00e2)/u;
+const DEFAULT_TEXT_LOCALE = 'tr-TR';
 
 const LEGACY_UTF8_REPLACEMENTS: readonly (readonly [RegExp, string])[] = [
   [/\u00c3\u00bc/g, '\u00fc'],
@@ -93,14 +92,16 @@ export function repairTextArray(values: string[]): string[] {
   return values.map(repairText);
 }
 
-export function normalizedText(value: string): string {
-  return repairText(value).toLocaleLowerCase(getRuntimeLocalization().localeTag);
+export function normalizedText(value: string, locale: string = DEFAULT_TEXT_LOCALE): string {
+  return repairText(value).toLocaleLowerCase(locale);
 }
 
-export function formatSourceLabel(source?: 'exercise' | 'program' | 'custom' | 'ai_program'): string {
+export function formatSourceLabel(
+  source?: 'exercise' | 'program' | 'custom' | 'ai_program',
+  language: 'tr' | 'en' = 'tr',
+): string {
   if (source === 'program') return 'Program';
   if (source === 'ai_program') return 'AI Signature';
-  const language = getRuntimeLocalization().language;
   if (source === 'custom') return language === 'tr' ? 'Ki\u015fisel plan' : 'Custom plan';
   return language === 'tr' ? 'Egzersiz' : 'Exercise';
 }
