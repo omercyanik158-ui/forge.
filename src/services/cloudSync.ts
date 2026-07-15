@@ -1,4 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { loadAIProgramInstances } from './aiProgramInstanceStore';
+import { loadSessionFeedback } from './aiProgramFeedbackStore';
+import { loadCoachAdjustments } from './coachAdjustmentStore';
 import { STORAGE_KEYS } from './storageRegistry';
 import { loadSyncMetadata, saveSyncMetadata } from './authStorage';
 import { saveStoredValue } from './safeStorage';
@@ -12,6 +15,9 @@ import type {
   UserProfileRow,
 } from '@/types/auth';
 import type { SubscriptionTier, UserProfile } from '@/types';
+import type { AIProgramPlan } from '@/types/aiProgramPlan';
+import type { SessionFeedback } from '@/types/aiProgramFeedback';
+import type { CoachAdjustment } from '@/types/coachAdjustment';
 
 type SnapshotKey = keyof Omit<CloudSnapshotV1, 'version'>;
 
@@ -49,6 +55,7 @@ const STORAGE_MAPPING: Record<SnapshotKey, string> = {
   aiProgramPhysiqueSeed: STORAGE_KEYS.aiProgramPhysiqueSeed,
   aiProgramInstances: STORAGE_KEYS.aiProgramInstances,
   aiProgramFeedback: STORAGE_KEYS.aiProgramFeedback,
+  coachAdjustments: STORAGE_KEYS.coachAdjustments,
   userPrograms: STORAGE_KEYS.userPrograms,
 };
 
@@ -76,11 +83,35 @@ const DEFAULT_SNAPSHOT: CloudSnapshotV1 = {
   aiProgramPhysiqueSeed: null,
   aiProgramInstances: [],
   aiProgramFeedback: [],
+  coachAdjustments: [],
   userPrograms: [],
 };
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isAIProgramPlan(value: unknown): value is AIProgramPlan {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+    && typeof (value as AIProgramPlan).id === 'string'
+    && typeof (value as AIProgramPlan).generatedAt === 'string'
+    && Array.isArray((value as AIProgramPlan).weeks);
+}
+
+function isSessionFeedback(value: unknown): value is SessionFeedback {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+    && typeof (value as SessionFeedback).id === 'string'
+    && typeof (value as SessionFeedback).completedAt === 'string';
+}
+
+function isCoachAdjustment(value: unknown): value is CoachAdjustment {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+    && typeof (value as CoachAdjustment).id === 'string'
+    && typeof (value as CoachAdjustment).createdAt === 'string';
+}
+
+function normalizeTypedArray<T>(items: unknown[] | undefined, guard: (value: unknown) => value is T): T[] {
+  return (items ?? []).filter(guard);
 }
 
 function decodeEnvelope<T>(raw: string | null): T | null {
@@ -183,6 +214,12 @@ function mergeProfiles(localProfile: UserProfile | null, remoteProfile: UserProf
 }
 
 function mergeSnapshot(localSnapshot: CloudSnapshotV1, remoteSnapshot: CloudSnapshotV1): CloudSnapshotV1 {
+  const localPrograms = normalizeTypedArray(localSnapshot.aiProgramInstances, isAIProgramPlan);
+  const remotePrograms = normalizeTypedArray(remoteSnapshot.aiProgramInstances, isAIProgramPlan);
+  const localFeedback = normalizeTypedArray(localSnapshot.aiProgramFeedback, isSessionFeedback);
+  const remoteFeedback = normalizeTypedArray(remoteSnapshot.aiProgramFeedback, isSessionFeedback);
+  const localAdjustments = normalizeTypedArray(localSnapshot.coachAdjustments, isCoachAdjustment);
+  const remoteAdjustments = normalizeTypedArray(remoteSnapshot.coachAdjustments, isCoachAdjustment);
   return {
     version: SNAPSHOT_VERSION,
     profile: mergeProfiles(localSnapshot.profile, remoteSnapshot.profile),
@@ -205,8 +242,9 @@ function mergeSnapshot(localSnapshot: CloudSnapshotV1, remoteSnapshot: CloudSnap
     cycleTracking: (pickLatest(remoteSnapshot.cycleTracking, localSnapshot.cycleTracking) ?? remoteSnapshot.cycleTracking ?? localSnapshot.cycleTracking),
     coachPreferences: (pickLatest(remoteSnapshot.coachPreferences, localSnapshot.coachPreferences) ?? remoteSnapshot.coachPreferences ?? localSnapshot.coachPreferences),
     aiProgramPhysiqueSeed: (pickLatest(remoteSnapshot.aiProgramPhysiqueSeed, localSnapshot.aiProgramPhysiqueSeed) ?? remoteSnapshot.aiProgramPhysiqueSeed ?? localSnapshot.aiProgramPhysiqueSeed),
-    aiProgramInstances: mergeArrayValues(localSnapshot.aiProgramInstances, remoteSnapshot.aiProgramInstances),
-    aiProgramFeedback: mergeArrayValues(localSnapshot.aiProgramFeedback, remoteSnapshot.aiProgramFeedback),
+    aiProgramInstances: mergeArrayValues(localPrograms, remotePrograms) as CloudSnapshotV1['aiProgramInstances'],
+    aiProgramFeedback: mergeArrayValues(localFeedback, remoteFeedback) as CloudSnapshotV1['aiProgramFeedback'],
+    coachAdjustments: mergeArrayValues(localAdjustments, remoteAdjustments) as CloudSnapshotV1['coachAdjustments'],
     userPrograms: mergeArrayValues(localSnapshot.userPrograms, remoteSnapshot.userPrograms) as CloudSnapshotV1['userPrograms'],
   };
 }
@@ -219,13 +257,26 @@ export async function exportLocalSnapshot(): Promise<CloudSnapshotV1> {
     }),
   );
 
-  return entries.reduce<CloudSnapshotV1>(
+  const [aiProgramInstances, aiProgramFeedback, coachAdjustments] = await Promise.all([
+    loadAIProgramInstances(),
+    loadSessionFeedback(),
+    loadCoachAdjustments(),
+  ]);
+
+  const baseSnapshot = entries.reduce<CloudSnapshotV1>(
     (snapshot, [snapshotKey, value]) => ({
       ...snapshot,
       [snapshotKey]: value ?? DEFAULT_SNAPSHOT[snapshotKey as SnapshotKey],
     }),
     { ...DEFAULT_SNAPSHOT },
   );
+
+  return {
+    ...baseSnapshot,
+    aiProgramInstances,
+    aiProgramFeedback,
+    coachAdjustments,
+  };
 }
 
 export async function importLocalSnapshot(snapshot: CloudSnapshotV1): Promise<void> {

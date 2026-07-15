@@ -22,22 +22,24 @@ export type ExplanationInput = {
   progressionPlan: ProgressionPlan;
 };
 
-function formatGoalLabel(goal?: string): string {
-  switch (goal) {
-    case 'build_muscle':
-      return 'kas gelişimi';
-    case 'lose_fat':
-      return 'yağ kaybı';
-    case 'recomposition':
-      return 'rekompozisyon';
-    case 'strength':
-      return 'güç';
-    case 'athletic_performance':
-      return 'atletik performans';
-    case 'return_to_training':
-      return 'antrenmana dönüş';
+function formatGoalClassificationLabel(classification: string): string {
+  switch (classification) {
+    case 'general_strength':
+      return 'general strength';
+    case 'powerlifting_strength':
+      return 'powerlifting strength';
+    case 'lift_specific_strength':
+      return 'lift-specific strength';
+    case 'hypertrophy':
+      return 'hypertrophy';
+    case 'muscle_specialization':
+      return 'muscle specialization';
+    case 'powerbuilding':
+      return 'powerbuilding';
+    case 'fat_loss_strength_retention':
+      return 'fat loss with strength retention';
     default:
-      return 'genel form';
+      return 'general fitness';
   }
 }
 
@@ -45,11 +47,37 @@ export function buildAIProgramExplanation(input: ExplanationInput): AIProgramExp
   const { context, blueprint, volumeBlueprint, assemblyPlan, progressionPlan } = input;
   const profile = context.userProfile;
 
-  const headline = `${blueprint.recommendedSplitLabel} · ${blueprint.recommendedTrainingDays} gün · ${formatGoalLabel(profile.goal)} odaklı ${progressionPlan.weekCount} haftalık blok`;
+  const headline = `${blueprint.recommendedSplitLabel} · ${blueprint.recommendedTrainingDays} gün · ${formatGoalClassificationLabel(blueprint.goalClassification)} odaklı ${progressionPlan.weekCount} haftalık blok`;
 
   const whyThisPlan = [
+    ...(blueprint.programFamily === 'strength'
+      ? ['Bu plan ana kaldırışlarda ilerleme için kuruldu; her seansta 1-2 ana lift ve ardından destek hareketleri var.']
+      : []),
+    ...(blueprint.programFamily === 'hypertrophy' || blueprint.goalClassification === 'muscle_specialization'
+      ? ['Bu plan kas gelişimi için kaliteli haftalık set, 2x frekans, kontrollü RIR ve zamanla artan tekrar/ağırlık mantığıyla kuruldu.']
+      : []),
+    ...(profile.goal === 'recomposition'
+      ? ['Bu plan recomp için kas gelişimi prensiplerini daha kontrollü hacimle kullanır; amaç kası koruyup geliştirebilecek kaliteli setler üretmektir.']
+      : []),
     ...blueprint.whyThisPlan.slice(0, 4),
     `Güven seviyesi: ${blueprint.confidence}.`,
+  ];
+
+  const archetypeRationale = [
+    `Neden bu archetype? ${blueprint.programArchetypeLabel}, ${formatGoalClassificationLabel(blueprint.goalClassification)} hedefi ve ${blueprint.recommendedTrainingDays} gün yapısına göre seçildi.`,
+    ...blueprint.programArchetypeRationale,
+  ];
+
+  const progressionModelRationale = [
+    `Neden bu progression modeli? ${blueprint.progressionModel.replaceAll('_', ' ')} yaklaşımı ${formatGoalClassificationLabel(blueprint.goalClassification)} hedefi için seçildi.`,
+    ...progressionPlan.progressionNotes,
+    ...(blueprint.stallProtocol ?? []),
+  ];
+
+  const roleDistributionRationale = [
+    `Neden bu kas/rol dağılımı? ${blueprint.exerciseRolePolicy.replaceAll('_', ' ')} politikası kullanıldı.`,
+    ...blueprint.weeklyArchitecture.notes,
+    ...(blueprint.specializationStrategy ?? []),
   ];
 
   const structureRationale = [
@@ -79,6 +107,10 @@ export function buildAIProgramExplanation(input: ExplanationInput): AIProgramExp
 
   const progressionRationale = [
     `${progressionPlan.weekCount} haftalık blok; RIR kademeli olarak düşer, deload haftalarında toparlanma için hacim azalır.`,
+    ...(blueprint.programFamily !== 'strength'
+      ? ['Double progression: önce tekrar aralığının üstüne yaklaş, sonra ağırlığı küçük artırıp tekrar aralığının altına dön.']
+      : []),
+    ...progressionPlan.progressionNotes,
     progressionPlan.deloadWeeks.length > 0
       ? `Toparlanma haftaları: ${progressionPlan.deloadWeeks.map((w) => w + 1).join(', ')}. hafta.`
       : 'Bu blok kısa olduğu için zamanlanmış deload yok; ilerleme ölçülü kalmalı.',
@@ -106,6 +138,9 @@ export function buildAIProgramExplanation(input: ExplanationInput): AIProgramExp
   return {
     headline,
     whyThisPlan,
+    archetypeRationale,
+    progressionModelRationale,
+    roleDistributionRationale,
     structureRationale,
     volumeRationale,
     selectionRationale,

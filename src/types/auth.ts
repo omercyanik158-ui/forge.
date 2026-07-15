@@ -18,6 +18,9 @@ import type { ProgramProgressMap } from '@/services/programProgressStore';
 import type { UserProgram } from '@/services/userProgramsStore';
 import type { RewardedCreditState } from '@/services/rewardedCreditStore';
 import type { AIProgramPhysiqueSeed } from '@/types/aiProgram';
+import type { AIProgramPlan } from '@/types/aiProgramPlan';
+import type { SessionFeedback } from '@/types/aiProgramFeedback';
+import type { CoachAdjustment } from '@/types/coachAdjustment';
 
 export type AuthUser = Pick<User, 'id' | 'email' | 'app_metadata' | 'user_metadata'>;
 
@@ -29,7 +32,14 @@ export type SessionState = {
 
 export type ActiveWorkoutSessionSnapshot = {
   sessionKey: string;
-  sets: unknown[];
+  sets: {
+    key: string;
+    exerciseId: string;
+    order: number;
+    kg: string;
+    reps: string;
+    done: boolean;
+  }[];
   activeIndex: number;
   savedAt: string;
 } | null;
@@ -60,8 +70,9 @@ export type CloudSnapshotV1 = {
   cycleTracking: CycleTracking | null;
   coachPreferences: CoachPreferences | null;
   aiProgramPhysiqueSeed: AIProgramPhysiqueSeed | null;
-  aiProgramInstances: unknown[];
-  aiProgramFeedback: unknown[];
+  aiProgramInstances: AIProgramPlan[];
+  aiProgramFeedback: SessionFeedback[];
+  coachAdjustments?: CoachAdjustment[];
   userPrograms: UserProgram[];
 };
 

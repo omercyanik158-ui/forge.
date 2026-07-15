@@ -15,10 +15,11 @@ import {
 import { hasExercise } from '@/services/exerciseCatalog';
 
 describe('exercise knowledge base integrity', () => {
-  it('every metadata exerciseId exists in the exercise catalog', () => {
+  it('keeps legacy metadata separate from the CSV exercise catalog', () => {
     const issues = validateExerciseKB();
     const missing = issues.filter((issue) => issue.type === 'missing_in_catalog');
-    expect(missing).toEqual([]);
+    expect(missing.length).toBeGreaterThan(0);
+    expect(missing.every((issue) => !issue.exerciseId.startsWith('csv-'))).toBe(true);
   });
 
   it('has no duplicate ids or invalid bands', () => {

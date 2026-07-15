@@ -366,6 +366,34 @@ export default function AddMealScreen() {
               </TouchableOpacity>
             </GlassCard>
 
+            {searchAllowed ? (
+              <GlassCard style={styles.aiMealCard}>
+                <View style={styles.searchInfoHeader}>
+                  <Ionicons name="camera-outline" size={18} color={colors.secondary} />
+                  <Text style={[typography.labelMd, { color: colors.secondary }]}>
+                    {t({ tr: "Premium AI öğün", en: "Premium AI meal" })}
+                  </Text>
+                </View>
+                <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
+                  {t({
+                    tr: "Fotoğrafla hızlı öğün tahmini al; manuel kayıt ve barkod takibi aynı şekilde sende kalır.",
+                    en: "Use a photo for a fast meal estimate; manual and barcode tracking remain available here.",
+                  })}
+                </Text>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  activeOpacity={0.82}
+                  onPress={() => router.push({ pathname: "/ai", params: { mode: "food" } })}
+                  style={styles.aiMealButton}
+                >
+                  <Ionicons name="sparkles-outline" size={18} color={colors.onSecondary} />
+                  <Text style={styles.aiMealButtonText}>
+                    {t({ tr: "Fotoğrafla analiz et", en: "Analyze photo" })}
+                  </Text>
+                </TouchableOpacity>
+              </GlassCard>
+            ) : null}
+
             <View style={styles.searchRow}>
               <TextInput
                 style={styles.input}
@@ -860,6 +888,18 @@ const styles = createDynamicStyles(() => ({
   modeText: { color: colors.onSurfaceVariant },
   modeTextActive: { color: colors.onPrimary },
   searchInfoCard: { padding: spacing.md, gap: spacing.xs },
+  aiMealCard: { padding: spacing.md, gap: spacing.sm },
+  aiMealButton: {
+    alignSelf: "flex-start",
+    minHeight: 42,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.secondary,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  aiMealButtonText: { ...typography.buttonLg, color: colors.onSecondary },
   searchInfoHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
   searchRow: { flexDirection: "row", gap: 12 },
   barcodeButton: {

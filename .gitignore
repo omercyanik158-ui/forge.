@@ -44,3 +44,4 @@ yarn-error.*
 Expo-Go-*.tar.app/
 .env.production
 *.apk
+programs_detailed_boostcamp_kaggle.csv

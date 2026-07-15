@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useFocusEffect, useLocalSearchParams, useRouter, useScrollToTop } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
@@ -9,16 +17,20 @@ import { AICaptureGuidance } from "@/components/ai-hub/ai-capture-guidance";
 import { AIHistoryCard } from "@/components/ai-hub/ai-history-card";
 import { AIImageCard } from "@/components/ai-hub/ai-image-card";
 import { AiLimitReachedModal } from "@/components/ai-hub/AiLimitReachedModal";
-import { AISegmentedControl } from "@/components/ai-hub/ai-segmented-control";
 import { FoodResultCard } from "@/components/ai-hub/food-result-card";
 import { PhysiqueResultCard } from "@/components/ai-hub/physique-result-card";
 import { GlassCard } from "@/components/GlassCard";
+import { ProgramInfluenceCard } from "@/components/ProgramInfluenceCard";
 import { PremiumFeatureCard } from "@/components/PremiumFeatureCard";
 import { TopBar } from "@/components/TopBar";
 import { useAppLocalization } from "@/providers/localization-context";
 import { compareFood, comparePhysique } from "@/services/aiHubComparison";
 import { saveAIProgramPhysiqueSeed } from "@/services/aiProgramSeedStore";
-import { loadAIProgramInstances } from "@/services/aiProgramInstanceStore";
+import { resolvePrimaryAIProgramId } from "@/services/aiProgramInstanceStore";
+import {
+  buildProgramInfluenceSummary,
+  summarizePhysiqueForProgram,
+} from "@/services/aiProgramEngine";
 import {
   ANALYTICS_EVENTS,
   trackEvent,
@@ -125,6 +137,8 @@ function createRewardedClaimId(type: RewardedCreditType): string {
   return `rewarded:${type}:${Date.now()}:${Math.random().toString(36).slice(2, 10)}`;
 }
 
+type AIHubView = "home" | "physique";
+
 export default function AIHubScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -136,7 +150,9 @@ export default function AIHubScreen() {
   const focusedModeRef = useRef<AIHubMode>("food");
   const focusedPremiumRef = useRef(false);
   useScrollToTop(listRef);
-  const [mode, setMode] = useState<AIHubMode>("food");
+  const [mode, setMode] = useState<AIHubMode>("physique");
+  const [hubView, setHubView] = useState<AIHubView>("home");
+  const [programSheetVisible, setProgramSheetVisible] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [appUserId, setAppUserId] = useState<string | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
@@ -153,6 +169,7 @@ export default function AIHubScreen() {
     [REWARDED_AD_TYPES.physiqueAnalysis]: false,
   });
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [refreshedAtMs, setRefreshedAtMs] = useState(0);
   const [analyzing, setAnalyzing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [rewardedLoading, setRewardedLoading] = useState(false);
@@ -191,7 +208,10 @@ export default function AIHubScreen() {
       rewardedAvailability[REWARDED_AD_TYPES.physiqueAnalysis],
   });
   const visibleLogs = useMemo(
-    () => (premium ? logs.filter((log) => log.type === mode) : []),
+    () => {
+      const filtered = logs.filter((log) => log.type === mode);
+      return premium ? filtered : filtered.slice(0, 2);
+    },
     [logs, mode, premium],
   );
   const hasSavedAnalyses = logs.length > 0;
@@ -209,7 +229,6 @@ export default function AIHubScreen() {
       nextAccessState,
       nextAppUserId,
       nextDeviceId,
-      nextSavedPrograms,
       nextRewardedState,
       mealAdAvailable,
       physiqueAdAvailable,
@@ -219,7 +238,6 @@ export default function AIHubScreen() {
       loadAIHubAccessState(),
       getCurrentAppUserId(),
       getCurrentDeviceId(),
-      loadAIProgramInstances(),
       loadRewardedCreditState(),
       loadRewardedAd(REWARDED_AD_TYPES.mealAnalysis),
       loadRewardedAd(REWARDED_AD_TYPES.physiqueAnalysis),
@@ -236,11 +254,12 @@ export default function AIHubScreen() {
     setRewardedState(resolvedRewardedState);
     setAppUserId(nextAppUserId);
     setDeviceId(nextDeviceId);
-    setSavedProgramId(nextSavedPrograms[0]?.id ?? null);
+    setSavedProgramId(await resolvePrimaryAIProgramId());
     setRewardedAvailability({
       [REWARDED_AD_TYPES.mealAnalysis]: mealAdAvailable,
       [REWARDED_AD_TYPES.physiqueAnalysis]: physiqueAdAvailable,
     });
+    setRefreshedAtMs(Date.now());
     setLoadingHistory(false);
   }, []);
 
@@ -266,10 +285,19 @@ export default function AIHubScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (params.mode === "food" || params.mode === "physique") {
-        setMode(params.mode);
+      if (params.mode === "food" && premium) {
+        setMode("food");
+        setHubView("home");
+        return;
       }
-    }, [params.mode]),
+      if (params.mode === "physique") {
+        setMode(params.mode);
+        setHubView("physique");
+        return;
+      }
+      setMode("physique");
+      setHubView("home");
+    }, [params.mode, premium]),
   );
 
   const alertError = useCallback(
@@ -806,38 +834,30 @@ export default function AIHubScreen() {
     [logs, t],
   );
 
-  const heroStatus = premium
-    ? {
-        title: t("ai_hub.status_premium_title"),
-        body: t("ai_hub.status_premium_body"),
-      }
-    : remainingPhysiqueAnalyses > 0
-      ? {
-          title: t("ai_hub.status_free_title"),
-          body: t("ai_hub.status_free_body"),
-        }
-      : {
-          title: t("ai_hub.status_used_title"),
-          body: t("ai_hub.status_used_body"),
-        };
-
-  const openSavedProgram = () => {
-    if (savedProgramId) {
-      router.push({
-        pathname: "/ai-program-detail",
-        params: { id: savedProgramId },
-      });
-    }
-  };
-
   const openNewProgramBuilder = () => {
+    setProgramSheetVisible(false);
     router.push({
       pathname: "/ai-program-builder",
       params: { fresh: "1" },
     });
   };
 
-  const openProgramBuilderFromPhysique = () => {
+  const openRegenerateProgram = () => {
+    if (!savedProgramId) return;
+    setProgramSheetVisible(false);
+    router.push({
+      pathname: "/ai-program-builder",
+      params: { regenerateFromId: savedProgramId },
+    });
+  };
+
+  const openPhysiqueFlow = () => {
+    setProgramSheetVisible(false);
+    setMode("physique");
+    setHubView("physique");
+  };
+
+  const openProgramBuilderFromPhysique = (regenerate = false) => {
     if (!physiqueResult) return;
     void saveAIProgramPhysiqueSeed({
       result: physiqueResult,
@@ -846,167 +866,50 @@ export default function AIHubScreen() {
     }).then(() => {
       router.push({
         pathname: "/ai-program-builder",
-        params: { entry: "physique_result" },
+        params: regenerate && savedProgramId
+          ? { entry: "physique_result", regenerateFromId: savedProgramId }
+          : { entry: "physique_result" },
       });
     });
   };
 
+  const currentProgramInfluence = physiqueResult
+    ? buildProgramInfluenceSummary(
+        summarizePhysiqueForProgram(
+          physiqueResult,
+          new Date().toISOString(),
+          "current_result",
+        ),
+      )
+    : undefined;
+
+  const latestPhysiqueLog = useMemo(
+    () => logs.find((log): log is PhysiqueAnalysisLog => log.type === "physique") ?? null,
+    [logs],
+  );
+  const latestFocusArea = latestPhysiqueLog?.result.eksikBolgeler[0];
+  const latestExerciseFocus = latestPhysiqueLog?.result.odaklanmasiGerekenHareketler[0];
+  const analysisAgeLabel = latestPhysiqueLog
+    ? (() => {
+        const diffMs = (refreshedAtMs || new Date(latestPhysiqueLog.createdAt).getTime()) - new Date(latestPhysiqueLog.createdAt).getTime();
+        const diffDays = Math.max(0, Math.floor(diffMs / 86_400_000));
+        if (diffDays === 0) return t({ tr: "bugün", en: "today" });
+        return t({ tr: `${diffDays} gün önce`, en: `${diffDays} days ago` });
+      })()
+    : t({ tr: "henüz yok", en: "not yet" });
+  const firstName = profile?.name?.trim().split(/\s+/)[0] || t({ tr: "sporcu", en: "athlete" });
+  const coachRecommendation = latestFocusArea
+    ? t({
+        tr: `Son vücut analizine göre ${latestFocusArea} odağın öne çıkıyor. Bugün programında ${latestExerciseFocus ?? "ana destek hareketlerine"} öncelik vermeni öneririm.`,
+        en: `Your last physique analysis highlights ${latestFocusArea}. Today, prioritize ${latestExerciseFocus ?? "your key support lifts"} in your program.`,
+      })
+    : t({
+        tr: "Bugünkü önerin hazır. İlk vücut analizini yaptığında FORGE program odağını ve gelişim takibini buna göre şekillendirecek.",
+        en: "Today's recommendation is ready. After your first physique analysis, FORGE will shape program focus and progress tracking from it.",
+      });
+
   const header = (
     <View style={styles.headerContent}>
-      <View
-        style={[
-          styles.hero,
-          {
-            backgroundColor: colors.surfaceContainerLow,
-            borderColor: colors.outlineVariant,
-          },
-        ]}
-      >
-        <View style={styles.heroTopRow}>
-          <View
-            style={[
-              styles.heroIcon,
-              { backgroundColor: colors.secondaryContainer },
-            ]}
-          >
-            <Ionicons name="sparkles" size={24} color={colors.secondary} />
-          </View>
-          <View style={styles.heroCopy}>
-            <Text style={[styles.eyebrow, { color: colors.secondary }]}>
-              {t("ai_hub.eyebrow")}
-            </Text>
-            <Text style={[styles.title, { color: colors.onSurface }]}>
-              {t({
-                tr: "AI ile hızlı karar al",
-                en: "Decide faster with AI",
-              })}
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.onSurfaceVariant }]}>
-              {t({
-                tr: "Program kur, öğün analiz et, fizik raporunu koç notuna çevir.",
-                en: "Build a plan, analyze meals, and turn physique reports into coaching notes.",
-              })}
-            </Text>
-          </View>
-        </View>
-
-        <View
-          style={[
-            styles.heroDivider,
-            { backgroundColor: colors.outlineVariant },
-          ]}
-        />
-
-        <View style={styles.statusCard}>
-          <View
-            style={[
-              styles.statusIcon,
-              {
-                backgroundColor: premium
-                  ? `${colors.success}18`
-                  : `${colors.secondary}18`,
-              },
-            ]}
-          >
-            <Ionicons
-              name={
-                premium
-                  ? "checkmark-circle"
-                  : remainingPhysiqueAnalyses > 0
-                    ? "flash-outline"
-                    : "lock-closed-outline"
-              }
-              size={18}
-              color={premium ? colors.success : colors.secondary}
-            />
-          </View>
-          <View style={styles.statusCopy}>
-            <Text style={[styles.statusTitle, { color: colors.onSurface }]}>
-              {heroStatus.title}
-            </Text>
-            <Text
-              style={[styles.statusBody, { color: colors.onSurfaceVariant }]}
-            >
-              {heroStatus.body}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      <View
-        style={[
-          styles.programCard,
-          {
-            backgroundColor: colors.surfaceContainerLowest,
-            borderColor: colors.outlineVariant,
-          },
-        ]}
-      >
-        <View style={styles.programHeader}>
-          <View
-            style={[
-              styles.programIcon,
-              { backgroundColor: `${colors.primary}18` },
-            ]}
-          >
-            <Ionicons name="barbell-outline" size={18} color={colors.primary} />
-          </View>
-          <View style={styles.programCopy}>
-            <Text style={[typography.cardTitle, { color: colors.onSurface }]}>
-              {t({ tr: "AI program koçu", en: "AI program coach" })}
-            </Text>
-            <Text
-              style={[typography.bodyXs, { color: colors.onSurfaceVariant }]}
-            >
-              {t({
-                tr: "AI programını burada oluştur, sonra Antrenman sekmesinde uygula ve yönet.",
-                en: "Create your AI program here, then use and manage it in the Training tab.",
-              })}
-            </Text>
-          </View>
-        </View>
-        {savedProgramId ? (
-          <View style={styles.programActions}>
-            <AIActionButton
-              label={t("ai_program.feature_view")}
-              icon="eye-outline"
-              secondary
-              style={styles.programActionButton}
-              onPress={openSavedProgram}
-            />
-            <AIActionButton
-              label={t("ai_program.feature_start")}
-              icon="sparkles-outline"
-              style={styles.programActionButton}
-              onPress={openNewProgramBuilder}
-            />
-          </View>
-        ) : null}
-        {!savedProgramId ? (
-          <View style={styles.programActions}>
-            <AIActionButton
-              label={t("ai_program.feature_start")}
-              icon="sparkles-outline"
-              style={styles.programActionButton}
-              onPress={openNewProgramBuilder}
-            />
-          </View>
-        ) : null}
-      </View>
-
-      <AISegmentedControl
-        value={mode}
-        foodLabel={t("ai_hub.tab_food")}
-        physiqueLabel={t("ai_hub.tab_physique")}
-        onChange={(value) => {
-          setMode(value);
-          void trackEvent(ANALYTICS_EVENTS.aiHubModeChanged, {
-            mode: value,
-            premium,
-          });
-        }}
-      />
-
       {mode === "food" ? (
         <View style={styles.flow}>
           <View style={styles.sectionHeading}>
@@ -1121,6 +1024,56 @@ export default function AIHubScreen() {
               />
             </>
           ) : null}
+        </View>
+      ) : hubView === "home" ? (
+        <View style={styles.homeFlow}>
+          <CoachRecommendationCard
+            firstName={firstName}
+            body={coachRecommendation}
+            onPrimary={() => router.push("/(tabs)/fitness")}
+            onWhy={openPhysiqueFlow}
+          />
+
+          <PhysiqueAnalysisHomeCard
+            ageLabel={analysisAgeLabel}
+            remainingLabel={
+              premium
+                ? t({ tr: "Premium", en: "Premium" })
+                : t({ tr: `${remainingPhysiqueAnalyses} hak`, en: `${remainingPhysiqueAnalyses} left` })
+            }
+            onStart={openPhysiqueFlow}
+          />
+
+          <PersonalProgramHomeCard
+            hasSavedProgram={Boolean(savedProgramId)}
+            onOpen={() => setProgramSheetVisible(true)}
+            onUpdate={savedProgramId ? openRegenerateProgram : openPhysiqueFlow}
+          />
+
+          <View style={styles.toolsBlock}>
+            <Text style={[styles.toolsTitle, { color: colors.onSurface }]}>
+              {t({ tr: "Araçlar", en: "Tools" })}
+            </Text>
+            <ToolRow
+              icon="restaurant-outline"
+              title={t({ tr: "Öğün Analizi", en: "Meal Analysis" })}
+              body={t({ tr: "Fotoğraftan kalori ve makro tahmini", en: "Estimate calories and macros from a photo" })}
+              onPress={() => {
+                if (premium) {
+                  setMode("food");
+                  setHubView("home");
+                } else {
+                  router.push("/premium");
+                }
+              }}
+            />
+            <ToolRow
+              icon="git-compare-outline"
+              title={t({ tr: "Gelişim Karşılaştırma", en: "Progress Comparison" })}
+              body={t({ tr: "Vücut fotoğraflarını zamanla kıyasla", en: "Compare physique photos over time" })}
+              onPress={() => router.push("/body-progress")}
+            />
+          </View>
         </View>
       ) : (
         <View style={styles.flow}>
@@ -1274,7 +1227,23 @@ export default function AIHubScreen() {
                   pose: t("ai_hub.physique_pose"),
                   confidence: t("ai_hub.food_result_confidence"),
                   confidenceNote: t("ai_hub.confidence_note"),
+                  strengths: t({ tr: "Güçlü yönler", en: "Strengths" }),
+                  improvements: t({ tr: "Geliştirilecek alanlar", en: "Improvement areas" }),
+                  priorities: t({ tr: "Öncelik sıralaması", en: "Priority roadmap" }),
+                  vTaper: t({ tr: "V-Taper görünümü", en: "V-taper look" }),
+                  posture: t({ tr: "Postür notu", en: "Posture note" }),
+                  fatDistribution: t({ tr: "Yağ dağılımı", en: "Fat distribution" }),
                 }}
+              />
+              <ProgramInfluenceCard influence={currentProgramInfluence} />
+              <AIActionButton
+                label={t({
+                  tr: "Bu değişimi Body Progress’te takip et",
+                  en: "Track this change in Body Progress",
+                })}
+                icon="analytics-outline"
+                secondary
+                onPress={() => router.push("/body-progress")}
               />
               <AIActionButton
                 label={
@@ -1285,10 +1254,18 @@ export default function AIHubScreen() {
                 onPress={() => void savePhysiqueEntry()}
               />
               <AIActionButton
-                label={t("ai_program.feature_from_physique")}
+                label={t({ tr: "Bu analize göre program oluştur", en: "Build from this analysis" })}
                 icon="barbell-outline"
-                onPress={openProgramBuilderFromPhysique}
+                onPress={() => openProgramBuilderFromPhysique(false)}
               />
+              {savedProgramId ? (
+                <AIActionButton
+                  label={t({ tr: "Programı bu sonuca göre güncelle", en: "Update program from this result" })}
+                  icon="refresh-outline"
+                  secondary
+                  onPress={() => openProgramBuilderFromPhysique(true)}
+                />
+              ) : null}
               {!premium ? (
                 <PremiumFeatureCard
                   title={t("ai_hub.physique_comparison_title")}
@@ -1318,7 +1295,8 @@ export default function AIHubScreen() {
       )}
 
       {premium ? (
-        <View style={styles.historyHeading}>
+        hubView !== "home" ? (
+          <View style={styles.historyHeading}>
           <View>
             <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>
               {t("ai_hub.history_title")}
@@ -1339,8 +1317,9 @@ export default function AIHubScreen() {
               {visibleLogs.length}
             </Text>
           </View>
-        </View>
-      ) : hasSavedAnalyses ? (
+          </View>
+        ) : null
+      ) : hasSavedAnalyses && hubView !== "home" ? (
         <PremiumFeatureCard
           title={t("ai_hub.history_ready_title")}
           body={t("ai_hub.history_ready_body")}
@@ -1352,10 +1331,15 @@ export default function AIHubScreen() {
   );
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <TopBar />
+      <TopBar
+        showAvatar
+        showAction
+        actionIcon="settings-outline"
+        onActionPress={() => router.push("/settings-privacy")}
+      />
       <FlashList<AIHubLog>
         ref={listRef}
-        data={premium ? visibleLogs : []}
+        data={premium && hubView !== "home" ? visibleLogs : []}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <AIHistoryCard
@@ -1367,7 +1351,7 @@ export default function AIHubScreen() {
         )}
         ListHeaderComponent={header}
         ListEmptyComponent={
-          premium ? (
+          premium && hubView !== "home" ? (
             loadingHistory ? (
               <GlassCard variant="panel" style={styles.loadingCard}>
                 <ActivityIndicator
@@ -1434,7 +1418,372 @@ export default function AIHubScreen() {
         onUpgrade={handleUpgradeFromLimit}
         onWatchAd={() => void handleRewardedAd()}
       />
+      <AIProgramChoiceSheet
+        visible={programSheetVisible}
+        hasSavedProgram={Boolean(savedProgramId)}
+        onClose={() => setProgramSheetVisible(false)}
+        onFresh={openNewProgramBuilder}
+        onAnalyze={openPhysiqueFlow}
+        onRegenerate={openRegenerateProgram}
+      />
     </View>
+  );
+}
+
+function CoachRecommendationCard({
+  firstName,
+  body,
+  onPrimary,
+  onWhy,
+}: {
+  firstName: string;
+  body: string;
+  onPrimary: () => void;
+  onWhy: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const { t } = useAppLocalization();
+  return (
+    <GlassCard variant="panel" style={styles.coachCard}>
+      <View style={styles.coachHeader}>
+        <View style={[styles.coachSparkIcon, { backgroundColor: `${colors.primary}12` }]}>
+          <Ionicons name="sparkles" size={24} color={colors.primary} />
+        </View>
+        <View style={styles.coachCopy}>
+          <Text style={[styles.homeEyebrow, { color: colors.primary }]}>
+            AI HUB
+          </Text>
+          <Text style={[styles.coachTitle, { color: colors.onSurface }]}>
+            {t({ tr: `Günaydın ${firstName}`, en: `Good morning ${firstName}` })}
+          </Text>
+        </View>
+      </View>
+      <Text style={[styles.coachBody, { color: colors.onSurfaceVariant }]}>
+        {body}
+      </Text>
+      <View style={styles.coachActions}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          activeOpacity={0.84}
+          onPress={onPrimary}
+          style={[styles.coachPrimaryButton, { backgroundColor: colors.primary }]}
+        >
+          <Text style={[styles.coachPrimaryText, { color: colors.onPrimary }]}>
+            {t({ tr: "Antrenmanı Görüntüle", en: "View workout" })}
+          </Text>
+          <Ionicons name="arrow-forward" size={18} color={colors.onPrimary} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          activeOpacity={0.84}
+          onPress={onWhy}
+          style={[styles.coachSecondaryButton, { borderColor: colors.primary }]}
+        >
+          <Text style={[styles.coachSecondaryText, { color: colors.primary }]}>
+            {t({ tr: "Neden?", en: "Why?" })}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </GlassCard>
+  );
+}
+
+function PhysiqueAnalysisHomeCard({
+  ageLabel,
+  remainingLabel,
+  onStart,
+}: {
+  ageLabel: string;
+  remainingLabel: string;
+  onStart: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const { t } = useAppLocalization();
+  return (
+    <GlassCard variant="panel" style={styles.homeCard}>
+      <View style={styles.homeCardHeader}>
+        <View style={[styles.homeIcon, { backgroundColor: `${colors.secondary}18` }]}>
+          <Ionicons name="body-outline" size={22} color={colors.secondary} />
+        </View>
+        <Text style={[styles.homeCardTitle, { color: colors.onSurface }]}>
+          {t({ tr: "Vücut Analizi", en: "Physique Analysis" })}
+        </Text>
+        <Text style={[styles.homeMeta, { color: colors.onSurfaceVariant }]}>
+          {ageLabel}
+        </Text>
+      </View>
+
+      <View style={[styles.noticeBox, { backgroundColor: colors.surfaceContainerLow }]}>
+        <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
+        <Text style={[styles.noticeText, { color: colors.onSurfaceVariant }]}>
+          {t({
+            tr: "Yeni bir analiz, kişiselleştirilmiş önerilerini günceller.",
+            en: "A new analysis updates your personalized recommendations.",
+          })}
+        </Text>
+      </View>
+
+      <View style={styles.estimateRow}>
+        <Text style={[styles.estimateLabel, { color: colors.onSurfaceVariant }]}>
+          {t({ tr: "Süre tahmini:", en: "Time estimate:" })}
+        </Text>
+        <Text style={[styles.estimateValue, { color: colors.onSurface }]}>
+          {t({ tr: "30-60 saniye", en: "30-60 seconds" })}
+        </Text>
+      </View>
+      <View style={styles.estimateRow}>
+        <Text style={[styles.estimateLabel, { color: colors.onSurfaceVariant }]}>
+          {t({ tr: "Kullanım:", en: "Usage:" })}
+        </Text>
+        <Text style={[styles.estimateValue, { color: colors.primary }]}>
+          {remainingLabel}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        accessibilityRole="button"
+        activeOpacity={0.84}
+        onPress={onStart}
+        style={[styles.darkActionButton, { backgroundColor: colors.inverseSurface }]}
+      >
+        <Ionicons name="camera-outline" size={19} color={colors.inverseOnSurface} />
+        <Text style={[styles.darkActionText, { color: colors.inverseOnSurface }]}>
+          {t({ tr: "Yeni Analiz Başlat", en: "Start New Analysis" })}
+        </Text>
+      </TouchableOpacity>
+    </GlassCard>
+  );
+}
+
+function PersonalProgramHomeCard({
+  hasSavedProgram,
+  onOpen,
+  onUpdate,
+}: {
+  hasSavedProgram: boolean;
+  onOpen: () => void;
+  onUpdate: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const { t } = useAppLocalization();
+  return (
+    <GlassCard variant="panel" style={styles.homeCard}>
+      <View style={styles.homeCardHeader}>
+        <View style={[styles.homeIcon, { backgroundColor: `${colors.primary}14` }]}>
+          <Ionicons name="barbell-outline" size={22} color={colors.primary} />
+        </View>
+        <Text style={[styles.homeCardTitle, { color: colors.onSurface }]}>
+          {t({ tr: "Kişisel Program", en: "Personal Program" })}
+        </Text>
+      </View>
+
+      <View style={styles.programStatsRow}>
+        <View style={styles.programStat}>
+          <Text style={[styles.programStatLabel, { color: colors.onSurfaceVariant }]}>
+            {t({ tr: "Odak", en: "Focus" })}
+          </Text>
+          <Text style={[styles.programStatValue, { color: colors.onSurface }]}>
+            {hasSavedProgram
+              ? t({ tr: "Program Hazır", en: "Plan Ready" })
+              : t({ tr: "Hedeflerine Göre", en: "From Goals" })}
+          </Text>
+        </View>
+        <View style={styles.programStat}>
+          <Text style={[styles.programStatLabel, { color: colors.onSurfaceVariant }]}>
+            {t({ tr: "Sıradaki", en: "Next" })}
+          </Text>
+          <Text style={[styles.programStatValue, { color: colors.onSurface }]}>
+            {hasSavedProgram
+              ? t({ tr: "Programı Aç", en: "Open Plan" })
+              : t({ tr: "Plan Önerisi | 5-10 dk", en: "Plan Match | 5-10 min" })}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.programHomeActions}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          activeOpacity={0.84}
+          onPress={onOpen}
+          style={[styles.programMainButton, { backgroundColor: `${colors.primary}14` }]}
+        >
+          <Text style={[styles.programMainText, { color: colors.onSurface }]}>
+            {hasSavedProgram
+              ? t({ tr: "Programı Aç", en: "Open Program" })
+              : t({ tr: "Plan önerisi al", en: "Get plan recommendation" })}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          activeOpacity={0.84}
+          onPress={onUpdate}
+          style={[styles.programOutlineButton, { borderColor: colors.outlineVariant }]}
+        >
+          <Ionicons name="sparkles" size={16} color={colors.primary} />
+          <Text style={[styles.programOutlineText, { color: colors.primary }]}>
+            {hasSavedProgram
+              ? t({ tr: "Yeniden öner", en: "Recommend again" })
+              : t({ tr: "Analizle Başla", en: "Start with Analysis" })}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </GlassCard>
+  );
+}
+
+function ToolRow({
+  icon,
+  title,
+  body,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  body: string;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.84}
+      onPress={onPress}
+      style={[
+        styles.toolRow,
+        {
+          backgroundColor: colors.surfaceContainerLow,
+          borderColor: colors.outlineVariant,
+        },
+      ]}
+    >
+      <View style={[styles.toolIcon, { backgroundColor: `${colors.secondary}14` }]}>
+        <Ionicons name={icon} size={21} color={colors.secondary} />
+      </View>
+      <View style={styles.toolCopy}>
+        <Text style={[styles.toolTitle, { color: colors.onSurface }]}>
+          {title}
+        </Text>
+        <Text style={[styles.toolBody, { color: colors.onSurfaceVariant }]}>
+          {body}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.onSurfaceVariant} />
+    </TouchableOpacity>
+  );
+}
+
+function AIProgramChoiceSheet({
+  visible,
+  hasSavedProgram,
+  onClose,
+  onFresh,
+  onAnalyze,
+  onRegenerate,
+}: {
+  visible: boolean;
+  hasSavedProgram: boolean;
+  onClose: () => void;
+  onFresh: () => void;
+  onAnalyze: () => void;
+  onRegenerate: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const { t } = useAppLocalization();
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.sheetOverlay}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={t({ tr: "Program seçeneklerini kapat", en: "Close program options" })}
+          activeOpacity={1}
+          onPress={onClose}
+          style={styles.sheetBackdrop}
+        />
+        <View
+          style={[
+            styles.sheetCard,
+            {
+              backgroundColor: colors.surfaceContainerLow,
+              borderColor: colors.outlineVariant,
+            },
+          ]}
+        >
+          <View style={[styles.sheetGrabber, { backgroundColor: colors.outlineVariant }]} />
+          <Text style={[styles.sheetTitle, { color: colors.onSurface }]}>
+            {t({ tr: "Kişisel Program", en: "Personal Program" })}
+          </Text>
+          <Text style={[styles.sheetBody, { color: colors.onSurfaceVariant }]}>
+            {t({
+              tr: "Fotoğraf zorunlu değil. Hedef, seviye, ekipman, gün sayısı ve odak bölgelerini seç; sana en uygun planı önerelim.",
+              en: "Photos are optional. Choose your goal, level, equipment, weekly days, and focus areas; we recommend the best-fit plan.",
+            })}
+          </Text>
+          <View style={styles.sheetActionList}>
+            <ProgramChoiceRow
+              icon="sparkles-outline"
+              title={t({ tr: "Hedeflerime göre plan öner", en: "Recommend a plan from my goals" })}
+              body={t({
+                tr: "Fotoğraf şart değil. Hedefin, seviyen, ekipmanın ve gün sayına göre en uygun planı seçelim.",
+                en: "No photo required. We select the best-fit plan from your goal, level, equipment, and weekly days.",
+              })}
+              onPress={onFresh}
+            />
+            <ProgramChoiceRow
+              icon="body-outline"
+              title={t({ tr: "Vücut analiziyle daha kişisel hale getir", en: "Personalize with physique analysis" })}
+              body={t({
+                tr: "Önce analiz yorumunu gör, sonra program odağını buna göre şekillendir.",
+                en: "Review the analysis first, then shape the program focus from it.",
+              })}
+              onPress={onAnalyze}
+            />
+            {hasSavedProgram ? (
+              <ProgramChoiceRow
+                icon="refresh-outline"
+                title={t({ tr: "Mevcut programı güncelle", en: "Update current program" })}
+                body={t({
+                  tr: "Kayıtlı programını güncel cevaplarınla yeniden düzenle.",
+                  en: "Regenerate your saved program with updated answers.",
+                })}
+                onPress={onRegenerate}
+              />
+            ) : null}
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function ProgramChoiceRow({
+  icon,
+  title,
+  body,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  body: string;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.84}
+      onPress={onPress}
+      style={[styles.sheetActionRowTall, { backgroundColor: colors.surfaceContainerLowest }]}
+    >
+      <View style={[styles.sheetActionIcon, { backgroundColor: `${colors.primary}14` }]}>
+        <Ionicons name={icon} size={18} color={colors.primary} />
+      </View>
+      <View style={styles.sheetActionCopy}>
+        <Text style={[styles.sheetActionTitle, { color: colors.onSurface }]}>{title}</Text>
+        <Text style={[styles.sheetActionBody, { color: colors.onSurfaceVariant }]}>{body}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={colors.onSurfaceVariant} />
+    </TouchableOpacity>
   );
 }
 
@@ -1482,6 +1831,147 @@ const styles = createDynamicStyles(() => ({
     paddingHorizontal: spacing.containerMargin,
   },
   headerContent: { gap: spacing.section, paddingBottom: spacing.section },
+  homeFlow: { gap: spacing.section },
+  coachCard: {
+    borderRadius: radius["3xl"],
+    padding: spacing.lg,
+    gap: spacing.md,
+    ...shadowStyle("floating"),
+  },
+  coachHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  coachSparkIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  coachCopy: { flex: 1 },
+  homeEyebrow: { ...typography.labelCaps },
+  coachTitle: { ...typography.sectionTitle },
+  coachBody: { ...typography.bodyMd },
+  coachActions: { flexDirection: "row", gap: spacing.sm },
+  coachPrimaryButton: {
+    flex: 1,
+    minHeight: 56,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+  },
+  coachPrimaryText: { ...typography.buttonLg },
+  coachSecondaryButton: {
+    minWidth: 88,
+    minHeight: 56,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+  },
+  coachSecondaryText: { ...typography.buttonLg },
+  homeCard: {
+    borderRadius: radius["3xl"],
+    padding: spacing.lg,
+    gap: spacing.md,
+    ...shadowStyle("sm"),
+  },
+  homeCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  homeIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  homeCardTitle: { ...typography.cardTitle, flex: 1 },
+  homeMeta: { ...typography.bodyXs },
+  noticeBox: {
+    borderRadius: radius.lg,
+    padding: spacing.sm,
+    flexDirection: "row",
+    gap: spacing.xs,
+    alignItems: "flex-start",
+  },
+  noticeText: { ...typography.bodySm, flex: 1 },
+  estimateRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  estimateLabel: { ...typography.bodySm },
+  estimateValue: { ...typography.labelMd },
+  darkActionButton: {
+    minHeight: 52,
+    borderRadius: radius.lg,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+  },
+  darkActionText: { ...typography.buttonLg },
+  programStatsRow: {
+    flexDirection: "row",
+    gap: spacing.md,
+  },
+  programStat: { flex: 1, gap: 4 },
+  programStatLabel: { ...typography.labelXs },
+  programStatValue: { ...typography.labelMd },
+  programHomeActions: { flexDirection: "row", gap: spacing.sm },
+  programMainButton: {
+    flex: 1,
+    minHeight: 58,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.sm,
+  },
+  programMainText: { ...typography.buttonSm, textAlign: "center" },
+  programOutlineButton: {
+    flex: 1,
+    minHeight: 58,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  programOutlineText: { ...typography.buttonSm, textAlign: "center" },
+  toolsBlock: { gap: spacing.sm },
+  toolsTitle: { ...typography.sectionTitle, marginBottom: spacing.xs },
+  toolRow: {
+    minHeight: 76,
+    borderRadius: radius["2xl"],
+    borderWidth: 1,
+    padding: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    ...shadowStyle("sm"),
+  },
+  toolIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  toolCopy: { flex: 1, gap: 3 },
+  toolTitle: { ...typography.labelMd },
+  toolBody: { ...typography.bodyXs },
   hero: {
     borderRadius: radius["4xl"],
     borderWidth: 1,
@@ -1521,6 +2011,26 @@ const styles = createDynamicStyles(() => ({
   statusTitle: { ...typography.labelMd },
   statusBody: { ...typography.bodySm },
   flow: { gap: spacing.md },
+  decisionGrid: { gap: spacing.smPlus },
+  decisionCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 18,
+    gap: 14,
+    ...shadowStyle("floating"),
+  },
+  decisionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.xl,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  decisionCopy: { gap: 5 },
+  decisionTitle: { ...typography.cardTitle },
+  decisionBody: { ...typography.bodySm },
+  decisionFooter: { flexDirection: "row", alignItems: "center", gap: 4 },
+  decisionCta: { ...typography.buttonSm },
   programCard: {
     borderRadius: 28,
     borderWidth: 1,
@@ -1546,6 +2056,55 @@ const styles = createDynamicStyles(() => ({
     gap: 10,
   },
   programActionButton: { flex: 1 },
+  sheetOverlay: { flex: 1, justifyContent: "flex-end" },
+  sheetBackdrop: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(8, 12, 18, 0.42)",
+  },
+  sheetCard: {
+    width: "100%",
+    maxWidth: 430,
+    alignSelf: "center",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderWidth: 1,
+    paddingTop: 10,
+    paddingHorizontal: 18,
+    paddingBottom: 18,
+    gap: 12,
+  },
+  sheetGrabber: {
+    alignSelf: "center",
+    width: 42,
+    height: 4,
+    borderRadius: radius.full,
+    marginBottom: 2,
+  },
+  sheetTitle: { ...typography.cardTitle },
+  sheetBody: { ...typography.bodySm },
+  sheetActionList: { gap: 10 },
+  sheetActionRowTall: {
+    minHeight: 82,
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  sheetActionIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sheetActionCopy: { flex: 1, gap: 3 },
+  sheetActionTitle: { ...typography.labelMd },
+  sheetActionBody: { ...typography.bodyXs, lineHeight: 17 },
   sectionHeading: { gap: 4 },
   sectionTitle: { ...typography.sectionTitle },
   sectionBody: { ...typography.bodySm },

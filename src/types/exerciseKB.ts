@@ -3,7 +3,7 @@ import type { AIProgramEquipmentKey, AIProgramPainLimitation } from './aiProgram
 /**
  * Faz 4 — Exercise Knowledge Base & Taxonomy
  *
- * Bu katman, egzersiz kataloğunun (src/data/exercises.ts) üzerinde duran
+ * Bu katman, generated CSV egzersiz kataloğunun üzerinde duran
  * programlama amaçlı metadata overlay'idir. Katalog isim ve görsel sağlar;
  * bu katman hareketin programlama anlamını (pattern, kas rolü, yorgunluk
  * maliyeti, ekipman/ağrı uyumu) sağlar.
@@ -112,10 +112,56 @@ export type PainCompatibility = 'preferred' | 'acceptable' | 'caution' | 'avoid'
  */
 export type ProgressionArchetype = 'load_led' | 'technique_led' | 'pump' | 'endurance';
 
+export type StrengthExerciseRole =
+  | 'main_lift'
+  | 'primary_variation'
+  | 'secondary_strength_lift'
+  | 'hypertrophy_assistance'
+  | 'structural_balance'
+  | 'core_bracing'
+  | 'conditioning_gpp';
+
+export type StrengthSpecificityTier = 'S' | 'A' | 'B' | 'C' | 'D';
+
+export type HypertrophyRegion =
+  | 'upper_chest'
+  | 'mid_chest'
+  | 'lower_chest'
+  | 'chest_adduction'
+  | 'lat_width'
+  | 'shoulder_extension'
+  | 'mid_back_thickness'
+  | 'scapular_retraction'
+  | 'upper_traps'
+  | 'rear_delts'
+  | 'erectors'
+  | 'anterior_delt'
+  | 'lateral_delt'
+  | 'posterior_delt'
+  | 'biceps_supinated'
+  | 'biceps_neutral'
+  | 'biceps_lengthened'
+  | 'triceps_overhead'
+  | 'triceps_pressdown'
+  | 'compound_press_carryover'
+  | 'quad_squat'
+  | 'quad_unilateral'
+  | 'knee_extension'
+  | 'hamstring_hinge'
+  | 'hamstring_knee_flexion'
+  | 'glute_lengthened'
+  | 'glute_shortened'
+  | 'glute_abduction'
+  | 'calf_straight_knee'
+  | 'calf_bent_knee'
+  | 'core_bracing'
+  | 'core_flexion'
+  | 'core_rotation';
+
 export type JointDemands = Partial<Record<Exclude<AIProgramPainLimitation, 'none' | 'other'>, JointDemandLevel>>;
 
 /**
- * Tek bir egzersizin programlama metadatası. exerciseId alanı src/data/exercises.ts
+ * Tek bir egzersizin programlama metadatası. exerciseId alanı CSV egzersiz kataloğu
  * kataloğundaki bir id'ye eşleşmek ZORUNDA; aksi halde Faz 8 program
  * seviye doğrulayıcısı reddeder ve session player sessizce düşürür.
  */
@@ -137,6 +183,14 @@ export type ExerciseProgrammingMeta = {
   painCompatibility: Partial<Record<AIProgramPainLimitation, PainCompatibility>>;
   equipment: AIProgramEquipmentKey[];
   progressionArchetype: ProgressionArchetype;
+  strengthRoles: StrengthExerciseRole[];
+  strengthSpecificityTiers?: Partial<Record<'squat' | 'bench' | 'deadlift' | 'press' | 'row' | 'pullup', StrengthSpecificityTier>>;
+  supportedLiftPatterns: ('squat' | 'bench' | 'deadlift' | 'press' | 'row' | 'pullup')[];
+  hypertrophyRegions: HypertrophyRegion[];
+  resistanceProfileHint?: 'lengthened_bias' | 'mid_range_bias' | 'shortened_bias' | 'mixed';
+  stabilityDemand?: 'low' | 'moderate' | 'high';
+  technicalDemand?: 'low' | 'moderate' | 'high';
+  indirectSetContributions?: Partial<Record<MuscleRole, number>>;
   defaultSetBand: { min: number; max: number };
   defaultRepRange: { min: number; max: number };
   defaultRestSeconds: number;

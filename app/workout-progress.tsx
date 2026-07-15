@@ -80,7 +80,7 @@ export default function WorkoutProgressScreen() {
   return (
     <View style={styles.container}>
       <ScreenHeader
-        title={t({ tr: "Antrenman ilerlemesi", en: "Workout progress" })}
+        title={t({ tr: "Antrenman içgörüleri", en: "Training insights" })}
       />
 
       <ScrollView

@@ -1,0 +1,25 @@
+{
+  "template_count": 26,
+  "exercise_row_count": 564,
+  "progression_rule_count": 6,
+  "adaptation_rule_count": 52,
+  "substitution_count": 27,
+  "exercise_catalog_count": 67,
+  "templates_by_goal": {
+    "strength": 6,
+    "hypertrophy": 9,
+    "powerbuilding": 4,
+    "general_fitness": 7
+  },
+  "templates_by_level": {
+    "beginner": 9,
+    "intermediate": 12,
+    "advanced": 5
+  },
+  "templates_by_days_per_week": {
+    "3": 9,
+    "4": 10,
+    "5": 5,
+    "6": 2
+  }
+}

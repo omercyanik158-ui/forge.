@@ -1,4 +1,4 @@
-import { createDynamicStyles, spacing, typography, useAppTheme } from '@/theme';
+import { createDynamicStyles, radius, shadowStyle, spacing, typography, useAppTheme } from '@/theme';
 import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,15 +19,21 @@ import {
 } from '@/services/customWorkoutStore';
 import { computeCycleIntensity, type CycleIntensity } from '@/services/personalCoach';
 import { summarizeCycleTracking, loadCycleTracking, type CyclePhase } from '@/services/cycleTracking';
-import { ALL_PROGRAMS, FREE_PROGRAMS, getProgramDayCount, PREMIUM_PROGRAMS } from '@/services/programCatalog';
+import { ALL_PROGRAMS, FREE_PROGRAMS } from '@/services/programCatalog';
 import { localizeProgramPlans } from '@/services/program-localization';
 import { subscribeFavoritesRailChange } from '@/services/favoritesRailEvents';
 import { loadFavoriteProgramIds } from '@/services/programFavoriteStore';
 import { loadAllProgramProgress } from '@/services/programProgressStore';
 import { loadProfile } from '@/services/profileStore';
-import { canAccessPremiumPrograms } from '@/services/subscription';
+import {
+  loadBodyProgress,
+  type BodyProgressSnapshot,
+} from '@/services/bodyProgress';
+import { getExerciseById } from '@/services/exerciseCatalog';
+import { formatWeightValue, weightUnitLabel } from '@/services/localization';
 import { normalizeProgramText, repairText } from '@/services/textUtils';
 import type { AIProgramPlan } from '@/types/aiProgramPlan';
+import type { CoachAdjustment } from '@/types/coachAdjustment';
 import type { ProgramProgressMap } from '@/services/programProgressStore';
 import type { UserProfile } from '@/types';
 
@@ -48,26 +54,32 @@ export default function FitnessScreen() {
   const [progressMap, setProgressMap] = useState<ProgramProgressMap>({});
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [favoriteProgramIds, setFavoriteProgramIds] = useState<string[]>([]);
+  const [bodyProgress, setBodyProgress] = useState<BodyProgressSnapshot | null>(null);
   const [cycleState, setCycleState] = useState<{ phase: CyclePhase | null; intensity: CycleIntensity }>({ phase: null, intensity: 'normal' });
   const [managementItem, setManagementItem] = useState<ProgramManagementItem | null>(null);
   const [managementMode, setManagementMode] = useState<ProgramManagementMode>('actions');
   const [renameTitle, setRenameTitle] = useState('');
   const [managementBusy, setManagementBusy] = useState(false);
+  const [createSheetVisible, setCreateSheetVisible] = useState(false);
+  const [progressReferenceTimeMs, setProgressReferenceTimeMs] = useState(0);
 
   const refreshData = useCallback(async () => {
-    const [loadedProfile, savedWorkouts, cycleTracking, aiProgramsData, favoriteIds, progress] = await Promise.all([
+    const [loadedProfile, savedWorkouts, cycleTracking, aiProgramsData, favoriteIds, progress, bodyProgressData] = await Promise.all([
       loadProfile(),
       loadCustomWorkouts(),
       loadCycleTracking(),
       loadAIProgramInstances(),
       loadFavoriteProgramIds(),
       loadAllProgramProgress(),
+      loadBodyProgress(),
     ]);
     setProfile(loadedProfile);
     setCustomWorkouts(savedWorkouts);
     setAIProgramInstances(aiProgramsData);
     setFavoriteProgramIds(favoriteIds);
     setProgressMap(progress);
+    setBodyProgress(bodyProgressData);
+    setProgressReferenceTimeMs(Date.now());
     if (loadedProfile?.gender === 'female') {
       const summary = summarizeCycleTracking(cycleTracking);
       setCycleState({ phase: summary?.phase ?? null, intensity: computeCycleIntensity(summary) });
@@ -91,6 +103,28 @@ export default function FitnessScreen() {
     () => ALL_PROGRAMS.filter((program) => favoriteProgramIds.includes(program.id)),
     [favoriteProgramIds],
   );
+  const programRailPrograms = useMemo(
+    () => favoriteLibraryPrograms.length > 0 ? favoriteLibraryPrograms : FREE_PROGRAMS.slice(0, 4),
+    [favoriteLibraryPrograms],
+  );
+  const activeAIProgram = useMemo(
+    () => [...aiPrograms].sort((left, right) => right.generatedAt.localeCompare(left.generatedAt))[0] ?? null,
+    [aiPrograms],
+  );
+  const activeProgramProgress = activeAIProgram ? progressMap[`ai:${activeAIProgram.id}`] ?? [] : [];
+  const activeProgramNextDayId = activeAIProgram ? getNextAIProgramDayId(activeAIProgram, activeProgramProgress) : "";
+  const activeProgramNextTitle = activeAIProgram ? getNextAIProgramDayTitle(activeAIProgram, activeProgramProgress) : "";
+  const activeProgramNextDay = activeAIProgram
+    ? activeAIProgram.weeks
+        .flatMap((week) => week.days)
+        .find((day) => day.id === activeProgramNextDayId) ?? null
+    : null;
+  const activeProgramWeekLabel = activeAIProgram
+    ? `${Math.min(activeProgramProgress.length + 1, activeAIProgram.daysPerWeek)} / ${activeAIProgram.daysPerWeek}`
+    : "0 / 0";
+  const activeProgramDayNumber = activeAIProgram
+    ? Math.min(activeProgramProgress.length + 1, activeAIProgram.daysPerWeek || 1)
+    : 1;
 
   const closeManagementSheet = useCallback(() => {
     if (managementBusy) return;
@@ -145,23 +179,57 @@ export default function FitnessScreen() {
   // Aktif AI planının ilerlemesi (tamamlanan / toplam gün).
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <TopBar />
+      <TopBar
+        showAvatar
+        showAction
+        actionIcon="settings-outline"
+        onActionPress={() => router.push('/settings-privacy')}
+      />
       <ScrollView
         ref={scrollRef}
         style={{ backgroundColor: colors.background }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.screenHeaderOffset, paddingBottom: spacing.tabContentBottom }]}
       >
-        <CreateProgramHero
-          onCreate={() => router.push('/create-workout')}
+        <TodayWorkoutHero
+          activeProgram={activeAIProgram}
+          nextTitle={activeProgramNextTitle}
+          nextExerciseName={getExerciseById(activeProgramNextDay?.exercises[0]?.exerciseId)?.displayName}
+          durationMin={activeProgramNextDay?.durationMin ?? 55}
+          dayNumber={activeProgramDayNumber}
+          weekLabel={activeProgramWeekLabel}
+          onStart={() => {
+            if (!activeAIProgram) {
+              setCreateSheetVisible(true);
+              return;
+            }
+            router.push({
+              pathname: '/program-session',
+              params: { aiProgramId: activeAIProgram.id, aiDayId: activeProgramNextDayId },
+            });
+          }}
+          onOpenProgram={() => {
+            if (!activeAIProgram) {
+              setCreateSheetVisible(true);
+              return;
+            }
+            router.push({ pathname: '/ai-program-detail', params: { id: activeAIProgram.id } });
+          }}
+          onOpen={() => setCreateSheetVisible(true)}
+        />
+        <ProgressSummaryGrid
+          snapshot={bodyProgress}
+          onOpen={() => router.push('/body-progress')}
+          streakCount={profile?.streak?.count ?? 0}
+          referenceTimeMs={progressReferenceTimeMs}
         />
         <FavoriteProgramsSection
-          programs={favoriteLibraryPrograms}
+          programs={programRailPrograms}
           customWorkouts={customWorkouts}
           aiPrograms={aiPrograms}
+          coachAdjustments={bodyProgress?.coachAdjustments ?? []}
           progressMap={progressMap}
-          onBuildAI={() => router.push('/ai-program-builder')}
-          onExplore={() => router.push('/programs')}
+          onOpenAllPrograms={() => router.push('/programs')}
           onOpenProgram={(id) => router.push({ pathname: '/program-detail', params: { id } })}
           onStartCustomWorkout={(id) => router.push({ pathname: '/program-session', params: { customWorkoutId: id } })}
           onOpenAIProgram={(id) => router.push({ pathname: '/ai-program-detail', params: { id } })}
@@ -182,12 +250,6 @@ export default function FitnessScreen() {
             onOpenCycle={() => router.push('/cycle-tracking')}
           />
         ) : null}
-        <DiscoverSection
-          gender={profile?.gender}
-          premiumUnlocked={canAccessPremiumPrograms(profile)}
-          onOpenAll={() => router.push('/programs')}
-          onOpenProgram={(id) => router.push({ pathname: '/program-detail', params: { id } })}
-        />
       </ScrollView>
       <ProgramManagementSheet
         item={managementItem}
@@ -228,89 +290,242 @@ export default function FitnessScreen() {
         onDelete={handleDeleteManagedItem}
         onRename={handleRenameManagedWorkout}
       />
+      <ProgramCreateSheet
+        visible={createSheetVisible}
+        onClose={() => setCreateSheetVisible(false)}
+        onBuildAI={() => {
+          setCreateSheetVisible(false);
+          router.push({ pathname: '/ai-program-builder', params: { fresh: '1' } });
+        }}
+        onAnalyze={() => {
+          setCreateSheetVisible(false);
+          router.push({ pathname: '/ai', params: { mode: 'physique' } });
+        }}
+        onCreateManual={() => {
+          setCreateSheetVisible(false);
+          router.push('/create-workout');
+        }}
+        onExplore={() => {
+          setCreateSheetVisible(false);
+          router.push('/programs');
+        }}
+      />
     </View>
   );
 }
 
-function CreateProgramHero({
-  onCreate,
+function ProgressSummaryGrid({
+  snapshot,
+  onOpen,
+  streakCount,
+  referenceTimeMs,
 }: {
-  onCreate: () => void;
+  snapshot: BodyProgressSnapshot | null;
+  onOpen: () => void;
+  streakCount: number;
+  referenceTimeMs: number;
 }) {
   const { colors } = useAppTheme();
-  const { t } = useAppLocalization();
+  const { resolved, t } = useAppLocalization();
+  const latestScore = snapshot?.latestPhysiqueScore ?? null;
+  const analysisLabel = latestScore
+    ? daysAgoLabel(latestScore.createdAt, referenceTimeMs, t)
+    : t({ tr: 'Bekliyor', en: 'Waiting' });
+  const weeklyVolumeKg = snapshot?.topStrengthProgress
+    .flatMap((item) => item.records.slice(-3))
+    .reduce((sum, record) => sum + record.volumeKg, 0) ?? 0;
+  const unit = weightUnitLabel(resolved);
 
   return (
-    <View
-      style={[
-        styles.createHero,
-        {
-          backgroundColor: colors.primary,
-          borderColor: `${colors.primary}55`,
-        },
-      ]}
-    >
-      <View style={[styles.createHeroGlowPrimary, { backgroundColor: `${colors.secondary}55` }]} />
-      <View style={[styles.createHeroGlowSecondary, { backgroundColor: `${colors.tertiary}45` }]} />
-      <View style={styles.createHeroHeader}>
-        <View style={[styles.createHeroIcon, { backgroundColor: colors.whiteAlpha20 }]}>
-          <Ionicons name="barbell-outline" size={22} color={colors.onPrimary} />
-        </View>
-        <View style={styles.createHeroCopy}>
-          <Text style={[styles.createHeroTitle, { color: colors.onPrimary }]}>
-            {t({ tr: 'Antrenman alanın', en: 'Your training space' })}
-          </Text>
-          <Text style={[styles.createHeroBody, { color: colors.whiteAlpha60 }]}>
-            {t({
-              tr: 'AI programını AI Hub’dan oluştur, burada uygula ve yönet. İstersen kendi antrenmanını da ekleyebilirsin.',
-              en: 'Create your AI program in AI Hub, then use and manage it here. You can also add your own workout.',
-            })}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.createHeroActions}>
-        <QuickActionChip
-          icon="add"
-          label={t({ tr: 'Antrenman oluştur', en: 'Create workout' })}
-          accessibilityLabel={t({ tr: 'Antrenman oluştur', en: 'Create workout' })}
-          accent={colors.primary}
-          onPress={onCreate}
+    <View style={styles.progressBlock}>
+      <Text style={[styles.sectionHeadingTitle, { color: colors.onSurface }]}>
+        {t({ tr: 'Gelişim', en: 'Progress' })}
+      </Text>
+      <View style={styles.progressGrid}>
+        <ProgressMetricCard
+          icon="stats-chart"
+          iconColor={colors.primary}
+          label={t({ tr: 'Analiz', en: 'Analysis' })}
+          value={analysisLabel}
+          onPress={onOpen}
+        />
+        <ProgressMetricCard
+          icon="flame"
+          iconColor={colors.error}
+          label={t({ tr: 'Seri', en: 'Streak' })}
+          value={t({ tr: `${streakCount} Gün`, en: `${streakCount} Days` })}
+          onPress={onOpen}
+        />
+        <ProgressMetricCard
+          wide
+          icon="trending-up"
+          iconColor={colors.primary}
+          label={t({ tr: 'Haftalık Hacim', en: 'Weekly Volume' })}
+          value={weeklyVolumeKg > 0 ? `${formatWeightValue(weeklyVolumeKg)} ${unit}` : t({ tr: 'Başlıyor', en: 'Starting' })}
+          onPress={onOpen}
         />
       </View>
     </View>
   );
 }
-function QuickActionChip({
+
+function ProgressMetricCard({
   icon,
+  iconColor,
   label,
-  accessibilityLabel,
-  accent,
+  value,
+  wide = false,
   onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
   label: string;
-  accessibilityLabel: string;
-  accent: string;
+  value: string;
+  wide?: boolean;
   onPress: () => void;
 }) {
   const { colors } = useAppTheme();
-
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      activeOpacity={0.82}
+      activeOpacity={0.84}
       onPress={onPress}
-      style={[styles.quickActionChip, { borderColor: colors.outlineVariant, backgroundColor: colors.surfaceContainerLowest }]}
+      style={[
+        wide ? styles.progressMetricWide : styles.progressMetric,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.outlineVariant,
+        },
+      ]}
     >
-      <View style={[styles.quickActionIcon, { backgroundColor: `${accent}14` }]}>
-        <Ionicons name={icon} size={16} color={accent} />
-      </View>
-      <Text numberOfLines={1} style={[styles.quickActionLabel, { color: colors.onSurface }]}>
+      <Ionicons name={icon} size={18} color={iconColor} />
+      <Text style={[styles.progressMetricLabel, { color: colors.onSurfaceVariant }]}>
         {label}
+      </Text>
+      <Text style={[styles.progressMetricValue, { color: colors.onSurface }]}>
+        {value}
       </Text>
     </TouchableOpacity>
   );
+}
+
+function TodayWorkoutHero({
+  activeProgram,
+  nextTitle,
+  nextExerciseName,
+  durationMin,
+  dayNumber,
+  weekLabel,
+  onStart,
+  onOpenProgram,
+  onOpen,
+}: {
+  activeProgram: AIProgramPlan | null;
+  nextTitle: string;
+  nextExerciseName?: string;
+  durationMin: number;
+  dayNumber: number;
+  weekLabel: string;
+  onStart: () => void;
+  onOpenProgram: () => void;
+  onOpen: () => void;
+}) {
+  const { colors } = useAppTheme();
+  const { t } = useAppLocalization();
+  const title = activeProgram
+    ? normalizeProgramText(activeProgram.title)
+    : t({ tr: 'Sana uygun planı bul', en: 'Find your best-fit plan' });
+
+  return (
+    <View style={[styles.todayCard, { backgroundColor: colors.surface, borderColor: colors.outlineVariant }]}>
+      <View style={styles.todayHeader}>
+        <View style={styles.todayTitleWrap}>
+          <Text style={[styles.todayEyebrow, { color: colors.onSurfaceVariant }]}>
+            {activeProgram
+              ? t({ tr: 'BUGÜNKÜ ANTRENMAN', en: "TODAY'S WORKOUT" })
+              : t({ tr: 'BAŞLANGIÇ', en: 'START' })}
+          </Text>
+          <Text style={[styles.todayTitle, { color: colors.onSurface }]}>
+            {title}
+          </Text>
+        </View>
+        <View style={[styles.dayBadge, { backgroundColor: `${colors.primary}12` }]}>
+          <Text style={[styles.dayBadgeLabel, { color: colors.primary }]}>
+            {t({ tr: 'GÜN', en: 'DAY' })}
+          </Text>
+          <Text style={[styles.dayBadgeValue, { color: colors.primary }]}>
+            {dayNumber}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.todayPills}>
+        <View style={[styles.todayPill, { backgroundColor: colors.surfaceContainerLow }]}>
+          <Ionicons name="time-outline" size={14} color={colors.onSurfaceVariant} />
+          <Text style={[styles.todayPillText, { color: colors.onSurfaceVariant }]}>
+            {activeProgram ? `${durationMin} dk` : '5-10 dk'}
+          </Text>
+        </View>
+        <View style={[styles.todayPill, { backgroundColor: colors.surfaceContainerLow }]}>
+          <Ionicons name="calendar-outline" size={14} color={colors.onSurfaceVariant} />
+          <Text style={[styles.todayPillText, { color: colors.onSurfaceVariant }]}>
+            {activeProgram ? `${t({ tr: 'Hafta', en: 'Week' })} ${weekLabel}` : t({ tr: 'Plan kurulumu', en: 'Plan setup' })}
+          </Text>
+        </View>
+      </View>
+
+      <View style={[styles.nextExerciseCard, { backgroundColor: `${colors.primary}10`, borderColor: `${colors.primary}18` }]}>
+        <View style={[styles.nextExerciseIcon, { backgroundColor: `${colors.primary}14` }]}>
+          <Ionicons name="barbell-outline" size={19} color={colors.primary} />
+        </View>
+        <View style={styles.nextExerciseCopy}>
+          <Text style={[styles.nextExerciseLabel, { color: colors.onSurfaceVariant }]}>
+            {activeProgram ? t({ tr: 'SIRADAKİ', en: 'NEXT' }) : t({ tr: 'ÖNERİ', en: 'SUGGESTION' })}
+          </Text>
+          <Text style={[styles.nextExerciseTitle, { color: colors.onSurface }]}>
+            {activeProgram
+              ? normalizeProgramText(nextExerciseName ?? nextTitle)
+              : t({ tr: 'Hedeflerine göre plan önerisi', en: 'Plan recommendation from your goals' })}
+          </Text>
+        </View>
+      </View>
+
+      <TouchableOpacity
+        accessibilityRole="button"
+        activeOpacity={0.86}
+        onPress={onStart}
+        style={[styles.startButton, { backgroundColor: colors.primary }]}
+      >
+        <Text style={[styles.startButtonText, { color: colors.onPrimary }]}>
+          {activeProgram ? t({ tr: 'Antrenmanı Başlat', en: 'Start Workout' }) : t({ tr: 'Plan önerisi al', en: 'Get plan recommendation' })}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        accessibilityRole="button"
+        activeOpacity={0.86}
+        onPress={activeProgram ? onOpenProgram : onOpen}
+        style={[styles.outlineButton, { borderColor: `${colors.primary}66` }]}
+      >
+        <Text style={[styles.outlineButtonText, { color: colors.primary }]}>
+          {activeProgram ? t({ tr: 'Programı Görüntüle', en: 'View Program' }) : t({ tr: 'Seçenekleri Gör', en: 'View Options' })}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function daysAgoLabel(
+  isoDate: string,
+  referenceTimeMs: number,
+  t: ReturnType<typeof useAppLocalization>['t'],
+): string {
+  if (referenceTimeMs <= 0) return t({ tr: 'Son analiz', en: 'Latest analysis' });
+  const createdAtMs = new Date(isoDate).getTime();
+  if (!Number.isFinite(createdAtMs)) return t({ tr: 'Son analiz', en: 'Latest analysis' });
+  const elapsedDays = Math.max(0, Math.floor((referenceTimeMs - createdAtMs) / 86_400_000));
+  if (elapsedDays === 0) return t({ tr: 'Bugün', en: 'Today' });
+  if (elapsedDays === 1) return t({ tr: 'Dün', en: 'Yesterday' });
+  return t({ tr: `${elapsedDays} gün önce`, en: `${elapsedDays} days ago` });
 }
 
 function getNextAIProgramDayId(plan: AIProgramPlan, completedDayIds: string[]): string {
@@ -330,7 +545,12 @@ function getNextAIProgramDayTitle(plan: AIProgramPlan, completedDayIds: string[]
   return nextDay ? normalizeProgramText(nextDay.title) : "Sıradaki antrenman";
 }
 
-function buildAIProgramInsight(plan: AIProgramPlan, completedDayIds: string[]): string {
+function buildAIProgramInsight(
+  plan: AIProgramPlan,
+  completedDayIds: string[],
+  coachAdjustment?: CoachAdjustment,
+): string {
+  if (coachAdjustment) return coachAdjustment.title;
   const nextTitle = getNextAIProgramDayTitle(plan, completedDayIds);
   if (completedDayIds.length === 0) return `İlk öneri: ${nextTitle}`;
   return `Sıradaki: ${nextTitle}`;
@@ -340,10 +560,10 @@ function FavoriteProgramsSection({
   programs,
   customWorkouts,
   aiPrograms,
+  coachAdjustments,
   progressMap,
-  onBuildAI,
-  onExplore,
   onOpenProgram,
+  onOpenAllPrograms,
   onStartCustomWorkout,
   onOpenAIProgram,
   onManageAIProgram,
@@ -352,10 +572,10 @@ function FavoriteProgramsSection({
   programs: ReturnType<typeof localizeProgramPlans>;
   customWorkouts: CustomWorkout[];
   aiPrograms: AIProgramPlan[];
+  coachAdjustments: CoachAdjustment[];
   progressMap: ProgramProgressMap;
-  onBuildAI: () => void;
-  onExplore: () => void;
   onOpenProgram: (id: string) => void;
+  onOpenAllPrograms: () => void;
   onStartCustomWorkout: (id: string) => void;
   onOpenAIProgram: (id: string) => void;
   onManageAIProgram: (plan: AIProgramPlan) => void;
@@ -373,56 +593,50 @@ function FavoriteProgramsSection({
     <View style={styles.favoritesArea}>
       <View style={styles.programAreaHeader}>
         <Text style={[styles.favoritesTitle, { color: colors.onSurface }]}>
-          {t({ tr: 'Favori Programlar', en: 'Favorite Programs' })}
+          {t({ tr: 'Programların', en: 'Your programs' })}
         </Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={t('fitness.open_all_a11y')}
+          onPress={onOpenAllPrograms}
+          activeOpacity={0.8}
+          style={styles.inlineAction}
+        >
+          <Text style={[styles.inlineActionText, { color: colors.primary }]}>
+            {t('fitness.all_programs')}
+          </Text>
+          <Ionicons name="chevron-forward" size={15} color={colors.primary} />
+        </TouchableOpacity>
       </View>
       {sortedAIPrograms.length === 0 && customWorkouts.length === 0 && localized.length === 0 ? (
         <View style={[styles.programsEmptyCard, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant }]}>
-          <View style={[styles.programsEmptyIcon, { backgroundColor: `${colors.secondary}14` }]}>
-            <Ionicons name="sparkles-outline" size={22} color={colors.secondary} />
+          <View style={[styles.programsEmptyIcon, { backgroundColor: `${colors.primary}14` }]}>
+            <Ionicons name="barbell-outline" size={22} color={colors.primary} />
           </View>
           <View style={styles.programsEmptyCopy}>
             <Text style={[styles.programsEmptyTitle, { color: colors.onSurface }]}>
-              {t('my_plans.shortcut_empty_title')}
+              {t({ tr: 'Henüz programın yok', en: 'No programs yet' })}
             </Text>
             <Text style={[styles.programsEmptyBody, { color: colors.onSurfaceVariant }]}>
-              {t('my_plans.shortcut_empty_body')}
+              {t({
+                tr: 'Üstteki seçeneklerden hedeflerine göre plan önerisi alabilir, manuel antrenman ekleyebilir veya hazır programları keşfedebilirsin.',
+                en: 'Use the options above to get a plan recommendation from your goals, add a manual workout, or explore ready-made programs.',
+              })}
             </Text>
-          </View>
-          <View style={styles.programsEmptyActions}>
-            <TouchableOpacity
-              accessibilityRole="button"
-              activeOpacity={0.85}
-              onPress={onBuildAI}
-              style={[styles.programsEmptyPrimary, { backgroundColor: colors.secondary }]}
-            >
-              <Text style={[styles.programsEmptyPrimaryText, { color: colors.onSecondary }]}>
-                {t('my_plans.empty_cta_ai')}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              accessibilityRole="button"
-              activeOpacity={0.85}
-              onPress={onExplore}
-              style={[styles.programsEmptySecondary, { borderColor: colors.outlineVariant }]}
-            >
-              <Text style={[styles.programsEmptySecondaryText, { color: colors.onSurface }]}>
-                {t('fitness.explore_programs')}
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       ) : (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.programRailContent}>
         {sortedAIPrograms.map((plan) => {
           const progress = progressMap[`ai:${plan.id}`] ?? [];
+          const latestAdjustment = coachAdjustments.find((item) => item.planId === plan.id);
           return (
             <ProgramCard
               key={`ai-${plan.id}`}
               type="ai"
               title={normalizeProgramText(plan.title)}
               subtitle={`${plan.weekCount} hafta · ${plan.daysPerWeek} ${t('migrated.fitness_005')}`}
-              insight={buildAIProgramInsight(plan, progress)}
+              insight={buildAIProgramInsight(plan, progress, latestAdjustment)}
               color={colors.primary}
               badgeLabel="AI"
               badgeTone="ai"
@@ -462,6 +676,141 @@ function FavoriteProgramsSection({
       </ScrollView>
       )}
     </View>
+  );
+}
+
+function ProgramCreateSheet({
+  visible,
+  onClose,
+  onBuildAI,
+  onAnalyze,
+  onCreateManual,
+  onExplore,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onBuildAI: () => void;
+  onAnalyze: () => void;
+  onCreateManual: () => void;
+  onExplore: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const { colors } = useAppTheme();
+  const { t } = useAppLocalization();
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.sheetOverlay}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={t({ tr: 'Program oluşturma seçeneklerini kapat', en: 'Close program creation options' })}
+          activeOpacity={1}
+          onPress={onClose}
+          style={styles.sheetBackdrop}
+        />
+        <View
+          style={[
+            styles.sheetCard,
+            {
+              paddingBottom: Math.max(insets.bottom, 14),
+              backgroundColor: colors.surfaceContainerLow,
+              borderColor: colors.outlineVariant,
+            },
+          ]}
+        >
+          <View style={[styles.sheetGrabber, { backgroundColor: colors.outlineVariant }]} />
+          <Text style={[styles.sheetTitle, { color: colors.onSurface }]}>
+            {t({ tr: 'Sana uygun planı bul', en: 'Find your best-fit plan' })}
+          </Text>
+          <Text style={[styles.sheetBody, { color: colors.onSurfaceVariant }]}>
+            {t({
+              tr: 'Fotoğraf şart değil. Hedeflerine göre başlayabilir, istersen vücut analiziyle daha kişisel hale getirebilirsin.',
+              en: 'Photos are optional. Start from your goals, or personalize further with physique analysis.',
+            })}
+          </Text>
+
+          <View style={styles.sheetActionList}>
+            <ProgramCreateActionRow
+              icon="sparkles-outline"
+              title={t({ tr: 'Hedeflerime göre plan öner', en: 'Recommend a plan from my goals' })}
+              body={t({
+                tr: 'Fotoğraf şart değil. Hedefin, seviyen, ekipmanın ve gün sayına göre sana en uygun planı seçelim.',
+                en: 'No photo required. We select the best-fit plan from your goal, level, equipment, and weekly days.',
+              })}
+              onPress={onBuildAI}
+            />
+            <ProgramCreateActionRow
+              icon="body-outline"
+              title={t({ tr: 'Vücut analiziyle daha kişisel hale getir', en: 'Personalize with physique analysis' })}
+              body={t({
+                tr: 'Önce analiz yorumunu gör; program odağını buna göre şekillendirelim.',
+                en: 'Review the analysis first; then we shape the program focus from it.',
+              })}
+              onPress={onAnalyze}
+            />
+            <ProgramCreateActionRow
+              icon="create-outline"
+              title={t({ tr: 'Manuel antrenman oluştur', en: 'Create a manual workout' })}
+              body={t({
+                tr: 'Hareketleri, setleri ve günleri kendin seçerek özel antrenman oluştur.',
+                en: 'Choose exercises, sets, and days yourself to create a custom workout.',
+              })}
+              onPress={onCreateManual}
+            />
+            <ProgramCreateActionRow
+              icon="albums-outline"
+              title={t({ tr: 'Hazır programlardan seç', en: 'Choose a ready-made program' })}
+              body={t({
+                tr: 'Kürasyonlu programları incele ve sana uygun olanı başlat.',
+                en: 'Browse curated programs and start the one that fits you.',
+              })}
+              onPress={onExplore}
+            />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function ProgramCreateActionRow({
+  icon,
+  title,
+  body,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  body: string;
+  onPress: () => void;
+}) {
+  const { colors } = useAppTheme();
+
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.82}
+      onPress={onPress}
+      style={[styles.createOptionRow, { backgroundColor: colors.surfaceContainerLowest }]}
+    >
+      <View style={[styles.sheetActionIcon, { backgroundColor: `${colors.primary}12` }]}>
+        <Ionicons name={icon} size={18} color={colors.primary} />
+      </View>
+      <View style={styles.createOptionCopy}>
+        <Text style={[styles.createOptionTitle, { color: colors.onSurface }]}>
+          {title}
+        </Text>
+        <Text style={[styles.createOptionBody, { color: colors.onSurfaceVariant }]}>
+          {body}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={colors.onSurfaceVariant} />
+    </TouchableOpacity>
   );
 }
 
@@ -701,98 +1050,102 @@ function WomenCycleCard({
   );
 }
 
-function prioritizeProgramsForGender<T extends { trainingStyle: string }>(programs: T[], gender?: UserProfile['gender']): T[] {
-  if (gender !== 'female') return programs;
-  return [...programs].sort((a, b) => Number(['Pilates', 'Yoga'].includes(b.trainingStyle)) - Number(['Pilates', 'Yoga'].includes(a.trainingStyle)));
-}
-
-function DiscoverSection({
-  gender,
-  premiumUnlocked,
-  onOpenAll,
-  onOpenProgram,
-}: {
-  gender?: UserProfile['gender'];
-  premiumUnlocked: boolean;
-  onOpenAll: () => void;
-  onOpenProgram: (id: string, locked: boolean) => void;
-}) {
-  const { colors } = useAppTheme();
-  const { resolved, t } = useAppLocalization();
-  const freePrograms = useMemo(() => prioritizeProgramsForGender(localizeProgramPlans(FREE_PROGRAMS, resolved.language), gender), [gender, resolved.language]);
-  const premiumPrograms = useMemo(() => localizeProgramPlans(PREMIUM_PROGRAMS, resolved.language), [resolved.language]);
-
-  const items = useMemo(() => {
-    const combined = [
-      ...freePrograms.map((program) => ({ program, locked: false })),
-      ...premiumPrograms.map((program) => ({ program, locked: !premiumUnlocked })),
-    ];
-    return combined.slice(0, 4);
-  }, [freePrograms, premiumPrograms, premiumUnlocked]);
-
-  return (
-    <View style={styles.programArea}>
-      <View style={styles.programAreaHeader}>
-        <Text style={[styles.programAreaTitle, { color: colors.onSurface }]}>
-          {t('fitness.programs')}
-        </Text>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel={t('fitness.open_all_a11y')}
-          onPress={onOpenAll}
-          activeOpacity={0.8}
-          style={styles.inlineAction}
-        >
-          <Text style={[styles.inlineActionText, { color: colors.onSurface }]}>
-            {t('fitness.all_programs')}
-          </Text>
-          <Ionicons name="chevron-forward" size={15} color={colors.onSurface} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.programRailContent}>
-        {items.map(({ program, locked }) => (
-          <TouchableOpacity
-            key={program.id}
-            accessibilityRole="button"
-            accessibilityLabel={`${normalizeProgramText(program.title)}, ${repairText(program.trainingStyle)}, ${program.daysPerWeek} ${t('migrated.fitness_005')}${locked ? `, ${t('migrated.fitness_006')}` : `, ${t('migrated.fitness_007')}`}`}
-            activeOpacity={0.86}
-            onPress={() => onOpenProgram(program.id, locked)}
-          >
-            <View style={[styles.programCard, { backgroundColor: colors.surfaceContainerLowest, borderColor: colors.outlineVariant }]}>
-              <View style={[styles.programVisual, { backgroundColor: program.color }]}>
-                <Ionicons name="arrow-down-outline" size={28} color={colors.whiteAlpha60} />
-              </View>
-              <View style={styles.programBadge}>
-                <Text style={[styles.programBadgeText, { color: colors.onSurface }]}>
-                  {locked ? t('migrated.fitness_008') : t('migrated.fitness_009')}
-                </Text>
-              </View>
-              <View style={styles.programCopy}>
-                <Text numberOfLines={2} style={[styles.programTitle, { color: colors.onSurface }]}>
-                  {normalizeProgramText(program.title)}
-                </Text>
-                <Text style={[styles.programMeta, { color: colors.onSurface }]}>
-                  {repairText(program.duration)} · {program.daysPerWeek} {t('migrated.fitness_005')}
-                </Text>
-                <Text numberOfLines={1} style={[styles.programSub, { color: colors.onSurface }]}>
-                  {repairText(program.trainingStyle)} · {repairText(program.difficultyLevel)}
-                </Text>
-                <Text numberOfLines={1} style={[styles.programHint, { color: colors.onSurface }]}>
-                  {getProgramDayCount(program)} {t('migrated.fitness_010')} · {repairText(program.focus)}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
-
 const styles = createDynamicStyles(() => ({
   container: { flex: 1 },
-  content: { paddingHorizontal: spacing.containerMargin, gap: 18 },
+  content: { paddingHorizontal: spacing.containerMargin, gap: 22 },
+
+  todayCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 20,
+    gap: 16,
+    ...shadowStyle('md'),
+  },
+  todayHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
+  todayTitleWrap: { flex: 1, gap: 4 },
+  todayEyebrow: { ...typography.labelCaps, fontSize: 10, letterSpacing: 1.1 },
+  todayTitle: { ...typography.headlineLg, fontSize: 24, lineHeight: 30 },
+  dayBadge: {
+    minWidth: 54,
+    minHeight: 48,
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  dayBadgeLabel: { ...typography.labelCaps, fontSize: 9, lineHeight: 11 },
+  dayBadgeValue: { ...typography.labelMd, fontSize: 15, lineHeight: 18 },
+  todayPills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  todayPill: {
+    minHeight: 32,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  todayPillText: { ...typography.labelMd, fontSize: 12, lineHeight: 16 },
+  nextExerciseCard: {
+    minHeight: 88,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  nextExerciseIcon: { width: 42, height: 42, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  nextExerciseCopy: { flex: 1, gap: 3 },
+  nextExerciseLabel: { ...typography.labelCaps, fontSize: 10, letterSpacing: 1.2 },
+  nextExerciseTitle: { ...typography.headlineMd, fontSize: 20, lineHeight: 25 },
+  startButton: {
+    minHeight: 54,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadowStyle('sm'),
+  },
+  startButtonText: { ...typography.buttonLg, fontSize: 17, lineHeight: 22 },
+  outlineButton: {
+    minHeight: 46,
+    borderRadius: 16,
+    borderWidth: 1.4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  outlineButtonText: { ...typography.labelMd },
+
+  progressBlock: { gap: 12 },
+  sectionHeadingTitle: { ...typography.sectionTitle, fontSize: 20, lineHeight: 26 },
+  progressGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  progressMetric: {
+    width: '48%',
+    minHeight: 108,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    padding: 14,
+    ...shadowStyle('sm'),
+  },
+  progressMetricWide: {
+    width: '100%',
+    minHeight: 92,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    padding: 14,
+    ...shadowStyle('sm'),
+  },
+  progressMetricLabel: { ...typography.labelMd, fontSize: 12, lineHeight: 16, textAlign: 'center' },
+  progressMetricValue: { ...typography.labelMd, textAlign: 'center' },
 
   createHero: {
     borderRadius: 24,
@@ -818,6 +1171,18 @@ const styles = createDynamicStyles(() => ({
   quickActionIcon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   quickActionLabel: { ...typography.labelXs, textAlign: 'center' },
 
+  bodyProgressCard: { padding: 14, gap: 12 },
+  bodyProgressHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  bodyProgressIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  bodyProgressCopy: { flex: 1, gap: 3 },
+  bodyProgressTitle: { ...typography.cardTitle },
+  bodyProgressBody: { ...typography.bodySm },
+  bodyProgressMetrics: { flexDirection: 'row', gap: 10 },
+  bodyProgressMetric: { flex: 1, borderWidth: 1, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 10, gap: 2 },
+  bodyProgressMetricLabel: { ...typography.labelXs },
+  bodyProgressMetricValue: { ...typography.labelMd },
+  bodyProgressMetricHint: { ...typography.bodyXs },
+
   favoritesArea: { gap: 12 },
   favoritesTitle: { ...typography.sectionTitle, fontSize: 19, lineHeight: 25 },
   programsEmptyCard: { borderRadius: 20, borderWidth: 1, padding: 16, gap: 12 },
@@ -825,11 +1190,11 @@ const styles = createDynamicStyles(() => ({
   programsEmptyCopy: { gap: 3 },
   programsEmptyTitle: { ...typography.headlineMd, fontSize: 18, lineHeight: 24 },
   programsEmptyBody: { ...typography.bodySm },
-  programsEmptyActions: { flexDirection: 'row', gap: 10 },
-  programsEmptyPrimary: { flex: 1, minHeight: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
-  programsEmptyPrimaryText: { ...typography.labelMd, textAlign: 'center' },
-  programsEmptySecondary: { flex: 1, minHeight: 46, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
-  programsEmptySecondaryText: { ...typography.labelMd, textAlign: 'center' },
+
+  createOptionRow: { minHeight: 86, borderRadius: 18, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  createOptionCopy: { flex: 1, gap: 3 },
+  createOptionTitle: { ...typography.labelMd },
+  createOptionBody: { ...typography.bodyXs, lineHeight: 17 },
 
   sheetOverlay: { flex: 1, justifyContent: 'flex-end' },
   sheetBackdrop: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(8, 12, 18, 0.42)' },

@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { startTransition, useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import Constants from 'expo-constants';
-import { InteractionManager, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import {
   useFonts,
   Montserrat_400Regular,
@@ -68,6 +68,32 @@ type BootstrapResult = {
   status: Exclude<GateStatus, 'loading'>;
   themeMode: ThemeMode;
 };
+
+type IdleScheduler = {
+  requestIdleCallback?: (
+    callback: () => void,
+    options?: { timeout?: number },
+  ) => number;
+  cancelIdleCallback?: (handle: number) => void;
+};
+
+function scheduleIdleTask(callback: () => void, timeoutMs = 1000): () => void {
+  const scheduler = globalThis as unknown as IdleScheduler;
+
+  if (typeof scheduler.requestIdleCallback === 'function') {
+    const handle = scheduler.requestIdleCallback(callback, { timeout: timeoutMs });
+    return () => {
+      if (typeof scheduler.cancelIdleCallback === 'function') {
+        scheduler.cancelIdleCallback(handle);
+      }
+    };
+  }
+
+  const handle = setTimeout(callback, 1);
+  return () => {
+    clearTimeout(handle);
+  };
+}
 
 const errorUtils: ErrorUtilsLike =
   typeof global !== 'undefined'
@@ -338,7 +364,7 @@ function AppShell({ bootstrapStatus }: { bootstrapStatus: Exclude<GateStatus, 'l
 
   useEffect(() => {
     let cancelled = false;
-    const task = InteractionManager.runAfterInteractions(() => {
+    const cancelIdleTask = scheduleIdleTask(() => {
       if (cancelled) {
         return;
       }
@@ -363,7 +389,7 @@ function AppShell({ bootstrapStatus }: { bootstrapStatus: Exclude<GateStatus, 'l
 
     return () => {
       cancelled = true;
-      task.cancel();
+      cancelIdleTask();
     };
   }, [user?.id]);
 

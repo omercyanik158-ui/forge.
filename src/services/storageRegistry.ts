@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   aiProgramPhysiqueSeed: '@forge/ai-program-physique-seed',
   aiProgramInstances: '@forge/ai-program-instances',
   aiProgramFeedback: '@forge/ai-program-feedback',
+  coachAdjustments: '@forge/coach-adjustments',
   userPrograms: '@forge/user-programs',
   programFavorites: '@forge/program-favorites',
 } as const;
@@ -48,6 +49,7 @@ export const STORAGE_LABELS: Record<StorageRegistryKey, string> = {
   aiProgramPhysiqueSeed: 'AI program fizik aktarımı',
   aiProgramInstances: 'Kayıtlı AI programları',
   aiProgramFeedback: 'AI seans geri bildirimleri',
+  coachAdjustments: 'Koç kararları',
   userPrograms: 'Kullanıcı programları',
   programFavorites: 'Favori programlar',
 };

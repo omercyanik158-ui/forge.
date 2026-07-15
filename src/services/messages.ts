@@ -62,8 +62,8 @@ export const messages = {
     en: "Build your training program",
   },
   "ai_program.intro_body": {
-    tr: "Kısa birkaç seçim yap. FORGE hedefin, takvimin, ekipmanın ve toparlanmana göre bilim temelli program context’ini hazırlasın.",
-    en: "Answer a few quick prompts and FORGE will prepare an evidence-based program context around your goal, schedule, equipment, and recovery.",
+    tr: "Fotoğraf gerekmez; hedefin, seviyen, ekipmanın, haftalık gün sayın ve toparlanmana göre programın hazırlanır.",
+    en: "No photo is required; your program is built around your goal, level, equipment, weekly days, and recovery.",
   },
   "ai_program.intro_start": { tr: "Başla", en: "Start" },
   "ai_program.intro_use_physique": {
@@ -357,16 +357,16 @@ export const messages = {
     en: "Not used",
   },
   "ai_program.summary_generate": {
-    tr: "Program context’ini oluştur",
-    en: "Generate my program context",
+    tr: "Plan önerisi al",
+    en: "Get plan recommendation",
   },
   "ai_program.processing_title": {
-    tr: "Program hazırlanıyor",
-    en: "Creating your program",
+    tr: "En uygun planlar aranıyor",
+    en: "Finding best-fit plans",
   },
   "ai_program.processing_body": {
-    tr: "FORGE profilini, tercihlerini ve bilim temelli kuralları birleştiriyor.",
-    en: "FORGE is combining your profile, preferences, and evidence-based training rules.",
+    tr: "FORGE hedeflerini, ekipmanını ve toparlanmanı kaliteli program kataloğuyla eşleştiriyor.",
+    en: "FORGE is matching your goals, equipment, and recovery with the curated program catalog.",
   },
   "ai_program.processing_eta": {
     tr: "Bu işlem genelde bir dakikadan kısa sürer.",
@@ -393,8 +393,8 @@ export const messages = {
     en: "Matching evidence-based training principles",
   },
   "ai_program.processing_step_split": {
-    tr: "En uygun split seçiliyor",
-    en: "Selecting the best split",
+    tr: "Program tarzı eşleştiriliyor",
+    en: "Matching program style",
   },
   "ai_program.processing_step_volume": {
     tr: "Haftalık hacim dengeleniyor",
@@ -405,8 +405,8 @@ export const messages = {
     en: "Managing fatigue",
   },
   "ai_program.processing_step_exercises": {
-    tr: "Egzersiz havuzu sınırlandırılıyor",
-    en: "Choosing exercises",
+    tr: "Katalog planları karşılaştırılıyor",
+    en: "Comparing catalog plans",
   },
   "ai_program.processing_step_progression": {
     tr: "Progresyon mantığı hazırlanıyor",
@@ -417,12 +417,12 @@ export const messages = {
     en: "Running final quality check",
   },
   "ai_program.ready_title": {
-    tr: "Forge Signature planın hazır",
-    en: "Your FORGE Signature plan is ready",
+    tr: "FORGE plan önerin hazır",
+    en: "Your FORGE plan recommendation is ready",
   },
   "ai_program.ready_body": {
-    tr: "Programın hazır. Kısa özete göz at, sonra kaydedip kullanmaya başla.",
-    en: "Your program is ready. Review the summary, then save it and start using it.",
+    tr: "Sana en uygun planı ve yakın alternatifleri seçtik. Özete göz at, sonra kaydedip kullanmaya başla.",
+    en: "We selected the best-fit plan and close alternatives. Review the summary, then save it and start using it.",
   },
   "ai_program.ready_return": { tr: "AI Hub’a dön", en: "Return to AI Hub" },
   "ai_program.ready_review": { tr: "Cevapları düzenle", en: "Edit answers" },
@@ -503,21 +503,21 @@ export const messages = {
     en: "Keep building",
   },
   "ai_program.detail_screen_title": {
-    tr: "AI programın",
-    en: "Your AI program",
+    tr: "Önerilen planın",
+    en: "Your recommended plan",
   },
-  "ai_program.detail_badge": { tr: "AI PROGRAM", en: "AI PROGRAM" },
+  "ai_program.detail_badge": { tr: "ÖNERİLEN PLAN", en: "RECOMMENDED PLAN" },
   "ai_program.detail_reason_title": {
     tr: "Bu plan neden seçildi?",
     en: "Why this plan?",
   },
   "ai_program.detail_open_builder": {
-    tr: "Yeni AI plan kur",
-    en: "Build a new AI plan",
+    tr: "Yeni plan önerisi al",
+    en: "Get a new recommendation",
   },
   "ai_program.detail_empty_title": {
-    tr: "AI program bulunamadı",
-    en: "AI program not found",
+    tr: "Önerilen plan bulunamadı",
+    en: "Recommended plan not found",
   },
   "ai_program.detail_empty_body": {
     tr: "Bu plan artık kayıtlı olmayabilir. Yeni bir plan oluşturabilirsin.",
@@ -546,22 +546,22 @@ export const messages = {
     en: "Completed",
   },
   "fitness.ai_program_primary_cta": {
-    tr: "AI plan oluştur",
-    en: "Build AI plan",
+    tr: "Plan önerisi al",
+    en: "Get plan recommendation",
   },
   "fitness.ai_program_new_a11y": {
-    tr: "Yeni AI programı oluştur",
-    en: "Create a new AI program",
+    tr: "Yeni plan önerisi al",
+    en: "Get a new plan recommendation",
   },
-  "my_workouts.ai_badge": { tr: "AI SIGNATURE", en: "AI SIGNATURE" },
+  "my_workouts.ai_badge": { tr: "ÖNERİLEN", en: "RECOMMENDED" },
   "my_workouts.ai_start": { tr: "Programı başlat", en: "Start program" },
   "my_workouts.ai_delete_title": {
-    tr: "AI program silinsin mi?",
-    en: "Delete this AI program?",
+    tr: "Önerilen plan silinsin mi?",
+    en: "Delete this recommended plan?",
   },
   "my_workouts.ai_delete_body": {
-    tr: "Bu AI program kayıtlı antrenmanlarından kaldırılacak.",
-    en: "This AI program will be removed from your saved workouts.",
+    tr: "Bu önerilen plan kayıtlı antrenmanlarından kaldırılacak.",
+    en: "This recommended plan will be removed from your saved workouts.",
   },
   "my_workouts.ai_last_opened": {
     tr: "Son seans {date}",
@@ -597,7 +597,7 @@ export const messages = {
     tr: "İlk antrenman planını oluştur veya AI ile hazırlat.",
     en: "Create your first workout or let AI build one for you.",
   },
-  "my_plans.empty_cta_ai": { tr: "AI program oluştur", en: "Create AI program" },
+  "my_plans.empty_cta_ai": { tr: "Plan önerisi al", en: "Get plan recommendation" },
   "my_plans.empty_cta_custom": { tr: "Antrenman oluştur", en: "Create workout" },
   "my_plans.stat_days": { tr: "gün", en: "days" },
   "my_plans.stat_weeks": { tr: "hafta", en: "weeks" },

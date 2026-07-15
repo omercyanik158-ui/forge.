@@ -35,5 +35,8 @@ describe('AI prompt registry', () => {
 
     expect(foodSchema.properties?.kalori).toBeTruthy();
     expect(physiqueSchema.properties?.tahminiYagOrani).toBeTruthy();
+    expect(physiqueSchema.properties?.priorityRoadmap).toBeTruthy();
+    expect(physiqueSchema.properties?.programSignals).toBeTruthy();
+    expect(buildPrompt('physique', 'tr')).toContain('priorityRoadmap');
   });
 });

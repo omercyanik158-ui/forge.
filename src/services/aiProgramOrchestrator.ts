@@ -1,8 +1,8 @@
 import { buildSessionVolumeBlueprint, priorityMuscleToBucket } from "@/services/aiProgramVolumeEngine";
-import { assembleSessionPlan } from "@/services/aiProgramAssemblyEngine";
-import { buildProgressionPlan } from "@/services/aiProgramProgressionEngine";
 import { buildAIProgramExplanation } from "@/services/aiProgramExplanation";
 import { validateAIProgramPlan } from "@/services/aiProgramValidator";
+import { assembleStrengthProgram, buildStrengthProgressionPlan } from "@/services/strengthProgramEngine";
+import { assembleHypertrophyProgram, buildHypertrophyProgressionPlan } from "@/services/hypertrophyProgramEngine";
 import type {
   AIDayPrescription,
   AIGeneratedWeek,
@@ -50,7 +50,12 @@ function goalLabel(goal?: string): string {
   }
 }
 
-function buildPremiumPlanTitle(goal: string | undefined, splitLabel: string): string {
+function buildPremiumPlanTitle(goal: string | undefined, splitLabel: string, goalClassification?: string): string {
+  if (goalClassification === 'powerlifting_strength') return `${goalLabel(goal)} · Powerlifting Specific`;
+  if (goalClassification === 'lift_specific_strength') return `${goalLabel(goal)} · Lift Specific Strength`;
+  if (goal === 'strength') return `${goalLabel(goal)} · Strength Ana Lift`;
+  if (goalClassification === 'muscle_specialization') return `${goalLabel(goal)} · Muscle Specialization`;
+  if (goal === 'build_muscle') return `${goalLabel(goal)} · Hypertrophy Volume`;
   return `${goalLabel(goal)} · ${splitLabel}`;
 }
 
@@ -148,22 +153,38 @@ export function orchestrateAIProgram(input: OrchestrationInput): OrchestrationOu
     priorityMuscles: priorityBuckets,
   });
 
-  const assemblyPlan = assembleSessionPlan({
+  const assemblyInput = {
     split: blueprint.recommendedSplit,
+    programArchetype: blueprint.programArchetype,
+    selectionSeed: `${draftId}:${profile.goal ?? 'goal'}:${blueprint.programArchetype}`,
     recommendedTrainingDays: blueprint.recommendedTrainingDays,
     volumeBlueprint,
     availableEquipment: profile.equipment,
     limitations: profile.painLimitations,
     goal: profile.goal ?? "general_fitness",
     sex: profile.sex,
-  });
+    experience: profile.experience,
+    sessionDurationMin: profile.sessionDuration,
+    recoveryQuality: profile.recoveryQuality,
+    preferredExerciseIds: profile.preferredExerciseIds,
+    avoidedExerciseIds: profile.avoidedExerciseIds,
+  };
+  const assemblyPlan = blueprint.programFamily === 'strength'
+    ? assembleStrengthProgram(assemblyInput)
+    : assembleHypertrophyProgram(assemblyInput);
 
-  const progressionPlan = buildProgressionPlan({
+  const progressionInput = {
     baseDays: assemblyPlan.days,
     effort: volumeBlueprint.effort,
     experience: profile.experience ?? "intermediate",
     goal: profile.goal ?? "general_fitness",
-  });
+    family: blueprint.programFamily,
+    goalClassification: blueprint.goalClassification,
+    progressionModel: blueprint.progressionModel,
+  };
+  const progressionPlan = blueprint.programFamily === 'strength'
+    ? buildStrengthProgressionPlan(progressionInput)
+    : buildHypertrophyProgressionPlan(progressionInput);
 
   const validation = validateAIProgramPlan({
     progression: progressionPlan,
@@ -196,7 +217,7 @@ export function orchestrateAIProgram(input: OrchestrationInput): OrchestrationOu
   const plan: AIProgramPlan = {
     id: planId,
     version: 1,
-    title: buildPremiumPlanTitle(profile.goal, blueprint.recommendedSplitLabel),
+    title: buildPremiumPlanTitle(profile.goal, blueprint.recommendedSplitLabel, blueprint.goalClassification),
     subtitle: `${blueprint.recommendedTrainingDays} gün · ${progressionPlan.weekCount} hafta · ${difficulty}`,
     generatedAt: new Date().toISOString(),
     daysPerWeek: blueprint.recommendedTrainingDays,
@@ -206,6 +227,7 @@ export function orchestrateAIProgram(input: OrchestrationInput): OrchestrationOu
     difficultyLevel: difficulty,
     weeks,
     explanation,
+    influenceSummary: profile.programInfluence,
     validation,
     sourceBlueprint: blueprint,
     sourceVolume: volumeBlueprint,
@@ -219,6 +241,7 @@ export function orchestrateAIProgram(input: OrchestrationInput): OrchestrationOu
       priorityMuscles: profile.priorityMuscles,
       painLimitations: profile.painLimitations,
       physiqueAnalysisUsed: profile.physiqueAnalysisUsed,
+      programInfluence: profile.programInfluence,
       confidence: profile.confidenceLevel,
     },
   };

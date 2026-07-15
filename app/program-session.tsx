@@ -40,6 +40,16 @@ import { localizeProgramPlan } from "@/services/program-localization";
 import { loadProfile } from "@/services/profileStore";
 import { canAccessPremiumPrograms } from "@/services/subscription";
 import { loadCoachPreferences } from "@/services/coachPreferences";
+import { buildCoachAdjustment } from "@/services/coachAdjustmentEngine";
+import {
+  loadLatestCoachAdjustment,
+  saveCoachAdjustment,
+} from "@/services/coachAdjustmentStore";
+import {
+  loadFeedbackForPlan,
+  saveSessionFeedback,
+} from "@/services/aiProgramFeedbackStore";
+import { loadStrengthProgress } from "@/services/strengthProgress";
 import {
   applyCycleIntensity,
   computeCycleIntensity,
@@ -76,6 +86,8 @@ import type {
   AIProgramEquipmentKey,
   AIProgramPainLimitation,
 } from "@/types/aiProgram";
+import type { SessionFeedback } from "@/types/aiProgramFeedback";
+import type { CoachAdjustment } from "@/types/coachAdjustment";
 
 type SessionParams = {
   programId?: string;
@@ -108,8 +120,14 @@ type SessionPlan = {
   aiProgramId?: string;
   aiProgramDayId?: string;
   cycleIntensity?: CycleIntensity;
+  coachAdjustment?: CoachAdjustment | null;
   warmup?: WarmupItem[];
   exercises: SessionExercise[];
+};
+
+type PersistSessionResult = {
+  newAchievementCount: number;
+  log: WorkoutLog;
 };
 
 function mapCoachEquipmentToAIEquipment(
@@ -151,6 +169,44 @@ function mapCoachLimitationToAI(
   return limitation;
 }
 
+function applyCoachAdjustmentToExercise(
+  exercise: SessionExercise,
+  adjustment?: CoachAdjustment | null,
+  cycleIntensity?: CycleIntensity,
+): SessionExercise {
+  if (!adjustment) return exercise;
+
+  if (adjustment.decision === "deload") {
+    return {
+      ...exercise,
+      sets: Math.max(2, Math.round(exercise.sets * 0.7)),
+      rir: Math.min(5, exercise.rir + 2),
+      restSeconds: Math.round(exercise.restSeconds * 1.15),
+    };
+  }
+  if (adjustment.decision === "reduce_volume") {
+    return {
+      ...exercise,
+      sets: Math.max(2, exercise.sets - 1),
+      rir: Math.min(5, exercise.rir + 1),
+    };
+  }
+  if (
+    adjustment.decision === "reduce_intensity" ||
+    adjustment.decision === "swap_exercise"
+  ) {
+    return { ...exercise, rir: Math.min(5, exercise.rir + 1) };
+  }
+  if (adjustment.decision === "progress") {
+    if (cycleIntensity === "lighter") {
+      return exercise;
+    }
+    return { ...exercise, rir: Math.max(1, exercise.rir - 1) };
+  }
+
+  return exercise;
+}
+
 type DraftSet = {
   key: string;
   exerciseId: string;
@@ -175,6 +231,12 @@ export default function ProgramSessionScreen() {
   const [resumed, setResumed] = useState(false);
   const [invalidSetKey, setInvalidSetKey] = useState<string | null>(null);
   const [exitSheetVisible, setExitSheetVisible] = useState(false);
+  const [checkInVisible, setCheckInVisible] = useState(false);
+  const [checkInRpe, setCheckInRpe] = useState(7);
+  const [checkInRir, setCheckInRir] = useState(2);
+  const [checkInRecovery, setCheckInRecovery] = useState<SessionFeedback["recoveryNextDay"]>("okay");
+  const [checkInPain, setCheckInPain] = useState<AIProgramPainLimitation>("none");
+  const [checkInNotes, setCheckInNotes] = useState("");
   const [swapSheetOptions, setSwapSheetOptions] = useState<SwapOption[]>([]);
   const [swapSheetVisible, setSwapSheetVisible] = useState(false);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">(
@@ -293,7 +355,10 @@ export default function ProgramSessionScreen() {
           };
         }
       } else if (params.aiProgramId && params.aiDayId) {
-        const aiProgram = await loadAIProgramInstanceById(params.aiProgramId);
+        const [aiProgram, coachAdjustment] = await Promise.all([
+          loadAIProgramInstanceById(params.aiProgramId),
+          loadLatestCoachAdjustment(params.aiProgramId),
+        ]);
         const aiDay = aiProgram?.weeks
           .flatMap((week) => week.days)
           .find((item) => item.id === params.aiDayId);
@@ -307,12 +372,19 @@ export default function ProgramSessionScreen() {
             aiProgramId: aiProgram.id,
             aiProgramDayId: aiDay.id,
             cycleIntensity: intensity,
+            coachAdjustment,
             warmup: aiDay.warmup ?? [],
             exercises: aiDay.exercises.flatMap((entry) => {
               const exercise = getExerciseById(entry.exerciseId);
-              return exercise
-                ? [{ exercise, ...applyCycleIntensity(entry, intensity) }]
-                : [];
+              if (!exercise) return [];
+              const adjusted = applyCycleIntensity(entry, intensity);
+              return [
+                applyCoachAdjustmentToExercise(
+                  { exercise, ...adjusted },
+                  coachAdjustment,
+                  intensity,
+                ),
+              ];
             }),
           };
         }
@@ -580,7 +652,7 @@ export default function ProgramSessionScreen() {
     }
   };
 
-  const persistSession = async (partial: boolean): Promise<number | null> => {
+  const persistSession = async (partial: boolean): Promise<PersistSessionResult | null> => {
     if (!plan || saving) return null;
     const sourceSets = partial ? sets.filter((set) => set.done) : sets;
     if (sourceSets.length === 0) return null;
@@ -690,7 +762,7 @@ export default function ProgramSessionScreen() {
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success,
         );
-      return newAchievementCount;
+      return { newAchievementCount, log };
     } catch {
       Alert.alert(
         t("session.save_failed_title"),
@@ -702,22 +774,72 @@ export default function ProgramSessionScreen() {
     }
   };
 
-  const finishSession = async () => {
-    if (!allDone) return;
-    const newAchievementCount = await persistSession(false);
-    if (newAchievementCount == null) return;
+  const completeSession = async (saveCheckIn: boolean) => {
+    const result = await persistSession(false);
+    if (result == null) return;
+    setCheckInVisible(false);
+    if (saveCheckIn) {
+      try {
+        const feedback = await saveSessionFeedback({
+          planId: plan?.aiProgramId,
+          programDayId: plan?.aiProgramDayId ?? plan?.programDayId,
+          exerciseIds: result.log.exerciseIds ?? [],
+          completedAt: result.log.completedAt,
+          perceivedExertion: checkInRpe,
+          averageRir: checkInRir,
+          painReported: [checkInPain],
+          recoveryNextDay: checkInRecovery,
+          notes: checkInNotes.trim() || undefined,
+        });
+        if (plan?.source === "ai_program" && plan.aiProgramId) {
+          const [aiProgram, feedbacks, strength] = await Promise.all([
+            loadAIProgramInstanceById(plan.aiProgramId),
+            loadFeedbackForPlan(plan.aiProgramId),
+            loadStrengthProgress(),
+          ]);
+          const adjustment = buildCoachAdjustment({
+            plan: aiProgram,
+            feedbacks: [
+              feedback,
+              ...feedbacks.filter((item) => item.id !== feedback.id),
+            ],
+            strengthProgress: strength.exercises,
+            cycleIntensity: plan.cycleIntensity,
+            physiqueFocusMuscles: aiProgram?.influenceSummary?.focusLabels,
+          });
+          await saveCoachAdjustment({
+            ...adjustment,
+            programDayId: plan.aiProgramDayId,
+          });
+        }
+      } catch {
+        // Workout history is the source of truth; coach feedback can be retried next session.
+      }
+    }
     const achievementMessage =
-      newAchievementCount > 0
+      result.newAchievementCount > 0
         ? t("session.achievement_suffix").replace(
             "{n}",
-            String(newAchievementCount),
+            String(result.newAchievementCount),
           )
+        : "";
+    const contributionMessage =
+      plan?.exercises.length
+        ? `\n\n${t({
+            tr: "Bu seans Body Progress tarafında ağırlık gelişimi ve odak kas takibine katkı verdi.",
+            en: "This session now contributes to Body Progress, strength trends, and focus muscle tracking.",
+          })}`
         : "";
     Alert.alert(
       t("session.completed_title"),
-      `${completedSets} ${t("session.completed_body")}${achievementMessage}`,
+      `${completedSets} ${t("session.completed_body")}${achievementMessage}${contributionMessage}`,
       [{ text: t("session.great"), onPress: leaveSession }],
     );
+  };
+
+  const finishSession = async () => {
+    if (!allDone) return;
+    setCheckInVisible(true);
   };
 
   const restartSession = () => {
@@ -742,8 +864,8 @@ export default function ProgramSessionScreen() {
 
   const savePartialSession = async (showConfirmation = true) => {
     const savedSetCount = sets.filter((set) => set.done).length;
-    const newAchievementCount = await persistSession(true);
-    if (newAchievementCount == null) return;
+    const result = await persistSession(true);
+    if (result == null) return;
     if (!showConfirmation) {
       leaveSession();
       return;
@@ -1000,9 +1122,47 @@ export default function ProgramSessionScreen() {
                     >
                       {t(
                         plan.cycleIntensity === "lighter"
-                          ? "cycle.session_notice_lighter"
+                          ? {
+                              tr: "Bugün döngü fazın nedeniyle yük biraz yumuşatıldı. Set, efor ve dinlenme ayarlandı.",
+                              en: "Today's load was softened for your cycle phase. Sets, effort, and rest were adjusted.",
+                            }
                           : "cycle.session_notice_strong",
                       )}
+                    </Text>
+                  </View>
+                </View>
+              ) : null}
+              {plan.coachAdjustment ? (
+                <View
+                  style={[
+                    styles.cycleNotice,
+                    {
+                      backgroundColor: `${themeColors.success}12`,
+                      borderColor: `${themeColors.success}38`,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="pulse-outline"
+                    size={16}
+                    color={themeColors.success}
+                  />
+                  <View style={styles.cycleNoticeCopy}>
+                    <Text
+                      style={[
+                        styles.cycleNoticeLabel,
+                        { color: themeColors.onSurface },
+                      ]}
+                    >
+                      {plan.coachAdjustment.title}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.cycleNoticeBody,
+                        { color: themeColors.onSurfaceVariant },
+                      ]}
+                    >
+                      {plan.coachAdjustment.nextSessionFocus}
                     </Text>
                   </View>
                 </View>
@@ -1647,6 +1807,183 @@ export default function ProgramSessionScreen() {
       </KeyboardAvoidingView>
 
       <Modal
+        visible={checkInVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCheckInVisible(false)}
+      >
+        <View style={styles.exitSheetBackdrop}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={t("common.cancel")}
+            activeOpacity={1}
+            onPress={() => setCheckInVisible(false)}
+            style={styles.exitSheetScrim}
+          />
+          <View
+            style={[
+              styles.checkInSheet,
+              {
+                paddingBottom: insets.bottom + spacing.md,
+                backgroundColor: themeColors.surface,
+                borderColor: themeColors.outlineVariant,
+              },
+            ]}
+          >
+            <View style={styles.exitSheetHandle} />
+            <Text style={[styles.exitSheetTitle, { color: themeColors.onSurface }]}>
+              {t({ tr: "Koç check-in", en: "Coach check-in" })}
+            </Text>
+            <Text style={[styles.exitSheetBody, { color: themeColors.onSurfaceVariant }]}>
+              {t({
+                tr: "Bunu doldurursan FORGE gelecek haftayı daha doğru ayarlar.",
+                en: "Fill this in so FORGE can tune next week more accurately.",
+              })}
+            </Text>
+
+            <CheckInScale
+              title={t({ tr: "Bugün ne kadar zordu?", en: "How hard was today?" })}
+              value={checkInRpe}
+              values={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+              onChange={setCheckInRpe}
+            />
+            <CheckInScale
+              title={t({ tr: "Kaç tekrar yedekte kaldı?", en: "How many reps in reserve?" })}
+              value={checkInRir}
+              values={[0, 1, 2, 3, 4, 5]}
+              onChange={setCheckInRir}
+            />
+
+            <View style={styles.checkInGroup}>
+              <Text style={[styles.checkInLabel, { color: themeColors.onSurface }]}>
+                {t({ tr: "Ağrı var mı?", en: "Any pain?" })}
+              </Text>
+              <View style={styles.checkInChips}>
+                {(["none", "knee", "shoulder", "lower_back"] as AIProgramPainLimitation[]).map((item) => (
+                  <TouchableOpacity
+                    key={item}
+                    accessibilityRole="button"
+                    activeOpacity={0.82}
+                    onPress={() => setCheckInPain(item)}
+                    style={[
+                      styles.checkInChip,
+                      {
+                        backgroundColor: checkInPain === item ? themeColors.primary : themeColors.surfaceContainerLowest,
+                        borderColor: checkInPain === item ? themeColors.primary : themeColors.outlineVariant,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.checkInChipText,
+                        { color: checkInPain === item ? themeColors.onPrimary : themeColors.onSurface },
+                      ]}
+                    >
+                      {item === "none"
+                        ? t({ tr: "Yok", en: "None" })
+                        : item === "knee"
+                          ? t({ tr: "Diz", en: "Knee" })
+                          : item === "shoulder"
+                            ? t({ tr: "Omuz", en: "Shoulder" })
+                            : t({ tr: "Bel", en: "Lower back" })}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.checkInGroup}>
+              <Text style={[styles.checkInLabel, { color: themeColors.onSurface }]}>
+                {t({ tr: "Toparlanman nasıl?", en: "How is your recovery?" })}
+              </Text>
+              <View style={styles.checkInChips}>
+                {(["poor", "okay", "good"] as SessionFeedback["recoveryNextDay"][]).map((item) => (
+                  <TouchableOpacity
+                    key={item}
+                    accessibilityRole="button"
+                    activeOpacity={0.82}
+                    onPress={() => setCheckInRecovery(item)}
+                    style={[
+                      styles.checkInChip,
+                      {
+                        backgroundColor: checkInRecovery === item ? themeColors.primary : themeColors.surfaceContainerLowest,
+                        borderColor: checkInRecovery === item ? themeColors.primary : themeColors.outlineVariant,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.checkInChipText,
+                        { color: checkInRecovery === item ? themeColors.onPrimary : themeColors.onSurface },
+                      ]}
+                    >
+                      {item === "poor"
+                        ? t({ tr: "Zayıf", en: "Poor" })
+                        : item === "good"
+                          ? t({ tr: "İyi", en: "Good" })
+                          : t({ tr: "Orta", en: "Okay" })}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <TextInput
+              value={checkInNotes}
+              onChangeText={setCheckInNotes}
+              placeholder={t({ tr: "Kısa not (opsiyonel)", en: "Short note (optional)" })}
+              placeholderTextColor={themeColors.onSurfaceVariant}
+              multiline
+              style={[
+                styles.checkInInput,
+                {
+                  color: themeColors.onSurface,
+                  backgroundColor: themeColors.surfaceContainerLowest,
+                  borderColor: themeColors.outlineVariant,
+                },
+              ]}
+            />
+
+            <View style={styles.exitSheetActions}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                activeOpacity={0.85}
+                disabled={saving}
+                onPress={() => {
+                  void completeSession(false);
+                }}
+                style={[
+                  styles.exitSheetButton,
+                  {
+                    backgroundColor: themeColors.surfaceContainerLowest,
+                    borderWidth: 1,
+                    borderColor: themeColors.outlineVariant,
+                  },
+                ]}
+              >
+                <Text style={[styles.exitSheetButtonText, { color: themeColors.onSurface }]}>
+                  {t({ tr: "Atla", en: "Skip" })}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                activeOpacity={0.85}
+                disabled={saving}
+                onPress={() => {
+                  void completeSession(true);
+                }}
+                style={[styles.exitSheetButton, { backgroundColor: themeColors.primary }]}
+              >
+                <Text style={[styles.exitSheetButtonText, { color: themeColors.onPrimary }]}>
+                  {saving ? t("common.saving") : t({ tr: "Kaydet ve tamamla", en: "Save and finish" })}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
         visible={exitSheetVisible}
         transparent
         animationType="fade"
@@ -2060,6 +2397,60 @@ function Meta({
   );
 }
 
+function CheckInScale({
+  title,
+  value,
+  values,
+  onChange,
+}: {
+  title: string;
+  value: number;
+  values: number[];
+  onChange: (value: number) => void;
+}) {
+  const { colors: themeColors } = useAppTheme();
+  return (
+    <View style={styles.checkInGroup}>
+      <Text style={[styles.checkInLabel, { color: themeColors.onSurface }]}>
+        {title}
+      </Text>
+      <View style={styles.checkInChips}>
+        {values.map((item) => {
+          const active = item === value;
+          return (
+            <TouchableOpacity
+              key={item}
+              accessibilityRole="button"
+              activeOpacity={0.82}
+              onPress={() => onChange(item)}
+              style={[
+                styles.checkInNumberChip,
+                {
+                  backgroundColor: active
+                    ? themeColors.primary
+                    : themeColors.surfaceContainerLowest,
+                  borderColor: active
+                    ? themeColors.primary
+                    : themeColors.outlineVariant,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.checkInChipText,
+                  { color: active ? themeColors.onPrimary : themeColors.onSurface },
+                ]}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 const styles = createDynamicStyles(() => ({
   container: { flex: 1 },
   flex: { flex: 1 },
@@ -2368,6 +2759,17 @@ const styles = createDynamicStyles(() => ({
     paddingHorizontal: spacing.containerMargin,
     gap: spacing.md,
   },
+  checkInSheet: {
+    width: "100%",
+    maxWidth: layout.maxContentWidth,
+    alignSelf: "center",
+    borderTopLeftRadius: radius["3xl"],
+    borderTopRightRadius: radius["3xl"],
+    borderWidth: 1,
+    paddingTop: spacing.sm,
+    paddingHorizontal: spacing.containerMargin,
+    gap: spacing.smPlus,
+  },
   exitSheetHandle: {
     width: 44,
     height: 5,
@@ -2407,6 +2809,36 @@ const styles = createDynamicStyles(() => ({
     minHeight: 40,
     alignItems: "center",
     justifyContent: "center",
+  },
+  checkInGroup: { gap: 8 },
+  checkInLabel: { ...typography.labelMd },
+  checkInChips: { flexDirection: "row", flexWrap: "wrap", gap: 7 },
+  checkInChip: {
+    minHeight: 38,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    paddingHorizontal: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkInNumberChip: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkInChipText: { ...typography.buttonSm },
+  checkInInput: {
+    minHeight: 58,
+    maxHeight: 92,
+    borderWidth: 1,
+    borderRadius: radius.xl,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    textAlignVertical: "top",
+    ...typography.bodySm,
   },
   swapSheetBackdrop: {
     flex: 1,

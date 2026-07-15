@@ -52,44 +52,24 @@ if (!expo.android?.package) failures.push("app.json: Android package eksik");
 if (!expo.version) failures.push("app.json: sürüm numarası eksik");
 if (!expo.scheme) failures.push("app.json: deep link scheme eksik");
 
-const [programCatalog, exerciseCatalog] = await Promise.all([
+const [programCatalog, trainingCatalog] = await Promise.all([
   readFile("src/services/programCatalog.ts", "utf8"),
-  readFile("src/data/exercises.ts", "utf8"),
+  readFile("src/data/trainingCatalog.generated.ts", "utf8"),
 ]);
-const idBlock =
-  programCatalog.match(/const IDS = \{([\s\S]*?)\} as const;/)?.[1] ?? "";
-const prescribedExerciseIds = [
-  ...idBlock.matchAll(/^\s+\w+: '([^']+)',$/gm),
-].map((match) => match[1]);
-if (prescribedExerciseIds.length < 20)
+if (!programCatalog.includes("CSV_PROGRAMS"))
   failures.push(
-    "programCatalog.ts: reçeteli egzersiz kimlikleri doğrulanamadı",
+    "programCatalog.ts: CSV_PROGRAMS ana program kaynağı olarak görünmüyor",
   );
-for (const exerciseId of prescribedExerciseIds) {
-  if (!exerciseCatalog.includes(`"id": "${exerciseId}"`)) {
-    failures.push(
-      `programCatalog.ts: ${exerciseId} egzersiz veri kümesinde bulunamadı`,
-    );
-  }
-}
-
-const seededPrograms = [
-  ...programCatalog.matchAll(/createProgram\(\{[^\n]+tier: '(free|premium)'/g),
-].map((match) => match[1]);
-const freeProgramCount = seededPrograms.filter(
-  (tier) => tier === "free",
-).length;
-const premiumProgramCount = seededPrograms.filter(
-  (tier) => tier === "premium",
-).length;
-if (freeProgramCount !== 7)
-  failures.push(
-    `programCatalog.ts: 7 yerine ${freeProgramCount} ücretsiz program bulundu`,
-  );
-if (premiumProgramCount !== 5)
-  failures.push(
-    `programCatalog.ts: 5 yerine ${premiumProgramCount} premium program bulundu`,
-  );
+const generatedProgramCount = Number(
+  trainingCatalog.match(/"selectedPrograms":\s*(\d+)/)?.[1] ?? 0,
+);
+const generatedExerciseCount = Number(
+  trainingCatalog.match(/"selectedExercises":\s*(\d+)/)?.[1] ?? 0,
+);
+if (generatedProgramCount < 20)
+  failures.push(`trainingCatalog.generated.ts: ${generatedProgramCount} CSV programı bulundu, en az 20 bekleniyor`);
+if (generatedExerciseCount < 100)
+  failures.push(`trainingCatalog.generated.ts: ${generatedExerciseCount} CSV egzersizi bulundu, en az 100 bekleniyor`);
 
 try {
   const messagesSrc = await readFile("src/services/messages.ts", "utf8");

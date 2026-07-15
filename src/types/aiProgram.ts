@@ -6,6 +6,7 @@ export type AIProgramEntryPath = 'ai_hub' | 'physique_result' | 'physique_histor
 export type AIProgramStepId =
   | 'intro'
   | 'goal'
+  | 'style'
   | 'days'
   | 'duration'
   | 'location'
@@ -27,6 +28,30 @@ export type AIProgramGoal =
   | 'return_to_training';
 
 export type AIProgramSecondaryGoal = 'none' | 'strength' | 'conditioning' | 'mobility' | 'body_composition';
+
+export type AIProgramGoalClassification =
+  | 'general_strength'
+  | 'powerlifting_strength'
+  | 'lift_specific_strength'
+  | 'hypertrophy'
+  | 'muscle_specialization'
+  | 'powerbuilding'
+  | 'general_fitness'
+  | 'fat_loss_strength_retention';
+
+export type AIProgramFamily =
+  | 'strength'
+  | 'hypertrophy'
+  | 'powerbuilding'
+  | 'general_fitness';
+
+export type AIProgramLiftPattern =
+  | 'squat'
+  | 'bench'
+  | 'deadlift'
+  | 'press'
+  | 'row'
+  | 'pullup';
 
 export type AIProgramLocation = 'gym' | 'home' | 'both';
 
@@ -61,6 +86,15 @@ export type AIProgramRecoveryQuality = 'great' | 'okay' | 'poor';
 export type AIProgramSleepContext = 'under_6h' | '6_7h' | '7_8h' | '8h_plus';
 
 export type AIProgramStressContext = 'low' | 'medium' | 'high';
+
+export type AIProgramPreferredStyle =
+  | 'auto'
+  | 'full_body'
+  | 'upper_lower'
+  | 'push_pull_legs'
+  | 'hybrid_athletic'
+  | 'body_part'
+  | 'minimalist_home';
 
 export type AIProgramEquipmentKey =
   | 'machines'
@@ -107,13 +141,28 @@ export type AIProgramPhysiqueSummary = {
   confidenceLevel: 'low' | 'medium' | 'high';
   estimateNote?: string;
   focusAreas: string[];
+  focusMuscles: AIProgramPriorityMuscle[];
+  volumeBias: 'conservative' | 'moderate' | 'moderate_high';
+  splitBiasHint: 'balanced' | 'upper_focus' | 'lower_focus' | 'posterior_focus';
+  exerciseEmphasis: string[];
   recommendedExercises: string[];
   generalSummary?: string;
+};
+
+export type ProgramInfluenceSummary = {
+  focusMuscles: AIProgramPriorityMuscle[];
+  focusLabels: string[];
+  splitImpact: string;
+  volumeImpact: string;
+  exerciseEmphasis: string[];
+  confidenceLevel: 'low' | 'medium' | 'high';
+  explanation: string;
 };
 
 export type AIProgramAnswers = {
   mainGoal?: AIProgramGoal;
   secondaryGoal?: AIProgramSecondaryGoal;
+  preferredProgramStyle?: AIProgramPreferredStyle;
   trainingDays?: 2 | 3 | 4 | 5 | 6;
   sessionDurationMin?: 30 | 45 | 60 | 75 | 90;
   location?: AIProgramLocation;
@@ -145,6 +194,7 @@ export type AIProgramUserProfileContext = {
   experience?: AIProgramExperience;
   goal?: AIProgramGoal;
   secondaryGoal?: AIProgramSecondaryGoal;
+  preferredProgramStyle: AIProgramPreferredStyle;
   trainingDays?: number;
   sessionDuration?: number;
   location?: AIProgramLocation;
@@ -158,8 +208,11 @@ export type AIProgramUserProfileContext = {
   recoveryQuality?: AIProgramRecoveryQuality;
   sleepContext?: AIProgramSleepContext;
   stressContext?: AIProgramStressContext;
+  inferredGoalClassification?: AIProgramGoalClassification;
+  targetLiftPatterns?: AIProgramLiftPattern[];
   physiqueAnalysisUsed: boolean;
   physiqueAnalysisSummary?: AIProgramPhysiqueSummary;
+  programInfluence?: ProgramInfluenceSummary;
   confidenceLevel: 'low' | 'medium' | 'high';
   missingInfo: AIProgramMissingInfo[];
   assumptions: string[];

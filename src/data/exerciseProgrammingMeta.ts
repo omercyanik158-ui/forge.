@@ -5,13 +5,16 @@ import type {
   MuscleRole,
   PainCompatibility,
   ReplacementGroup,
+  HypertrophyRegion,
+  StrengthExerciseRole,
+  StrengthSpecificityTier,
 } from '@/types/exerciseKB';
 import type { AIProgramEquipmentKey, AIProgramPainLimitation } from '@/types/aiProgram';
 
 /**
  * Faz 4 — Exercise Programming Metadata
  *
- * Bu, src/data/exercises.ts kataloğunun üzerinde duran küratörlü bir overlay'dir.
+ * Bu, generated CSV egzersiz kataloğunun üzerinde duran küratörlü bir overlay'dir.
  * Her exerciseId kataloğda gerçekte var olan bir id'ye eşleşir (programCatalog
  * IDS haritasıyla aynı kaynak). Aksi halde Faz 8 program seviye doğrulayıcısı
  * reddeder ve session player hareketi sessizce düşürür.
@@ -63,12 +66,71 @@ type MetaInput = {
   painCompatibility: Partial<Record<AIProgramPainLimitation, PainCompatibility>>;
   equipment: AIProgramEquipmentKey[];
   progressionArchetype: 'load_led' | 'technique_led' | 'pump' | 'endurance';
+  strengthRoles?: StrengthExerciseRole[];
+  strengthSpecificityTiers?: Partial<Record<'squat' | 'bench' | 'deadlift' | 'press' | 'row' | 'pullup', StrengthSpecificityTier>>;
+  supportedLiftPatterns?: ('squat' | 'bench' | 'deadlift' | 'press' | 'row' | 'pullup')[];
+  hypertrophyRegions?: HypertrophyRegion[];
+  resistanceProfileHint?: 'lengthened_bias' | 'mid_range_bias' | 'shortened_bias' | 'mixed';
+  stabilityDemand?: 'low' | 'moderate' | 'high';
+  technicalDemand?: 'low' | 'moderate' | 'high';
+  indirectSetContributions?: Partial<Record<MuscleRole, number>>;
   sets: [number, number];
   reps: [number, number];
   rest: number;
   rir: number;
   evidenceConfidence?: 'low' | 'moderate' | 'high';
 };
+
+function inferStrengthRoles(input: MetaInput): StrengthExerciseRole[] {
+  if (input.strengthRoles) return input.strengthRoles;
+  if (input.pattern.startsWith('core_')) return ['core_bracing'];
+  if (input.pattern === 'conditioning' || input.pattern === 'carry') return ['conditioning_gpp'];
+  if (input.category === 'compound' && input.progressionArchetype === 'load_led') return ['secondary_strength_lift'];
+  if (input.category === 'compound') return ['hypertrophy_assistance'];
+  if (input.category === 'accessory') return ['structural_balance'];
+  return ['hypertrophy_assistance'];
+}
+
+function inferSupportedLiftPatterns(input: MetaInput): ('squat' | 'bench' | 'deadlift' | 'press' | 'row' | 'pullup')[] {
+  if (input.supportedLiftPatterns) return input.supportedLiftPatterns;
+  if (input.pattern === 'squat_pattern' || input.pattern === 'lunge_pattern' || input.pattern === 'knee_extension') return ['squat'];
+  if (input.pattern === 'hinge_pattern' || input.pattern === 'hip_extension') return ['deadlift'];
+  if (input.pattern === 'horizontal_push' && (input.angleVariant === 'flat' || !input.angleVariant)) return ['bench'];
+  if (input.pattern === 'horizontal_push' && input.angleVariant === 'incline') return ['bench', 'press'];
+  if (input.pattern === 'vertical_push') return ['press'];
+  if (input.pattern === 'horizontal_pull') return ['row'];
+  if (input.pattern === 'vertical_pull') return ['pullup'];
+  return [];
+}
+
+function inferHypertrophyRegions(input: MetaInput): HypertrophyRegion[] {
+  if (input.hypertrophyRegions) return input.hypertrophyRegions;
+  const regions = new Set<HypertrophyRegion>();
+  input.primaryMuscles.forEach((muscle) => {
+    if (muscle === 'upper_chest') regions.add('upper_chest');
+    if (muscle === 'mid_chest') regions.add('mid_chest');
+    if (muscle === 'lower_chest') regions.add('lower_chest');
+    if (muscle === 'lats') regions.add(input.pattern === 'vertical_pull' ? 'lat_width' : 'shoulder_extension');
+    if (muscle === 'upper_back') regions.add('mid_back_thickness');
+    if (muscle === 'traps') regions.add('upper_traps');
+    if (muscle === 'rear_delts') regions.add('rear_delts');
+    if (muscle === 'front_delts') regions.add('anterior_delt');
+    if (muscle === 'side_delts') regions.add('lateral_delt');
+    if (muscle === 'biceps') regions.add(input.pattern === 'elbow_flexion' ? 'biceps_supinated' : 'biceps_lengthened');
+    if (muscle === 'triceps') regions.add(input.pattern === 'elbow_extension' ? 'triceps_pressdown' : 'compound_press_carryover');
+    if (muscle === 'quads' || muscle === 'quads_vastus' || muscle === 'quads_rectus') regions.add(input.pattern === 'knee_extension' ? 'knee_extension' : 'quad_squat');
+    if (muscle === 'hamstrings') regions.add(input.pattern === 'knee_flexion' ? 'hamstring_knee_flexion' : 'hamstring_hinge');
+    if (muscle === 'glutes') regions.add(input.pattern === 'hip_extension' ? 'glute_shortened' : 'glute_lengthened');
+    if (muscle === 'calves' || muscle === 'gastrocnemius') regions.add('calf_straight_knee');
+    if (muscle === 'soleus') regions.add('calf_bent_knee');
+    if (muscle === 'abs' || muscle === 'upper_abs') regions.add('core_flexion');
+    if (muscle === 'obliques') regions.add('core_rotation');
+    if (muscle === 'lower_back') regions.add('erectors');
+  });
+  if (input.category === 'isolation' && input.primaryMuscles.some((muscle) => muscle.includes('chest'))) regions.add('chest_adduction');
+  if (input.pattern.startsWith('core_') && regions.size === 0) regions.add('core_bracing');
+  return [...regions];
+}
 
 function meta(input: MetaInput): ExerciseProgrammingMeta {
   return {
@@ -83,6 +145,14 @@ function meta(input: MetaInput): ExerciseProgrammingMeta {
     painCompatibility: input.painCompatibility,
     equipment: input.equipment,
     progressionArchetype: input.progressionArchetype,
+    strengthRoles: inferStrengthRoles(input),
+    strengthSpecificityTiers: input.strengthSpecificityTiers,
+    supportedLiftPatterns: inferSupportedLiftPatterns(input),
+    hypertrophyRegions: inferHypertrophyRegions(input),
+    resistanceProfileHint: input.resistanceProfileHint ?? 'mixed',
+    stabilityDemand: input.stabilityDemand ?? (input.category === 'compound' ? 'high' : 'moderate'),
+    technicalDemand: input.technicalDemand ?? (input.category === 'compound' && input.stimulusToFatigue === 'high' ? 'high' : 'moderate'),
+    indirectSetContributions: input.indirectSetContributions,
     defaultSetBand: { min: input.sets[0], max: input.sets[1] },
     defaultRepRange: { min: input.reps[0], max: input.reps[1] },
     defaultRestSeconds: input.rest,

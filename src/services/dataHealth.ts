@@ -153,6 +153,22 @@ function isSessionFeedbackArray(value: unknown): boolean {
   });
 }
 
+function isCoachAdjustmentArray(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  return value.every((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const candidate = item as Record<string, unknown>;
+    return (
+      typeof candidate.id === 'string' &&
+      typeof candidate.createdAt === 'string' &&
+      typeof candidate.decision === 'string' &&
+      Array.isArray(candidate.reasons) &&
+      typeof candidate.title === 'string' &&
+      typeof candidate.summary === 'string'
+    );
+  });
+}
+
 function isRewardedCreditRecord(value: unknown): boolean {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as {
@@ -204,6 +220,7 @@ const STORAGE_VALIDATORS: Record<StorageRegistryKey, (value: unknown) => boolean
   aiProgramPhysiqueSeed: (value) => value === null || isAIProgramPhysiqueSeedRecord(value),
   aiProgramInstances: isAIProgramInstanceArray,
   aiProgramFeedback: isSessionFeedbackArray,
+  coachAdjustments: isCoachAdjustmentArray,
   userPrograms: isUserProgramArray,
 };
 

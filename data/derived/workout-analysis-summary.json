@@ -1,0 +1,5417 @@
+{
+  "generatedAt": "2026-07-15T00:00:00.000Z",
+  "files": {
+    "program_summary.csv": {
+      "sizeBytes": 1167365,
+      "rowCount": 2598,
+      "columns": [
+        "title",
+        "description",
+        "level",
+        "goal",
+        "equipment",
+        "program_length",
+        "time_per_workout",
+        "total_exercises",
+        "created",
+        "last_edit"
+      ]
+    },
+    "programs_detailed_boostcamp_kaggle.csv": {
+      "sizeBytes": 294831276,
+      "rowCount": 605033,
+      "columns": [
+        "title",
+        "description",
+        "level",
+        "goal",
+        "equipment",
+        "program_length",
+        "time_per_workout",
+        "week",
+        "day",
+        "number_of_exercises",
+        "exercise_name",
+        "sets",
+        "reps",
+        "intensity",
+        "created",
+        "last_edit"
+      ]
+    }
+  },
+  "schema": {
+    "program_summary.csv": {
+      "title": "string",
+      "description": "string",
+      "level": "list-like-string",
+      "goal": "list-like-string",
+      "equipment": "string",
+      "program_length": "number",
+      "time_per_workout": "number",
+      "total_exercises": "number",
+      "created": "datetime",
+      "last_edit": "datetime"
+    },
+    "programs_detailed_boostcamp_kaggle.csv": {
+      "title": "string",
+      "description": "string",
+      "level": "list-like-string",
+      "goal": "list-like-string",
+      "equipment": "string",
+      "program_length": "number",
+      "time_per_workout": "number",
+      "week": "number",
+      "day": "number",
+      "number_of_exercises": "number",
+      "exercise_name": "string",
+      "sets": "number",
+      "reps": "number",
+      "intensity": "number",
+      "created": "datetime",
+      "last_edit": "datetime"
+    }
+  },
+  "missingRates": {
+    "program_summary.csv": {
+      "title": 0,
+      "description": 0.0015,
+      "level": 0,
+      "goal": 0,
+      "equipment": 0.0004,
+      "program_length": 0.0004,
+      "time_per_workout": 0,
+      "total_exercises": 0,
+      "created": 0.0004,
+      "last_edit": 0.0008
+    },
+    "programs_detailed_boostcamp_kaggle.csv": {
+      "title": 0,
+      "description": 0.0014,
+      "level": 0,
+      "goal": 0,
+      "equipment": 0,
+      "program_length": 0,
+      "time_per_workout": 0,
+      "week": 0,
+      "day": 0,
+      "number_of_exercises": 0,
+      "exercise_name": 0,
+      "sets": 0,
+      "reps": 0,
+      "intensity": 0,
+      "created": 0,
+      "last_edit": 0.0001
+    }
+  },
+  "rowCounts": {
+    "summary": 2598,
+    "detailed": 605033
+  },
+  "uniqueProgramCount": 2598,
+  "duplicateRows": {
+    "summary": 0,
+    "detailed": 904
+  },
+  "duplicateProgramTitles": 0,
+  "qualityCounts": {
+    "structurally_reliable": 1914,
+    "usable_with_caution": 658,
+    "structurally_unreliable": 26
+  },
+  "suspiciousValues": {
+    "unusualSets": 100,
+    "unusualReps": 26046,
+    "unusualIntensity": 0,
+    "invalidWeekDayRows": 0,
+    "emptyExerciseNameRows": 0
+  },
+  "aggregateStats": {
+    "sets": {
+      "count": 605033,
+      "median": 3,
+      "q1": 2,
+      "q3": 3,
+      "min": 1,
+      "max": 30
+    },
+    "reps": {
+      "count": 605033,
+      "median": 10,
+      "q1": 8,
+      "q3": 12,
+      "min": -86400,
+      "max": 200
+    },
+    "intensity": {
+      "count": 605033,
+      "median": 8,
+      "q1": 7,
+      "q3": 9,
+      "min": 0,
+      "max": 10
+    },
+    "exercisesPerSession": {
+      "count": 98818,
+      "median": 6,
+      "q1": 5,
+      "q3": 7,
+      "min": 1,
+      "max": 105
+    },
+    "daysPerWeek": {
+      "count": 2598,
+      "median": 4,
+      "q1": 3,
+      "q3": 5,
+      "min": 1,
+      "max": 10
+    },
+    "programLength": {
+      "count": 2597,
+      "median": 8,
+      "q1": 5,
+      "q3": 12,
+      "min": 1,
+      "max": 18
+    }
+  },
+  "goalDistribution": {
+    "hypertrophy": 1051,
+    "powerbuilding": 905,
+    "mixed": 414,
+    "general_fitness": 146,
+    "strength": 73,
+    "unknown": 9
+  },
+  "levelDistribution": {
+    "novice": 217,
+    "intermediate": 622,
+    "mixed": 1465,
+    "beginner": 165,
+    "advanced": 121,
+    "unknown": 8
+  },
+  "splitDistribution": {
+    "unknown": 1647,
+    "home_bodyweight": 135,
+    "upper_lower": 185,
+    "full_body": 172,
+    "push_pull_legs": 226,
+    "powerbuilding": 41,
+    "powerlifting": 116,
+    "circuit": 55,
+    "body_part": 21
+  },
+  "reliableCategoryStats": {
+    "general_fitness:circuit": {
+      "programCount": 1,
+      "daysPerWeek": {
+        "count": 1,
+        "median": 6,
+        "q1": 6,
+        "q3": 6,
+        "min": 6,
+        "max": 6
+      },
+      "exercisesPerSession": {
+        "count": 18,
+        "median": 5,
+        "q1": 1,
+        "q3": 5,
+        "min": 1,
+        "max": 5
+      },
+      "sets": {
+        "count": 66,
+        "median": 3,
+        "q1": 3,
+        "q3": 4,
+        "min": 1,
+        "max": 4
+      },
+      "reps": {
+        "count": 66,
+        "median": 15,
+        "q1": 8,
+        "q3": 15,
+        "min": -180,
+        "max": 20
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Cardio",
+          "count": 6
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 3
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 3
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 3
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 3
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 24,
+        "secondary_compound": 18,
+        "accessory_compound": 6,
+        "core": 6,
+        "isolation": 6,
+        "unknown": 6
+      },
+      "movementDistribution": {
+        "vertical_push": 6,
+        "squat": 6,
+        "vertical_pull": 12,
+        "horizontal_pull": 6,
+        "spinal_flexion": 6,
+        "hinge": 6,
+        "horizontal_push": 12,
+        "elbow_extension": 6,
+        "unknown": 6
+      },
+      "muscleDirectSets": {
+        "shoulders": 24,
+        "front_delts": 33,
+        "triceps": 51,
+        "quads": 24,
+        "glutes": 24,
+        "lats": 45,
+        "biceps": 27,
+        "upper_back": 18,
+        "core": 18,
+        "hamstrings": 24,
+        "back": 12,
+        "chest": 42
+      }
+    },
+    "general_fitness:full_body": {
+      "programCount": 11,
+      "daysPerWeek": {
+        "count": 11,
+        "median": 3,
+        "q1": 3,
+        "q3": 3.5,
+        "min": 2,
+        "max": 5
+      },
+      "exercisesPerSession": {
+        "count": 315,
+        "median": 6,
+        "q1": 6,
+        "q3": 8,
+        "min": 3,
+        "max": 14
+      },
+      "sets": {
+        "count": 2353,
+        "median": 2,
+        "q1": 1,
+        "q3": 3,
+        "min": 1,
+        "max": 6
+      },
+      "reps": {
+        "count": 2353,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -1650,
+        "max": 40
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 52
+        },
+        {
+          "name": "High Knees",
+          "count": 36
+        },
+        {
+          "name": "Arm Circle",
+          "count": 30
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 25
+        },
+        {
+          "name": "Chest Press (Machine)",
+          "count": 15
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 13
+        },
+        {
+          "name": "Leg Press",
+          "count": 12
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 9
+        },
+        {
+          "name": "Bench Press (Paused)",
+          "count": 8
+        },
+        {
+          "name": "Decline Bench Press (Dumbbell)",
+          "count": 8
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 498,
+        "secondary_compound": 375,
+        "isolation": 684,
+        "accessory_compound": 216,
+        "unknown": 415,
+        "conditioning": 69,
+        "mobility": 70,
+        "core": 26
+      },
+      "movementDistribution": {
+        "horizontal_push": 261,
+        "horizontal_pull": 210,
+        "elbow_extension": 113,
+        "elbow_flexion": 211,
+        "shoulder_abduction": 108,
+        "lunge": 80,
+        "hinge": 129,
+        "vertical_push": 89,
+        "vertical_pull": 134,
+        "unknown": 474,
+        "calf_raise": 103,
+        "squat": 279,
+        "knee_flexion": 56,
+        "loaded_carry": 10,
+        "mobility": 70,
+        "spinal_flexion": 23,
+        "anti_extension": 3
+      },
+      "muscleDirectSets": {
+        "chest": 645,
+        "triceps": 666.5,
+        "front_delts": 441.5,
+        "upper_back": 443,
+        "lats": 481,
+        "biceps": 765.5,
+        "forearms": 226,
+        "side_delts": 211,
+        "quads": 792,
+        "glutes": 508.5,
+        "hamstrings": 377.5,
+        "back": 148,
+        "shoulders": 238,
+        "calves": 229,
+        "full_body": 129,
+        "rear_delts": 142,
+        "core": 53
+      }
+    },
+    "general_fitness:home_bodyweight": {
+      "programCount": 4,
+      "daysPerWeek": {
+        "count": 4,
+        "median": 3.5,
+        "q1": 2.75,
+        "q3": 4.25,
+        "min": 2,
+        "max": 5
+      },
+      "exercisesPerSession": {
+        "count": 134,
+        "median": 6,
+        "q1": 6,
+        "q3": 7,
+        "min": 1,
+        "max": 9
+      },
+      "sets": {
+        "count": 856,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 4
+      },
+      "reps": {
+        "count": 856,
+        "median": 8,
+        "q1": 7,
+        "q3": 10,
+        "min": -300,
+        "max": 25
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Push Up",
+          "count": 50
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 8
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 8
+        },
+        {
+          "name": "Lying Leg Curl",
+          "count": 8
+        },
+        {
+          "name": "Pull Through (Cable)",
+          "count": 8
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 8
+        },
+        {
+          "name": "Pull-Up (Weighted)",
+          "count": 7
+        },
+        {
+          "name": "Chin-Up (Bodyweight)",
+          "count": 6
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 6
+        },
+        {
+          "name": "Leg Extension",
+          "count": 6
+        }
+      ],
+      "roleDistribution": {
+        "secondary_compound": 186,
+        "isolation": 208,
+        "conditioning": 109,
+        "main_lift": 198,
+        "unknown": 82,
+        "accessory_compound": 64,
+        "core": 9
+      },
+      "movementDistribution": {
+        "horizontal_push": 185,
+        "calf_raise": 58,
+        "unknown": 191,
+        "squat": 114,
+        "hinge": 38,
+        "elbow_extension": 45,
+        "vertical_push": 23,
+        "shoulder_abduction": 19,
+        "lunge": 27,
+        "spinal_flexion": 3,
+        "vertical_pull": 47,
+        "horizontal_pull": 60,
+        "elbow_flexion": 28,
+        "anti_extension": 6,
+        "knee_flexion": 12
+      },
+      "muscleDirectSets": {
+        "chest": 390,
+        "triceps": 375,
+        "front_delts": 225,
+        "calves": 124,
+        "full_body": 210,
+        "quads": 299,
+        "glutes": 177,
+        "hamstrings": 110.5,
+        "back": 27.5,
+        "shoulders": 69,
+        "side_delts": 55,
+        "core": 27,
+        "lats": 219,
+        "biceps": 235,
+        "upper_back": 154,
+        "forearms": 47,
+        "rear_delts": 56,
+        "upper_chest": 18
+      }
+    },
+    "general_fitness:powerbuilding": {
+      "programCount": 3,
+      "daysPerWeek": {
+        "count": 3,
+        "median": 5,
+        "q1": 4.5,
+        "q3": 5,
+        "min": 4,
+        "max": 5
+      },
+      "exercisesPerSession": {
+        "count": 91,
+        "median": 6,
+        "q1": 6,
+        "q3": 7,
+        "min": 1,
+        "max": 8
+      },
+      "sets": {
+        "count": 573,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 4
+      },
+      "reps": {
+        "count": 573,
+        "median": 15,
+        "q1": 8,
+        "q3": 15,
+        "min": -1800,
+        "max": 30
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 20
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 20
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 20
+        },
+        {
+          "name": "Bench Press (Close Grip)",
+          "count": 10
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 10
+        },
+        {
+          "name": "Military Press (Barbell)",
+          "count": 9
+        },
+        {
+          "name": "Hack Squat",
+          "count": 1
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 1
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 222,
+        "unknown": 93,
+        "accessory_compound": 40,
+        "isolation": 158,
+        "secondary_compound": 51,
+        "core": 9
+      },
+      "movementDistribution": {
+        "horizontal_push": 80,
+        "unknown": 93,
+        "horizontal_pull": 56,
+        "elbow_flexion": 31,
+        "squat": 72,
+        "hinge": 62,
+        "vertical_push": 58,
+        "shoulder_abduction": 29,
+        "elbow_extension": 48,
+        "vertical_pull": 15,
+        "knee_flexion": 9,
+        "lunge": 9,
+        "spinal_flexion": 9,
+        "calf_raise": 2
+      },
+      "muscleDirectSets": {
+        "chest": 189,
+        "triceps": 288.5,
+        "front_delts": 144.5,
+        "upper_back": 137.5,
+        "lats": 96.5,
+        "biceps": 159,
+        "forearms": 42,
+        "quads": 180,
+        "glutes": 125.5,
+        "hamstrings": 165,
+        "back": 69,
+        "shoulders": 100,
+        "side_delts": 68,
+        "rear_delts": 61,
+        "core": 18,
+        "calves": 8
+      }
+    },
+    "general_fitness:powerlifting": {
+      "programCount": 7,
+      "daysPerWeek": {
+        "count": 7,
+        "median": 4,
+        "q1": 3.5,
+        "q3": 4.5,
+        "min": 2,
+        "max": 6
+      },
+      "exercisesPerSession": {
+        "count": 257,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 1,
+        "max": 12
+      },
+      "sets": {
+        "count": 1390,
+        "median": 3,
+        "q1": 2,
+        "q3": 4,
+        "min": 1,
+        "max": 7
+      },
+      "reps": {
+        "count": 1390,
+        "median": 10,
+        "q1": 9,
+        "q3": 12,
+        "min": -1200,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 58
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 43
+        },
+        {
+          "name": "Deadlift (Paused)",
+          "count": 28
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 24
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 20
+        },
+        {
+          "name": "Squat (Paused)",
+          "count": 19
+        },
+        {
+          "name": "Bench Press (Paused)",
+          "count": 16
+        },
+        {
+          "name": "Halting Deadlift",
+          "count": 9
+        },
+        {
+          "name": "Leg Extension",
+          "count": 9
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 8
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 894,
+        "secondary_compound": 130,
+        "isolation": 145,
+        "conditioning": 47,
+        "unknown": 49,
+        "accessory_compound": 111,
+        "core": 14
+      },
+      "movementDistribution": {
+        "squat": 270,
+        "horizontal_push": 352,
+        "hinge": 263,
+        "knee_flexion": 7,
+        "unknown": 96,
+        "shoulder_abduction": 25,
+        "elbow_flexion": 33,
+        "elbow_extension": 44,
+        "horizontal_pull": 132,
+        "vertical_pull": 70,
+        "vertical_push": 66,
+        "anti_extension": 14,
+        "calf_raise": 18
+      },
+      "muscleDirectSets": {
+        "quads": 685,
+        "glutes": 664,
+        "chest": 1059,
+        "triceps": 715.5,
+        "front_delts": 602.5,
+        "hamstrings": 696,
+        "back": 339.5,
+        "full_body": 128,
+        "side_delts": 71,
+        "biceps": 440.5,
+        "forearms": 39.5,
+        "upper_back": 511,
+        "lats": 467.5,
+        "shoulders": 146,
+        "core": 52,
+        "calves": 36
+      }
+    },
+    "general_fitness:push_pull_legs": {
+      "programCount": 11,
+      "daysPerWeek": {
+        "count": 11,
+        "median": 4,
+        "q1": 4,
+        "q3": 5,
+        "min": 4,
+        "max": 6
+      },
+      "exercisesPerSession": {
+        "count": 448,
+        "median": 5,
+        "q1": 5,
+        "q3": 6,
+        "min": 3,
+        "max": 8
+      },
+      "sets": {
+        "count": 2383,
+        "median": 3,
+        "q1": 3,
+        "q3": 3,
+        "min": 1,
+        "max": 9
+      },
+      "reps": {
+        "count": 2383,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -2100,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 68
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 61
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 38
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 27
+        },
+        {
+          "name": "Front Squat (Barbell)",
+          "count": 24
+        },
+        {
+          "name": "Hack Squat",
+          "count": 24
+        },
+        {
+          "name": "Bent Over Row (Barbell)",
+          "count": 21
+        },
+        {
+          "name": "Incline Bench Press (Smith Machine)",
+          "count": 20
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 17
+        },
+        {
+          "name": "Trap Bar Deadlift",
+          "count": 13
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 471,
+        "isolation": 802,
+        "secondary_compound": 461,
+        "accessory_compound": 241,
+        "unknown": 334,
+        "conditioning": 46,
+        "core": 18,
+        "mobility": 10
+      },
+      "movementDistribution": {
+        "horizontal_push": 273,
+        "vertical_push": 93,
+        "shoulder_abduction": 112,
+        "horizontal_pull": 279,
+        "vertical_pull": 205,
+        "elbow_flexion": 186,
+        "squat": 268,
+        "hinge": 166,
+        "knee_flexion": 101,
+        "calf_raise": 90,
+        "unknown": 380,
+        "elbow_extension": 181,
+        "spinal_flexion": 13,
+        "lunge": 21,
+        "anti_extension": 5,
+        "mobility": 10
+      },
+      "muscleDirectSets": {
+        "chest": 831,
+        "triceps": 1064,
+        "front_delts": 558,
+        "shoulders": 291,
+        "side_delts": 322,
+        "upper_back": 800.5,
+        "lats": 1002.5,
+        "biceps": 1236.5,
+        "forearms": 273,
+        "quads": 885,
+        "glutes": 613,
+        "hamstrings": 751.5,
+        "back": 232,
+        "calves": 268,
+        "rear_delts": 87,
+        "full_body": 118,
+        "upper_chest": 12,
+        "core": 62
+      }
+    },
+    "general_fitness:unknown": {
+      "programCount": 59,
+      "daysPerWeek": {
+        "count": 59,
+        "median": 4,
+        "q1": 3,
+        "q3": 5,
+        "min": 2,
+        "max": 10
+      },
+      "exercisesPerSession": {
+        "count": 2047,
+        "median": 5,
+        "q1": 4,
+        "q3": 7,
+        "min": 1,
+        "max": 13
+      },
+      "sets": {
+        "count": 10991,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 30
+      },
+      "reps": {
+        "count": 10991,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -2700,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 237
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 221
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 95
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 84
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 79
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 66
+        },
+        {
+          "name": "Pull-Up (Bodyweight)",
+          "count": 58
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 50
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 47
+        },
+        {
+          "name": "Squat (Smith Machine)",
+          "count": 42
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 2622,
+        "unknown": 1409,
+        "accessory_compound": 904,
+        "secondary_compound": 1830,
+        "isolation": 3549,
+        "core": 382,
+        "conditioning": 278,
+        "mobility": 17
+      },
+      "movementDistribution": {
+        "squat": 1329,
+        "horizontal_push": 1235,
+        "unknown": 1636,
+        "horizontal_pull": 1097,
+        "hinge": 792,
+        "vertical_pull": 824,
+        "elbow_extension": 761,
+        "lunge": 180,
+        "anti_extension": 112,
+        "vertical_push": 441,
+        "elbow_flexion": 1231,
+        "knee_flexion": 247,
+        "spinal_flexion": 264,
+        "shoulder_abduction": 458,
+        "anti_rotation": 6,
+        "loaded_carry": 51,
+        "calf_raise": 310,
+        "mobility": 17
+      },
+      "muscleDirectSets": {
+        "quads": 3750,
+        "glutes": 2865,
+        "chest": 3280,
+        "triceps": 4123,
+        "front_delts": 2177,
+        "upper_back": 2548.5,
+        "lats": 3220,
+        "biceps": 5326.5,
+        "hamstrings": 2593,
+        "back": 982.5,
+        "rear_delts": 765,
+        "core": 1052,
+        "shoulders": 1091,
+        "forearms": 1678,
+        "side_delts": 1137,
+        "full_body": 704,
+        "calves": 755,
+        "upper_chest": 34
+      }
+    },
+    "general_fitness:upper_lower": {
+      "programCount": 7,
+      "daysPerWeek": {
+        "count": 7,
+        "median": 4,
+        "q1": 4,
+        "q3": 4,
+        "min": 3,
+        "max": 4
+      },
+      "exercisesPerSession": {
+        "count": 188,
+        "median": 8,
+        "q1": 6,
+        "q3": 8,
+        "min": 5,
+        "max": 8
+      },
+      "sets": {
+        "count": 1295,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 6
+      },
+      "reps": {
+        "count": 1295,
+        "median": 10,
+        "q1": 8,
+        "q3": 10,
+        "min": -45,
+        "max": 21
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 21
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 19
+        },
+        {
+          "name": "Incline Chest Press (Machine)",
+          "count": 12
+        },
+        {
+          "name": "Neutral Grip Pull Up",
+          "count": 12
+        },
+        {
+          "name": "Yates Row",
+          "count": 12
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 10
+        },
+        {
+          "name": "Seated Overhead Press (Dumbbell)",
+          "count": 10
+        },
+        {
+          "name": "Sumo Deadlift (Barbell)",
+          "count": 10
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 8
+        },
+        {
+          "name": "Incline Bench Press (Smith Machine)",
+          "count": 8
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 318,
+        "secondary_compound": 226,
+        "accessory_compound": 142,
+        "isolation": 414,
+        "unknown": 177,
+        "core": 16,
+        "conditioning": 2
+      },
+      "movementDistribution": {
+        "horizontal_push": 130,
+        "vertical_pull": 117,
+        "vertical_push": 57,
+        "horizontal_pull": 138,
+        "shoulder_abduction": 82,
+        "unknown": 179,
+        "squat": 199,
+        "hinge": 116,
+        "spinal_flexion": 6,
+        "elbow_flexion": 120,
+        "elbow_extension": 74,
+        "knee_flexion": 41,
+        "calf_raise": 16,
+        "lunge": 10,
+        "anti_extension": 10
+      },
+      "muscleDirectSets": {
+        "chest": 291,
+        "triceps": 388,
+        "front_delts": 216,
+        "lats": 449,
+        "biceps": 596.5,
+        "shoulders": 159,
+        "upper_back": 338,
+        "side_delts": 218,
+        "quads": 553,
+        "glutes": 457,
+        "hamstrings": 428.5,
+        "back": 148,
+        "core": 54,
+        "forearms": 148,
+        "rear_delts": 68,
+        "calves": 32,
+        "upper_chest": 36,
+        "full_body": 7
+      }
+    },
+    "hypertrophy:body_part": {
+      "programCount": 8,
+      "daysPerWeek": {
+        "count": 8,
+        "median": 4.5,
+        "q1": 4,
+        "q3": 5,
+        "min": 4,
+        "max": 6
+      },
+      "exercisesPerSession": {
+        "count": 419,
+        "median": 6,
+        "q1": 6,
+        "q3": 7,
+        "min": 3,
+        "max": 8
+      },
+      "sets": {
+        "count": 2519,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 7
+      },
+      "reps": {
+        "count": 2519,
+        "median": 10,
+        "q1": 9,
+        "q3": 12,
+        "min": -1200,
+        "max": 50
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Seated Hamstring Curl",
+          "count": 48
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 33
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 31
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 28
+        },
+        {
+          "name": "Bicep Curl (Dumbbell)",
+          "count": 24
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 24
+        },
+        {
+          "name": "Incline Chest Press (Machine)",
+          "count": 24
+        },
+        {
+          "name": "Rear Delt Fly (Dumbbell)",
+          "count": 24
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 22
+        },
+        {
+          "name": "Barbell Row",
+          "count": 21
+        }
+      ],
+      "roleDistribution": {
+        "unknown": 305,
+        "isolation": 924,
+        "secondary_compound": 469,
+        "main_lift": 456,
+        "accessory_compound": 217,
+        "core": 56,
+        "conditioning": 92
+      },
+      "movementDistribution": {
+        "unknown": 385,
+        "shoulder_abduction": 115,
+        "horizontal_pull": 349,
+        "elbow_extension": 161,
+        "vertical_pull": 122,
+        "hinge": 125,
+        "spinal_flexion": 56,
+        "horizontal_push": 359,
+        "elbow_flexion": 399,
+        "squat": 215,
+        "knee_flexion": 34,
+        "calf_raise": 67,
+        "vertical_push": 110,
+        "lunge": 10,
+        "loaded_carry": 12
+      },
+      "muscleDirectSets": {
+        "side_delts": 341,
+        "rear_delts": 280,
+        "upper_back": 780,
+        "triceps": 1022.5,
+        "lats": 612,
+        "biceps": 1407,
+        "hamstrings": 388,
+        "glutes": 409,
+        "back": 161,
+        "core": 132,
+        "full_body": 264,
+        "chest": 915,
+        "front_delts": 594.5,
+        "forearms": 482.5,
+        "quads": 616,
+        "calves": 220,
+        "shoulders": 274
+      }
+    },
+    "hypertrophy:circuit": {
+      "programCount": 14,
+      "daysPerWeek": {
+        "count": 14,
+        "median": 4.5,
+        "q1": 4,
+        "q3": 6,
+        "min": 2,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 366,
+        "median": 4,
+        "q1": 2,
+        "q3": 7,
+        "min": 1,
+        "max": 14
+      },
+      "sets": {
+        "count": 1645,
+        "median": 2,
+        "q1": 1,
+        "q3": 3,
+        "min": 1,
+        "max": 8
+      },
+      "reps": {
+        "count": 1645,
+        "median": 11,
+        "q1": 8,
+        "q3": 15,
+        "min": -900,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 71
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 47
+        },
+        {
+          "name": "Walk",
+          "count": 36
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 19
+        },
+        {
+          "name": "Fasted Walking",
+          "count": 18
+        },
+        {
+          "name": "Chest Fly (Cable)",
+          "count": 12
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Sprint",
+          "count": 10
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 8
+        }
+      ],
+      "roleDistribution": {
+        "secondary_compound": 341,
+        "main_lift": 425,
+        "unknown": 316,
+        "isolation": 300,
+        "accessory_compound": 114,
+        "conditioning": 95,
+        "core": 45,
+        "mobility": 9
+      },
+      "movementDistribution": {
+        "horizontal_push": 202,
+        "unknown": 407,
+        "elbow_extension": 53,
+        "squat": 193,
+        "hinge": 134,
+        "horizontal_pull": 147,
+        "lunge": 30,
+        "calf_raise": 44,
+        "elbow_flexion": 127,
+        "vertical_pull": 137,
+        "vertical_push": 78,
+        "shoulder_abduction": 20,
+        "spinal_flexion": 26,
+        "knee_flexion": 15,
+        "mobility": 9,
+        "anti_extension": 19,
+        "loaded_carry": 4
+      },
+      "muscleDirectSets": {
+        "chest": 433,
+        "triceps": 429,
+        "front_delts": 290,
+        "quads": 477,
+        "glutes": 354.5,
+        "hamstrings": 283,
+        "back": 106,
+        "upper_back": 304,
+        "lats": 420.5,
+        "biceps": 615.5,
+        "calves": 116,
+        "forearms": 173.5,
+        "full_body": 222,
+        "shoulders": 147,
+        "side_delts": 54,
+        "rear_delts": 46,
+        "core": 115
+      }
+    },
+    "hypertrophy:full_body": {
+      "programCount": 43,
+      "daysPerWeek": {
+        "count": 43,
+        "median": 3,
+        "q1": 3,
+        "q3": 4,
+        "min": 2,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 1349,
+        "median": 6,
+        "q1": 5,
+        "q3": 8,
+        "min": 1,
+        "max": 13
+      },
+      "sets": {
+        "count": 8507,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 8
+      },
+      "reps": {
+        "count": 8507,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -2400,
+        "max": 32
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 118
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 111
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 110
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 106
+        },
+        {
+          "name": "Rear Delt Row",
+          "count": 48
+        },
+        {
+          "name": "Hip Thrust (Barbell)",
+          "count": 40
+        },
+        {
+          "name": "Chest Press (Machine)",
+          "count": 36
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 32
+        },
+        {
+          "name": "Neck Flexion",
+          "count": 32
+        },
+        {
+          "name": "Squat (Smith Machine)",
+          "count": 28
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 1871,
+        "secondary_compound": 1582,
+        "isolation": 2572,
+        "unknown": 1249,
+        "conditioning": 225,
+        "accessory_compound": 676,
+        "core": 251,
+        "mobility": 81
+      },
+      "movementDistribution": {
+        "squat": 966,
+        "horizontal_push": 1104,
+        "horizontal_pull": 850,
+        "shoulder_abduction": 367,
+        "unknown": 1452,
+        "elbow_flexion": 935,
+        "elbow_extension": 405,
+        "calf_raise": 292,
+        "hinge": 669,
+        "vertical_push": 376,
+        "vertical_pull": 484,
+        "knee_flexion": 140,
+        "lunge": 113,
+        "spinal_flexion": 110,
+        "anti_extension": 141,
+        "mobility": 81,
+        "loaded_carry": 22
+      },
+      "muscleDirectSets": {
+        "quads": 2787,
+        "glutes": 2205,
+        "chest": 2740,
+        "triceps": 2890.5,
+        "front_delts": 1851.5,
+        "upper_back": 2049.5,
+        "lats": 2148.5,
+        "biceps": 3890,
+        "side_delts": 987,
+        "forearms": 1217.5,
+        "calves": 812,
+        "hamstrings": 1802,
+        "back": 607.5,
+        "shoulders": 1008,
+        "full_body": 556,
+        "rear_delts": 533,
+        "core": 600,
+        "upper_chest": 90
+      }
+    },
+    "hypertrophy:home_bodyweight": {
+      "programCount": 37,
+      "daysPerWeek": {
+        "count": 37,
+        "median": 3,
+        "q1": 3,
+        "q3": 5,
+        "min": 1,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 1108,
+        "median": 5,
+        "q1": 3,
+        "q3": 6,
+        "min": 1,
+        "max": 14
+      },
+      "sets": {
+        "count": 5138,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 5138,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -1500,
+        "max": 50
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Push Up",
+          "count": 84
+        },
+        {
+          "name": "Pull-Up (Weighted)",
+          "count": 82
+        },
+        {
+          "name": "Plank",
+          "count": 60
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 40
+        },
+        {
+          "name": "Bicep Curl (Dumbbell)",
+          "count": 36
+        },
+        {
+          "name": "Goblet Squat",
+          "count": 36
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 34
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 32
+        },
+        {
+          "name": "Bulgarian Split Squat (Dumbbell)",
+          "count": 29
+        },
+        {
+          "name": "Lateral Raise (Dumbbell)",
+          "count": 28
+        }
+      ],
+      "roleDistribution": {
+        "secondary_compound": 1243,
+        "isolation": 946,
+        "core": 418,
+        "main_lift": 993,
+        "accessory_compound": 476,
+        "unknown": 792,
+        "mobility": 76,
+        "conditioning": 194
+      },
+      "movementDistribution": {
+        "horizontal_push": 922,
+        "elbow_flexion": 403,
+        "spinal_flexion": 197,
+        "squat": 589,
+        "horizontal_pull": 446,
+        "shoulder_abduction": 168,
+        "calf_raise": 86,
+        "hinge": 327,
+        "vertical_pull": 282,
+        "vertical_push": 127,
+        "elbow_extension": 141,
+        "unknown": 964,
+        "lunge": 147,
+        "anti_extension": 219,
+        "knee_flexion": 20,
+        "mobility": 76,
+        "anti_rotation": 2,
+        "loaded_carry": 22
+      },
+      "muscleDirectSets": {
+        "chest": 2611,
+        "triceps": 1922.5,
+        "front_delts": 1487.5,
+        "biceps": 2167,
+        "forearms": 641.5,
+        "core": 869,
+        "quads": 2096,
+        "glutes": 1520,
+        "upper_back": 1307.5,
+        "lats": 1291.5,
+        "side_delts": 487,
+        "calves": 233,
+        "hamstrings": 1026.5,
+        "back": 459,
+        "shoulders": 390,
+        "rear_delts": 181,
+        "full_body": 455,
+        "upper_chest": 52
+      }
+    },
+    "hypertrophy:powerbuilding": {
+      "programCount": 9,
+      "daysPerWeek": {
+        "count": 9,
+        "median": 4,
+        "q1": 4,
+        "q3": 5,
+        "min": 3,
+        "max": 5
+      },
+      "exercisesPerSession": {
+        "count": 329,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 2,
+        "max": 9
+      },
+      "sets": {
+        "count": 1633,
+        "median": 3,
+        "q1": 1,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 1633,
+        "median": 9,
+        "q1": 6,
+        "q3": 12,
+        "min": -86400,
+        "max": 80
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 57
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 44
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 39
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 34
+        },
+        {
+          "name": "Bench Press (Paused)",
+          "count": 22
+        },
+        {
+          "name": "Squat (Low Bar)",
+          "count": 14
+        },
+        {
+          "name": "Deficit Deadlift (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Front Squat (Paused)",
+          "count": 12
+        },
+        {
+          "name": "Hack Squat",
+          "count": 12
+        },
+        {
+          "name": "Safety Squat Bar Wide Stance",
+          "count": 12
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 549,
+        "accessory_compound": 120,
+        "secondary_compound": 263,
+        "isolation": 518,
+        "unknown": 127,
+        "conditioning": 36,
+        "core": 20
+      },
+      "movementDistribution": {
+        "squat": 249,
+        "horizontal_push": 258,
+        "lunge": 16,
+        "knee_flexion": 69,
+        "calf_raise": 71,
+        "elbow_extension": 78,
+        "hinge": 122,
+        "vertical_push": 115,
+        "horizontal_pull": 168,
+        "vertical_pull": 95,
+        "shoulder_abduction": 64,
+        "elbow_flexion": 145,
+        "unknown": 163,
+        "spinal_flexion": 8,
+        "anti_extension": 12
+      },
+      "muscleDirectSets": {
+        "quads": 711,
+        "glutes": 484,
+        "chest": 662,
+        "triceps": 718.5,
+        "front_delts": 491.5,
+        "hamstrings": 538.5,
+        "calves": 130,
+        "back": 199.5,
+        "shoulders": 345,
+        "upper_back": 422,
+        "lats": 414,
+        "biceps": 680,
+        "side_delts": 145,
+        "rear_delts": 36,
+        "forearms": 186,
+        "full_body": 124,
+        "core": 52,
+        "upper_chest": 48
+      }
+    },
+    "hypertrophy:powerlifting": {
+      "programCount": 30,
+      "daysPerWeek": {
+        "count": 30,
+        "median": 4,
+        "q1": 3,
+        "q3": 4.75,
+        "min": 1,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 925,
+        "median": 5,
+        "q1": 5,
+        "q3": 6,
+        "min": 1,
+        "max": 10
+      },
+      "sets": {
+        "count": 5056,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 5056,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -1800,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 249
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 185
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 182
+        },
+        {
+          "name": "Bench Press (Paused)",
+          "count": 45
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 41
+        },
+        {
+          "name": "Squat (Low Bar)",
+          "count": 17
+        },
+        {
+          "name": "Clean and Press",
+          "count": 14
+        },
+        {
+          "name": "Bench Press (Close Grip)",
+          "count": 12
+        },
+        {
+          "name": "Larsen Press (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Sumo Deadlift (Paused)",
+          "count": 12
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 2091,
+        "secondary_compound": 854,
+        "isolation": 1207,
+        "unknown": 342,
+        "accessory_compound": 298,
+        "conditioning": 109,
+        "core": 155
+      },
+      "movementDistribution": {
+        "horizontal_push": 875,
+        "vertical_pull": 367,
+        "vertical_push": 333,
+        "shoulder_abduction": 167,
+        "elbow_flexion": 411,
+        "squat": 753,
+        "hinge": 625,
+        "unknown": 427,
+        "elbow_extension": 233,
+        "horizontal_pull": 431,
+        "knee_flexion": 87,
+        "lunge": 54,
+        "calf_raise": 114,
+        "spinal_flexion": 93,
+        "anti_extension": 62,
+        "loaded_carry": 24
+      },
+      "muscleDirectSets": {
+        "chest": 2351,
+        "triceps": 2097,
+        "front_delts": 1554,
+        "lats": 1391,
+        "biceps": 2056.5,
+        "shoulders": 773,
+        "side_delts": 482,
+        "forearms": 604.5,
+        "quads": 2099,
+        "glutes": 1778.5,
+        "hamstrings": 1699.5,
+        "back": 722.5,
+        "upper_chest": 32,
+        "upper_back": 1005,
+        "full_body": 266,
+        "calves": 309,
+        "core": 383,
+        "rear_delts": 298
+      }
+    },
+    "hypertrophy:push_pull_legs": {
+      "programCount": 64,
+      "daysPerWeek": {
+        "count": 64,
+        "median": 5,
+        "q1": 3.75,
+        "q3": 6,
+        "min": 1,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 2856,
+        "median": 6,
+        "q1": 5,
+        "q3": 7,
+        "min": 1,
+        "max": 14
+      },
+      "sets": {
+        "count": 17661,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 17661,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -5400,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 389
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 354
+        },
+        {
+          "name": "Pull-Up (Weighted)",
+          "count": 124
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 122
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 115
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 115
+        },
+        {
+          "name": "Leg Press",
+          "count": 90
+        },
+        {
+          "name": "Leg Curl",
+          "count": 85
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 82
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 82
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 3619,
+        "unknown": 2356,
+        "isolation": 6276,
+        "secondary_compound": 3141,
+        "accessory_compound": 1243,
+        "core": 465,
+        "conditioning": 549,
+        "mobility": 12
+      },
+      "movementDistribution": {
+        "horizontal_push": 2142,
+        "vertical_push": 848,
+        "unknown": 2845,
+        "shoulder_abduction": 788,
+        "elbow_extension": 1142,
+        "vertical_pull": 1152,
+        "horizontal_pull": 1759,
+        "elbow_flexion": 2080,
+        "knee_flexion": 539,
+        "squat": 2021,
+        "hinge": 918,
+        "calf_raise": 700,
+        "lunge": 190,
+        "spinal_flexion": 370,
+        "anti_extension": 83,
+        "loaded_carry": 60,
+        "mobility": 12,
+        "anti_rotation": 12
+      },
+      "muscleDirectSets": {
+        "chest": 5853.5,
+        "triceps": 7315,
+        "front_delts": 4218,
+        "shoulders": 2612,
+        "side_delts": 2259,
+        "lats": 5197.5,
+        "biceps": 9307.5,
+        "upper_back": 4548.5,
+        "forearms": 2934.5,
+        "hamstrings": 3794,
+        "quads": 6169,
+        "glutes": 3724,
+        "back": 1106.5,
+        "calves": 2164,
+        "rear_delts": 1323,
+        "core": 1376,
+        "full_body": 1364,
+        "upper_chest": 59
+      }
+    },
+    "hypertrophy:unknown": {
+      "programCount": 512,
+      "daysPerWeek": {
+        "count": 512,
+        "median": 4,
+        "q1": 3,
+        "q3": 5,
+        "min": 1,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 16970,
+        "median": 6,
+        "q1": 4,
+        "q3": 7,
+        "min": 1,
+        "max": 19
+      },
+      "sets": {
+        "count": 94905,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 20
+      },
+      "reps": {
+        "count": 94905,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -86400,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 1801
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 1790
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 1052
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 515
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 451
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 444
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 389
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 382
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 374
+        },
+        {
+          "name": "Leg Extension",
+          "count": 240
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 22071,
+        "secondary_compound": 16116,
+        "isolation": 30120,
+        "core": 2669,
+        "unknown": 13024,
+        "accessory_compound": 7812,
+        "conditioning": 2878,
+        "mobility": 215
+      },
+      "movementDistribution": {
+        "hinge": 6147,
+        "vertical_pull": 6167,
+        "elbow_flexion": 10101,
+        "elbow_extension": 5933,
+        "squat": 11854,
+        "horizontal_push": 11705,
+        "spinal_flexion": 1861,
+        "unknown": 15587,
+        "calf_raise": 2643,
+        "horizontal_pull": 9149,
+        "vertical_push": 4441,
+        "shoulder_abduction": 4259,
+        "lunge": 1398,
+        "knee_flexion": 2322,
+        "mobility": 215,
+        "anti_extension": 794,
+        "loaded_carry": 315,
+        "anti_rotation": 14
+      },
+      "muscleDirectSets": {
+        "hamstrings": 21129.5,
+        "glutes": 24344.5,
+        "back": 7104,
+        "lats": 25776.5,
+        "biceps": 43256,
+        "forearms": 13228.5,
+        "triceps": 36300.5,
+        "quads": 36435,
+        "chest": 31460,
+        "front_delts": 21388.5,
+        "core": 7502,
+        "calves": 7167,
+        "upper_back": 21185.5,
+        "shoulders": 11648,
+        "side_delts": 10965,
+        "rear_delts": 5229,
+        "upper_chest": 662,
+        "full_body": 7006
+      }
+    },
+    "hypertrophy:upper_lower": {
+      "programCount": 50,
+      "daysPerWeek": {
+        "count": 50,
+        "median": 4,
+        "q1": 4,
+        "q3": 5,
+        "min": 2,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 2072,
+        "median": 6,
+        "q1": 5,
+        "q3": 7,
+        "min": 1,
+        "max": 10
+      },
+      "sets": {
+        "count": 11934,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 11934,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -7200,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 202
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 194
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 137
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 120
+        },
+        {
+          "name": "Bench Press (Smith Machine)",
+          "count": 76
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 62
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 60
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 60
+        },
+        {
+          "name": "Leg Extension",
+          "count": 58
+        },
+        {
+          "name": "Hamstring Curl",
+          "count": 48
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 2631,
+        "secondary_compound": 2093,
+        "unknown": 1625,
+        "isolation": 4164,
+        "accessory_compound": 983,
+        "conditioning": 286,
+        "core": 151,
+        "mobility": 1
+      },
+      "movementDistribution": {
+        "horizontal_push": 1294,
+        "vertical_pull": 815,
+        "unknown": 1905,
+        "hinge": 867,
+        "squat": 1678,
+        "elbow_flexion": 1592,
+        "elbow_extension": 808,
+        "horizontal_pull": 1067,
+        "shoulder_abduction": 567,
+        "knee_flexion": 190,
+        "calf_raise": 399,
+        "spinal_flexion": 131,
+        "vertical_push": 475,
+        "lunge": 119,
+        "anti_extension": 20,
+        "mobility": 1,
+        "loaded_carry": 6
+      },
+      "muscleDirectSets": {
+        "chest": 3035,
+        "triceps": 3971.5,
+        "front_delts": 2016.5,
+        "lats": 3123.5,
+        "biceps": 5732,
+        "hamstrings": 2244.5,
+        "glutes": 2833.5,
+        "back": 798.5,
+        "quads": 4333,
+        "forearms": 1820,
+        "full_body": 623,
+        "upper_back": 2361,
+        "side_delts": 1356,
+        "rear_delts": 432,
+        "calves": 1167,
+        "core": 368,
+        "shoulders": 1092,
+        "upper_chest": 188
+      }
+    },
+    "mixed:body_part": {
+      "programCount": 2,
+      "daysPerWeek": {
+        "count": 2,
+        "median": 4.5,
+        "q1": 4.25,
+        "q3": 4.75,
+        "min": 4,
+        "max": 5
+      },
+      "exercisesPerSession": {
+        "count": 55,
+        "median": 5,
+        "q1": 4.5,
+        "q3": 8,
+        "min": 1,
+        "max": 8
+      },
+      "sets": {
+        "count": 301,
+        "median": 3,
+        "q1": 2,
+        "q3": 4,
+        "min": 1,
+        "max": 6
+      },
+      "reps": {
+        "count": 301,
+        "median": 10,
+        "q1": 9,
+        "q3": 12,
+        "min": -20,
+        "max": 20
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 13
+        },
+        {
+          "name": "Reverse Wrist Curl (Barbell)",
+          "count": 8
+        },
+        {
+          "name": "Standing Calf Raise (Machine)",
+          "count": 8
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 6
+        },
+        {
+          "name": "Pull-Up (Assisted)",
+          "count": 6
+        },
+        {
+          "name": "Bicep Curl (Barbell)",
+          "count": 5
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 5
+        },
+        {
+          "name": "Run",
+          "count": 2
+        },
+        {
+          "name": "Hack Squat",
+          "count": 1
+        },
+        {
+          "name": "Incline Curl (Dumbbell)",
+          "count": 1
+        }
+      ],
+      "roleDistribution": {
+        "isolation": 110,
+        "main_lift": 89,
+        "secondary_compound": 36,
+        "accessory_compound": 19,
+        "core": 21,
+        "unknown": 24,
+        "conditioning": 2
+      },
+      "movementDistribution": {
+        "calf_raise": 14,
+        "elbow_extension": 14,
+        "horizontal_push": 33,
+        "elbow_flexion": 57,
+        "hinge": 29,
+        "vertical_pull": 20,
+        "squat": 54,
+        "spinal_flexion": 21,
+        "unknown": 26,
+        "horizontal_pull": 17,
+        "knee_flexion": 6,
+        "vertical_push": 5,
+        "shoulder_abduction": 5
+      },
+      "muscleDirectSets": {
+        "calves": 62,
+        "triceps": 105,
+        "chest": 105,
+        "front_delts": 60,
+        "biceps": 229.5,
+        "forearms": 88,
+        "hamstrings": 92,
+        "glutes": 113.5,
+        "back": 28.5,
+        "lats": 81,
+        "quads": 160,
+        "core": 50,
+        "full_body": 2,
+        "upper_back": 52,
+        "shoulders": 15,
+        "side_delts": 15
+      }
+    },
+    "mixed:circuit": {
+      "programCount": 10,
+      "daysPerWeek": {
+        "count": 10,
+        "median": 4.5,
+        "q1": 4,
+        "q3": 5,
+        "min": 2,
+        "max": 6
+      },
+      "exercisesPerSession": {
+        "count": 322,
+        "median": 4,
+        "q1": 3,
+        "q3": 6,
+        "min": 1,
+        "max": 9
+      },
+      "sets": {
+        "count": 1383,
+        "median": 3,
+        "q1": 3,
+        "q3": 4,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 1383,
+        "median": 12,
+        "q1": 8,
+        "q3": 12,
+        "min": -2400,
+        "max": 80
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Push Up",
+          "count": 40
+        },
+        {
+          "name": "Pull-Up (Bodyweight)",
+          "count": 24
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 20
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 16
+        },
+        {
+          "name": "Sand Bag Conditioning",
+          "count": 16
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 15
+        },
+        {
+          "name": "Chest Supported Row (Machine)",
+          "count": 12
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 12
+        },
+        {
+          "name": "Jump Squat",
+          "count": 10
+        },
+        {
+          "name": "Yoga Class",
+          "count": 10
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 428,
+        "accessory_compound": 123,
+        "isolation": 147,
+        "unknown": 313,
+        "secondary_compound": 212,
+        "conditioning": 94,
+        "core": 66
+      },
+      "movementDistribution": {
+        "squat": 196,
+        "horizontal_push": 223,
+        "horizontal_pull": 96,
+        "calf_raise": 58,
+        "unknown": 403,
+        "vertical_push": 50,
+        "hinge": 104,
+        "vertical_pull": 58,
+        "knee_flexion": 8,
+        "lunge": 40,
+        "loaded_carry": 4,
+        "elbow_extension": 12,
+        "spinal_flexion": 32,
+        "elbow_flexion": 49,
+        "shoulder_abduction": 16,
+        "anti_extension": 34
+      },
+      "muscleDirectSets": {
+        "quads": 769,
+        "glutes": 562,
+        "chest": 663,
+        "triceps": 449,
+        "front_delts": 417,
+        "upper_back": 299,
+        "lats": 360.5,
+        "biceps": 400,
+        "calves": 190,
+        "shoulders": 171,
+        "hamstrings": 343.5,
+        "back": 146.5,
+        "full_body": 184,
+        "forearms": 78.5,
+        "core": 190,
+        "side_delts": 32
+      }
+    },
+    "mixed:full_body": {
+      "programCount": 19,
+      "daysPerWeek": {
+        "count": 19,
+        "median": 3,
+        "q1": 2.5,
+        "q3": 4,
+        "min": 2,
+        "max": 8
+      },
+      "exercisesPerSession": {
+        "count": 622,
+        "median": 8,
+        "q1": 7,
+        "q3": 10,
+        "min": 3,
+        "max": 12
+      },
+      "sets": {
+        "count": 5110,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 8
+      },
+      "reps": {
+        "count": 5110,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -3600,
+        "max": 80
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Leg Extension",
+          "count": 37
+        },
+        {
+          "name": "Cable Crunch",
+          "count": 36
+        },
+        {
+          "name": "Squat (Bodyweight)",
+          "count": 36
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 33
+        },
+        {
+          "name": "Stiff Leg Deadlift",
+          "count": 32
+        },
+        {
+          "name": "Lying Leg Curl",
+          "count": 28
+        },
+        {
+          "name": "Lateral Raise (Cable)",
+          "count": 24
+        },
+        {
+          "name": "Pullover (EZ Bar)",
+          "count": 24
+        },
+        {
+          "name": "Pull-Up (Bodyweight)",
+          "count": 21
+        },
+        {
+          "name": "Leg Press",
+          "count": 20
+        }
+      ],
+      "roleDistribution": {
+        "secondary_compound": 838,
+        "accessory_compound": 519,
+        "isolation": 1863,
+        "unknown": 769,
+        "core": 235,
+        "main_lift": 750,
+        "conditioning": 120,
+        "mobility": 16
+      },
+      "movementDistribution": {
+        "horizontal_push": 446,
+        "horizontal_pull": 430,
+        "squat": 543,
+        "knee_flexion": 126,
+        "elbow_flexion": 683,
+        "unknown": 885,
+        "spinal_flexion": 63,
+        "hinge": 338,
+        "shoulder_abduction": 237,
+        "calf_raise": 159,
+        "vertical_pull": 338,
+        "lunge": 68,
+        "elbow_extension": 455,
+        "anti_extension": 172,
+        "vertical_push": 147,
+        "loaded_carry": 4,
+        "mobility": 16
+      },
+      "muscleDirectSets": {
+        "chest": 1273,
+        "triceps": 2067,
+        "front_delts": 838,
+        "upper_back": 1128,
+        "lats": 1532.5,
+        "biceps": 2906.5,
+        "quads": 1787,
+        "hamstrings": 1140,
+        "forearms": 942,
+        "core": 572,
+        "glutes": 1336,
+        "back": 302.5,
+        "side_delts": 628,
+        "calves": 501,
+        "full_body": 298,
+        "shoulders": 403,
+        "rear_delts": 102
+      }
+    },
+    "mixed:home_bodyweight": {
+      "programCount": 22,
+      "daysPerWeek": {
+        "count": 22,
+        "median": 3.5,
+        "q1": 3,
+        "q3": 5,
+        "min": 1,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 763,
+        "median": 5,
+        "q1": 3,
+        "q3": 6,
+        "min": 1,
+        "max": 10
+      },
+      "sets": {
+        "count": 3730,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 3730,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -2700,
+        "max": 60
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Sit Up",
+          "count": 90
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 47
+        },
+        {
+          "name": "Jump Rope",
+          "count": 28
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 27
+        },
+        {
+          "name": "Cardio",
+          "count": 26
+        },
+        {
+          "name": "Backward Run",
+          "count": 24
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 24
+        },
+        {
+          "name": "Chin-Up (Bodyweight)",
+          "count": 24
+        },
+        {
+          "name": "Overhead Press (Dumbbell)",
+          "count": 24
+        },
+        {
+          "name": "Pull-Up (Bodyweight)",
+          "count": 24
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 612,
+        "unknown": 721,
+        "secondary_compound": 770,
+        "isolation": 605,
+        "accessory_compound": 366,
+        "core": 465,
+        "conditioning": 153,
+        "mobility": 38
+      },
+      "movementDistribution": {
+        "horizontal_push": 604,
+        "unknown": 874,
+        "elbow_flexion": 257,
+        "horizontal_pull": 224,
+        "hinge": 257,
+        "elbow_extension": 136,
+        "squat": 380,
+        "vertical_push": 84,
+        "knee_flexion": 29,
+        "spinal_flexion": 237,
+        "anti_extension": 216,
+        "vertical_pull": 152,
+        "lunge": 117,
+        "calf_raise": 30,
+        "shoulder_abduction": 83,
+        "mobility": 38,
+        "anti_rotation": 12
+      },
+      "muscleDirectSets": {
+        "chest": 1300,
+        "triceps": 1136,
+        "front_delts": 778,
+        "biceps": 1191.5,
+        "forearms": 307.5,
+        "upper_back": 700.5,
+        "lats": 821.5,
+        "hamstrings": 769,
+        "glutes": 1210,
+        "back": 296.5,
+        "quads": 1551,
+        "shoulders": 256,
+        "core": 1114,
+        "full_body": 375,
+        "calves": 95,
+        "side_delts": 255,
+        "rear_delts": 75
+      }
+    },
+    "mixed:powerbuilding": {
+      "programCount": 4,
+      "daysPerWeek": {
+        "count": 4,
+        "median": 5,
+        "q1": 3.75,
+        "q3": 6.25,
+        "min": 3,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 181,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 2,
+        "max": 6
+      },
+      "sets": {
+        "count": 908,
+        "median": 2,
+        "q1": 1,
+        "q3": 3,
+        "min": 1,
+        "max": 7
+      },
+      "reps": {
+        "count": 908,
+        "median": 10,
+        "q1": 8,
+        "q3": 11,
+        "min": -30,
+        "max": 30
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Paused)",
+          "count": 38
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 34
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 34
+        },
+        {
+          "name": "Squat (Low Bar)",
+          "count": 15
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 10
+        },
+        {
+          "name": "Squat (Paused)",
+          "count": 8
+        },
+        {
+          "name": "Dumbbell Row",
+          "count": 6
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 6
+        },
+        {
+          "name": "Reverse Wrist Curl (Dumbbell)",
+          "count": 6
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 6
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 310,
+        "isolation": 306,
+        "unknown": 60,
+        "secondary_compound": 166,
+        "accessory_compound": 48,
+        "core": 6,
+        "conditioning": 12
+      },
+      "movementDistribution": {
+        "horizontal_push": 181,
+        "unknown": 66,
+        "shoulder_abduction": 36,
+        "elbow_extension": 54,
+        "hinge": 96,
+        "vertical_pull": 72,
+        "elbow_flexion": 98,
+        "horizontal_pull": 68,
+        "squat": 147,
+        "knee_flexion": 30,
+        "spinal_flexion": 6,
+        "calf_raise": 18,
+        "vertical_push": 30,
+        "loaded_carry": 6
+      },
+      "muscleDirectSets": {
+        "chest": 403,
+        "triceps": 359.5,
+        "front_delts": 237.5,
+        "upper_chest": 24,
+        "side_delts": 72,
+        "hamstrings": 237,
+        "glutes": 209,
+        "back": 88.5,
+        "lats": 219,
+        "biceps": 358,
+        "forearms": 118,
+        "upper_back": 157,
+        "quads": 271,
+        "rear_delts": 22,
+        "core": 24,
+        "calves": 72,
+        "shoulders": 84,
+        "full_body": 30
+      }
+    },
+    "mixed:powerlifting": {
+      "programCount": 17,
+      "daysPerWeek": {
+        "count": 17,
+        "median": 5,
+        "q1": 4,
+        "q3": 5,
+        "min": 2,
+        "max": 8
+      },
+      "exercisesPerSession": {
+        "count": 545,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 1,
+        "max": 11
+      },
+      "sets": {
+        "count": 2728,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 8
+      },
+      "reps": {
+        "count": 2728,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -1800,
+        "max": 65
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 137
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 131
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 104
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 30
+        },
+        {
+          "name": "Squat (Low Bar)",
+          "count": 19
+        },
+        {
+          "name": "Calf Raise (Leg Press)",
+          "count": 12
+        },
+        {
+          "name": "Cardio (LISS)",
+          "count": 12
+        },
+        {
+          "name": "Military Press (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Spider Curl",
+          "count": 12
+        },
+        {
+          "name": "Bench Press (Paused)",
+          "count": 11
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 1071,
+        "isolation": 678,
+        "conditioning": 45,
+        "secondary_compound": 462,
+        "accessory_compound": 143,
+        "unknown": 299,
+        "core": 28,
+        "mobility": 2
+      },
+      "movementDistribution": {
+        "squat": 457,
+        "knee_flexion": 22,
+        "unknown": 335,
+        "calf_raise": 12,
+        "horizontal_push": 477,
+        "shoulder_abduction": 127,
+        "elbow_extension": 138,
+        "hinge": 257,
+        "vertical_pull": 145,
+        "horizontal_pull": 303,
+        "elbow_flexion": 244,
+        "spinal_flexion": 19,
+        "vertical_push": 163,
+        "lunge": 9,
+        "mobility": 2,
+        "anti_rotation": 6,
+        "loaded_carry": 9,
+        "anti_extension": 3
+      },
+      "muscleDirectSets": {
+        "quads": 1183,
+        "glutes": 858.5,
+        "hamstrings": 668,
+        "full_body": 132,
+        "calves": 32,
+        "chest": 1242,
+        "triceps": 1236,
+        "front_delts": 845,
+        "side_delts": 335,
+        "back": 319,
+        "lats": 675.5,
+        "biceps": 1054,
+        "upper_back": 740,
+        "forearms": 294,
+        "core": 60,
+        "shoulders": 448,
+        "rear_delts": 278
+      }
+    },
+    "mixed:push_pull_legs": {
+      "programCount": 29,
+      "daysPerWeek": {
+        "count": 29,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 2,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 1196,
+        "median": 6,
+        "q1": 5,
+        "q3": 7,
+        "min": 1,
+        "max": 11
+      },
+      "sets": {
+        "count": 7500,
+        "median": 3,
+        "q1": 3,
+        "q3": 3,
+        "min": 1,
+        "max": 6
+      },
+      "reps": {
+        "count": 7500,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -2700,
+        "max": 99
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 218
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 211
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 82
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 62
+        },
+        {
+          "name": "Barbell Row",
+          "count": 50
+        },
+        {
+          "name": "Cardio",
+          "count": 40
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 38
+        },
+        {
+          "name": "Hack Squat",
+          "count": 31
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 30
+        },
+        {
+          "name": "Bent Over Row (Barbell)",
+          "count": 28
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 1667,
+        "unknown": 868,
+        "secondary_compound": 1265,
+        "accessory_compound": 491,
+        "isolation": 3034,
+        "conditioning": 116,
+        "core": 59
+      },
+      "movementDistribution": {
+        "horizontal_push": 863,
+        "unknown": 984,
+        "vertical_pull": 456,
+        "horizontal_pull": 899,
+        "elbow_extension": 575,
+        "elbow_flexion": 929,
+        "shoulder_abduction": 371,
+        "squat": 968,
+        "hinge": 464,
+        "calf_raise": 363,
+        "lunge": 33,
+        "vertical_push": 310,
+        "anti_extension": 40,
+        "knee_flexion": 226,
+        "anti_rotation": 8,
+        "spinal_flexion": 11
+      },
+      "muscleDirectSets": {
+        "chest": 2552,
+        "triceps": 3449,
+        "front_delts": 1719,
+        "lats": 2257.5,
+        "biceps": 4421,
+        "upper_back": 2246,
+        "forearms": 1419.5,
+        "side_delts": 1114,
+        "quads": 2891,
+        "glutes": 1828.5,
+        "hamstrings": 1926.5,
+        "back": 618,
+        "calves": 1374,
+        "full_body": 332,
+        "rear_delts": 866,
+        "shoulders": 900,
+        "core": 166,
+        "upper_chest": 28
+      }
+    },
+    "mixed:unknown": {
+      "programCount": 190,
+      "daysPerWeek": {
+        "count": 190,
+        "median": 4,
+        "q1": 3,
+        "q3": 5,
+        "min": 1,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 6512,
+        "median": 6,
+        "q1": 5,
+        "q3": 7,
+        "min": 1,
+        "max": 24
+      },
+      "sets": {
+        "count": 37568,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 15
+      },
+      "reps": {
+        "count": 37568,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -4500,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 787
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 712
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 419
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 254
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 216
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 198
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 140
+        },
+        {
+          "name": "Hack Squat",
+          "count": 129
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 128
+        },
+        {
+          "name": "Leg Extension",
+          "count": 112
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 8611,
+        "secondary_compound": 6599,
+        "isolation": 12059,
+        "unknown": 4923,
+        "accessory_compound": 3212,
+        "conditioning": 1236,
+        "core": 873,
+        "mobility": 55
+      },
+      "movementDistribution": {
+        "squat": 4679,
+        "horizontal_pull": 3705,
+        "knee_flexion": 741,
+        "elbow_extension": 2489,
+        "horizontal_push": 4843,
+        "vertical_pull": 2483,
+        "vertical_push": 1661,
+        "elbow_flexion": 4121,
+        "unknown": 5983,
+        "hinge": 2641,
+        "lunge": 453,
+        "calf_raise": 1144,
+        "anti_extension": 238,
+        "shoulder_abduction": 1521,
+        "spinal_flexion": 625,
+        "loaded_carry": 176,
+        "mobility": 55,
+        "anti_rotation": 10
+      },
+      "muscleDirectSets": {
+        "quads": 14290,
+        "glutes": 9982,
+        "upper_back": 9141.5,
+        "lats": 10965,
+        "biceps": 18605,
+        "hamstrings": 8649,
+        "triceps": 15660,
+        "chest": 13366,
+        "front_delts": 9027,
+        "shoulders": 4854,
+        "forearms": 5843,
+        "back": 2989,
+        "rear_delts": 2295,
+        "calves": 3567,
+        "full_body": 3162,
+        "core": 2611,
+        "side_delts": 4323,
+        "upper_chest": 332
+      }
+    },
+    "mixed:upper_lower": {
+      "programCount": 20,
+      "daysPerWeek": {
+        "count": 20,
+        "median": 4.5,
+        "q1": 4,
+        "q3": 5,
+        "min": 3,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 821,
+        "median": 7,
+        "q1": 5,
+        "q3": 7,
+        "min": 1,
+        "max": 14
+      },
+      "sets": {
+        "count": 5140,
+        "median": 2,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 5140,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -1800,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 105
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 66
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 58
+        },
+        {
+          "name": "Walk",
+          "count": 46
+        },
+        {
+          "name": "AD Press",
+          "count": 44
+        },
+        {
+          "name": "Bulgarian Split Squat (Dumbbell)",
+          "count": 32
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 30
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 28
+        },
+        {
+          "name": "Lateral Raise (Dumbbell)",
+          "count": 25
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 24
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 1036,
+        "secondary_compound": 831,
+        "unknown": 682,
+        "isolation": 1901,
+        "core": 106,
+        "accessory_compound": 459,
+        "conditioning": 125
+      },
+      "movementDistribution": {
+        "horizontal_push": 548,
+        "vertical_pull": 316,
+        "unknown": 807,
+        "shoulder_abduction": 296,
+        "elbow_flexion": 601,
+        "squat": 708,
+        "hinge": 407,
+        "calf_raise": 232,
+        "spinal_flexion": 88,
+        "horizontal_pull": 452,
+        "elbow_extension": 316,
+        "knee_flexion": 168,
+        "lunge": 64,
+        "vertical_push": 119,
+        "anti_extension": 18
+      },
+      "muscleDirectSets": {
+        "chest": 1436.5,
+        "triceps": 1656,
+        "front_delts": 896,
+        "lats": 1344.5,
+        "biceps": 2468,
+        "side_delts": 714,
+        "forearms": 778.5,
+        "quads": 1876,
+        "glutes": 1397.5,
+        "hamstrings": 1300.5,
+        "back": 401.5,
+        "calves": 662,
+        "core": 290,
+        "upper_back": 1094.5,
+        "full_body": 320,
+        "rear_delts": 279,
+        "shoulders": 363,
+        "upper_chest": 15
+      }
+    },
+    "powerbuilding:body_part": {
+      "programCount": 6,
+      "daysPerWeek": {
+        "count": 6,
+        "median": 6,
+        "q1": 5.25,
+        "q3": 6,
+        "min": 5,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 198,
+        "median": 6,
+        "q1": 4,
+        "q3": 6,
+        "min": 1,
+        "max": 7
+      },
+      "sets": {
+        "count": 1014,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 5
+      },
+      "reps": {
+        "count": 1014,
+        "median": 10,
+        "q1": 7,
+        "q3": 12,
+        "min": -1350,
+        "max": 30
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 18
+        },
+        {
+          "name": "Bayesian Curl",
+          "count": 12
+        },
+        {
+          "name": "Lateral Raise (Dumbbell)",
+          "count": 12
+        },
+        {
+          "name": "Pull-Up (Weighted)",
+          "count": 12
+        },
+        {
+          "name": "Standing Calf Raise",
+          "count": 12
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 11
+        },
+        {
+          "name": "Jog",
+          "count": 11
+        },
+        {
+          "name": "Military Press (Barbell)",
+          "count": 11
+        },
+        {
+          "name": "Skull Crusher",
+          "count": 11
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 10
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 225,
+        "secondary_compound": 205,
+        "isolation": 348,
+        "accessory_compound": 60,
+        "unknown": 152,
+        "conditioning": 13,
+        "core": 11
+      },
+      "movementDistribution": {
+        "horizontal_push": 138,
+        "horizontal_pull": 105,
+        "vertical_pull": 72,
+        "squat": 102,
+        "calf_raise": 36,
+        "vertical_push": 51,
+        "elbow_flexion": 117,
+        "elbow_extension": 76,
+        "shoulder_abduction": 60,
+        "hinge": 53,
+        "knee_flexion": 16,
+        "unknown": 165,
+        "lunge": 12,
+        "spinal_flexion": 11
+      },
+      "muscleDirectSets": {
+        "chest": 361,
+        "triceps": 451.5,
+        "front_delts": 241.5,
+        "upper_back": 252,
+        "lats": 293,
+        "biceps": 530.5,
+        "quads": 318,
+        "glutes": 223,
+        "calves": 111,
+        "shoulders": 122,
+        "rear_delts": 72,
+        "forearms": 165,
+        "side_delts": 183,
+        "hamstrings": 179.5,
+        "back": 67.5,
+        "full_body": 31,
+        "core": 27
+      }
+    },
+    "powerbuilding:circuit": {
+      "programCount": 14,
+      "daysPerWeek": {
+        "count": 14,
+        "median": 4.5,
+        "q1": 4,
+        "q3": 5,
+        "min": 3,
+        "max": 5
+      },
+      "exercisesPerSession": {
+        "count": 440,
+        "median": 6,
+        "q1": 5,
+        "q3": 7,
+        "min": 1,
+        "max": 10
+      },
+      "sets": {
+        "count": 2551,
+        "median": 3,
+        "q1": 3,
+        "q3": 3,
+        "min": 1,
+        "max": 6
+      },
+      "reps": {
+        "count": 2551,
+        "median": 11,
+        "q1": 9,
+        "q3": 12,
+        "min": -1800,
+        "max": 60
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Push Up",
+          "count": 40
+        },
+        {
+          "name": "Pull-Up (Weighted)",
+          "count": 29
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 27
+        },
+        {
+          "name": "Sprint",
+          "count": 26
+        },
+        {
+          "name": "Dip (Weighted)",
+          "count": 24
+        },
+        {
+          "name": "Sand Bag Conditioning",
+          "count": 24
+        },
+        {
+          "name": "Squat (Low Bar)",
+          "count": 24
+        },
+        {
+          "name": "Power Clean",
+          "count": 21
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 21
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 17
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 495,
+        "accessory_compound": 251,
+        "isolation": 577,
+        "unknown": 551,
+        "secondary_compound": 410,
+        "core": 160,
+        "conditioning": 99,
+        "mobility": 8
+      },
+      "movementDistribution": {
+        "horizontal_push": 320,
+        "squat": 239,
+        "horizontal_pull": 272,
+        "calf_raise": 100,
+        "unknown": 634,
+        "vertical_push": 64,
+        "hinge": 170,
+        "vertical_pull": 139,
+        "shoulder_abduction": 35,
+        "knee_flexion": 15,
+        "anti_extension": 77,
+        "spinal_flexion": 83,
+        "lunge": 56,
+        "loaded_carry": 16,
+        "elbow_flexion": 182,
+        "elbow_extension": 141,
+        "mobility": 8
+      },
+      "muscleDirectSets": {
+        "chest": 869,
+        "triceps": 921,
+        "front_delts": 542,
+        "quads": 894,
+        "glutes": 776,
+        "upper_back": 778.5,
+        "lats": 750.5,
+        "biceps": 1076.5,
+        "calves": 366,
+        "shoulders": 251,
+        "hamstrings": 496,
+        "back": 190.5,
+        "side_delts": 103,
+        "core": 443,
+        "full_body": 275,
+        "forearms": 285,
+        "rear_delts": 171,
+        "upper_chest": 72
+      }
+    },
+    "powerbuilding:full_body": {
+      "programCount": 45,
+      "daysPerWeek": {
+        "count": 45,
+        "median": 4,
+        "q1": 3,
+        "q3": 4,
+        "min": 2,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 1483,
+        "median": 7,
+        "q1": 6,
+        "q3": 9,
+        "min": 1,
+        "max": 14
+      },
+      "sets": {
+        "count": 11039,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 11039,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -7200,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 131
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 112
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 65
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 61
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 50
+        },
+        {
+          "name": "Hack Squat",
+          "count": 42
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 38
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 36
+        },
+        {
+          "name": "Pike Push Up",
+          "count": 36
+        },
+        {
+          "name": "Rotator Cuff Eccentrics",
+          "count": 36
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 2278,
+        "isolation": 3737,
+        "unknown": 1245,
+        "secondary_compound": 2026,
+        "core": 382,
+        "conditioning": 329,
+        "accessory_compound": 1034,
+        "mobility": 8
+      },
+      "movementDistribution": {
+        "horizontal_push": 1362,
+        "elbow_flexion": 1223,
+        "unknown": 1574,
+        "squat": 1346,
+        "hinge": 613,
+        "horizontal_pull": 1099,
+        "vertical_push": 471,
+        "vertical_pull": 725,
+        "shoulder_abduction": 567,
+        "spinal_flexion": 246,
+        "elbow_extension": 774,
+        "calf_raise": 438,
+        "knee_flexion": 242,
+        "lunge": 215,
+        "anti_rotation": 4,
+        "mobility": 8,
+        "anti_extension": 132
+      },
+      "muscleDirectSets": {
+        "chest": 3250,
+        "triceps": 3938,
+        "front_delts": 2158,
+        "biceps": 4793,
+        "forearms": 1424,
+        "quads": 3733,
+        "glutes": 2551,
+        "hamstrings": 2024,
+        "back": 642,
+        "upper_back": 2437,
+        "lats": 2829,
+        "shoulders": 1110,
+        "side_delts": 1406,
+        "core": 960,
+        "full_body": 886,
+        "calves": 1059,
+        "rear_delts": 630,
+        "upper_chest": 88
+      }
+    },
+    "powerbuilding:home_bodyweight": {
+      "programCount": 26,
+      "daysPerWeek": {
+        "count": 26,
+        "median": 3,
+        "q1": 3,
+        "q3": 4.75,
+        "min": 1,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 798,
+        "median": 5,
+        "q1": 4,
+        "q3": 7,
+        "min": 1,
+        "max": 11
+      },
+      "sets": {
+        "count": 4116,
+        "median": 2,
+        "q1": 1,
+        "q3": 3,
+        "min": 1,
+        "max": 12
+      },
+      "reps": {
+        "count": 4116,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -86400,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Neck Tilts",
+          "count": 84
+        },
+        {
+          "name": "Split Squat (Bodyweight)",
+          "count": 53
+        },
+        {
+          "name": "Push Up",
+          "count": 52
+        },
+        {
+          "name": "Push Up (Knees)",
+          "count": 39
+        },
+        {
+          "name": "1km Row",
+          "count": 36
+        },
+        {
+          "name": "Sit Up",
+          "count": 34
+        },
+        {
+          "name": "Light Jog",
+          "count": 28
+        },
+        {
+          "name": "Blank Bodyweight Row",
+          "count": 24
+        },
+        {
+          "name": "Single Leg Romanian Deadlift",
+          "count": 24
+        },
+        {
+          "name": "Squat (Bodyweight)",
+          "count": 24
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 550,
+        "isolation": 740,
+        "accessory_compound": 359,
+        "conditioning": 127,
+        "secondary_compound": 603,
+        "unknown": 841,
+        "core": 329,
+        "mobility": 567
+      },
+      "movementDistribution": {
+        "horizontal_push": 409,
+        "elbow_flexion": 277,
+        "horizontal_pull": 250,
+        "unknown": 968,
+        "squat": 472,
+        "hinge": 223,
+        "vertical_pull": 128,
+        "shoulder_abduction": 108,
+        "vertical_push": 40,
+        "calf_raise": 120,
+        "spinal_flexion": 136,
+        "anti_extension": 177,
+        "lunge": 56,
+        "mobility": 567,
+        "elbow_extension": 141,
+        "knee_flexion": 28,
+        "anti_rotation": 16
+      },
+      "muscleDirectSets": {
+        "chest": 1017,
+        "triceps": 892.5,
+        "front_delts": 556.5,
+        "biceps": 1154.5,
+        "forearms": 356.5,
+        "upper_back": 600,
+        "lats": 604,
+        "full_body": 360,
+        "quads": 1387,
+        "glutes": 1019.5,
+        "hamstrings": 512.5,
+        "back": 178,
+        "side_delts": 280,
+        "shoulders": 96,
+        "rear_delts": 84,
+        "calves": 335,
+        "core": 699
+      }
+    },
+    "powerbuilding:powerbuilding": {
+      "programCount": 10,
+      "daysPerWeek": {
+        "count": 10,
+        "median": 4,
+        "q1": 4,
+        "q3": 5.75,
+        "min": 3,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 316,
+        "median": 6,
+        "q1": 4,
+        "q3": 7,
+        "min": 1,
+        "max": 10
+      },
+      "sets": {
+        "count": 1895,
+        "median": 3,
+        "q1": 3,
+        "q3": 3,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 1895,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -3150,
+        "max": 40
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 98
+        },
+        {
+          "name": "Shoulder Press (Plate Loaded)",
+          "count": 34
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 32
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 25
+        },
+        {
+          "name": "Squat (Low Bar)",
+          "count": 20
+        },
+        {
+          "name": "Incline Treadmill",
+          "count": 10
+        },
+        {
+          "name": "Seated Row (Cable)",
+          "count": 10
+        },
+        {
+          "name": "High Bar Squat (Barbell)",
+          "count": 9
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 9
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 9
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 583,
+        "secondary_compound": 211,
+        "isolation": 684,
+        "accessory_compound": 175,
+        "unknown": 188,
+        "conditioning": 39,
+        "core": 15
+      },
+      "movementDistribution": {
+        "vertical_push": 122,
+        "squat": 207,
+        "elbow_flexion": 213,
+        "calf_raise": 64,
+        "horizontal_push": 267,
+        "hinge": 138,
+        "vertical_pull": 127,
+        "horizontal_pull": 210,
+        "shoulder_abduction": 130,
+        "unknown": 217,
+        "elbow_extension": 136,
+        "knee_flexion": 35,
+        "spinal_flexion": 15,
+        "loaded_carry": 10,
+        "lunge": 4
+      },
+      "muscleDirectSets": {
+        "shoulders": 372,
+        "front_delts": 563.5,
+        "triceps": 969.5,
+        "quads": 603,
+        "glutes": 435.5,
+        "biceps": 1056,
+        "forearms": 343.5,
+        "calves": 196,
+        "chest": 755,
+        "hamstrings": 436.5,
+        "back": 156,
+        "lats": 583.5,
+        "upper_back": 503.5,
+        "side_delts": 402,
+        "full_body": 131,
+        "core": 39,
+        "rear_delts": 157
+      }
+    },
+    "powerbuilding:powerlifting": {
+      "programCount": 36,
+      "daysPerWeek": {
+        "count": 36,
+        "median": 4,
+        "q1": 3.75,
+        "q3": 5,
+        "min": 2,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 1245,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 1,
+        "max": 14
+      },
+      "sets": {
+        "count": 6743,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 20
+      },
+      "reps": {
+        "count": 6743,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -4500,
+        "max": 165
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 267
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 244
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 173
+        },
+        {
+          "name": "Squat (Low Bar)",
+          "count": 60
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 52
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 37
+        },
+        {
+          "name": "Sumo Deadlift (Barbell)",
+          "count": 35
+        },
+        {
+          "name": "Bench Press (Paused)",
+          "count": 27
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 27
+        },
+        {
+          "name": "Bicep Curl (Barbell)",
+          "count": 25
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 2346,
+        "secondary_compound": 1107,
+        "isolation": 1902,
+        "conditioning": 186,
+        "accessory_compound": 427,
+        "unknown": 588,
+        "core": 124,
+        "mobility": 63
+      },
+      "movementDistribution": {
+        "squat": 1017,
+        "horizontal_push": 1051,
+        "horizontal_pull": 720,
+        "elbow_extension": 435,
+        "elbow_flexion": 481,
+        "unknown": 748,
+        "hinge": 654,
+        "vertical_push": 369,
+        "vertical_pull": 410,
+        "shoulder_abduction": 314,
+        "knee_flexion": 178,
+        "spinal_flexion": 60,
+        "anti_extension": 64,
+        "mobility": 63,
+        "calf_raise": 122,
+        "loaded_carry": 26,
+        "lunge": 31
+      },
+      "muscleDirectSets": {
+        "quads": 3133,
+        "glutes": 2354,
+        "chest": 3145,
+        "triceps": 3232,
+        "front_delts": 2073,
+        "upper_back": 1901,
+        "lats": 1948.5,
+        "biceps": 2604,
+        "forearms": 634,
+        "full_body": 470,
+        "hamstrings": 2315.5,
+        "back": 885,
+        "shoulders": 1025,
+        "side_delts": 881,
+        "core": 296,
+        "rear_delts": 540,
+        "calves": 376,
+        "upper_chest": 48
+      }
+    },
+    "powerbuilding:push_pull_legs": {
+      "programCount": 50,
+      "daysPerWeek": {
+        "count": 50,
+        "median": 5,
+        "q1": 3.25,
+        "q3": 6,
+        "min": 1,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 1938,
+        "median": 6,
+        "q1": 5,
+        "q3": 7,
+        "min": 1,
+        "max": 14
+      },
+      "sets": {
+        "count": 12053,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 6
+      },
+      "reps": {
+        "count": 12053,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -86400,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 194
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 190
+        },
+        {
+          "name": "Cardio",
+          "count": 106
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 94
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 73
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 70
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 62
+        },
+        {
+          "name": "Hack Squat",
+          "count": 54
+        },
+        {
+          "name": "Leg Curl",
+          "count": 50
+        },
+        {
+          "name": "Lying Leg Curl",
+          "count": 47
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 2405,
+        "secondary_compound": 2050,
+        "unknown": 1851,
+        "conditioning": 355,
+        "isolation": 4156,
+        "accessory_compound": 1002,
+        "core": 227,
+        "mobility": 7
+      },
+      "movementDistribution": {
+        "squat": 1302,
+        "hinge": 700,
+        "vertical_pull": 891,
+        "unknown": 2182,
+        "horizontal_push": 1307,
+        "horizontal_pull": 1334,
+        "loaded_carry": 24,
+        "elbow_extension": 835,
+        "elbow_flexion": 1261,
+        "calf_raise": 493,
+        "vertical_push": 477,
+        "shoulder_abduction": 564,
+        "knee_flexion": 328,
+        "spinal_flexion": 167,
+        "lunge": 121,
+        "anti_extension": 60,
+        "mobility": 7
+      },
+      "muscleDirectSets": {
+        "quads": 3701,
+        "glutes": 2543.5,
+        "hamstrings": 2737.5,
+        "back": 886.5,
+        "lats": 3834.5,
+        "biceps": 5875,
+        "chest": 3709.5,
+        "triceps": 4613.5,
+        "front_delts": 2452.5,
+        "upper_back": 3121.5,
+        "full_body": 960,
+        "forearms": 1692,
+        "calves": 1483,
+        "rear_delts": 1077,
+        "shoulders": 1218,
+        "side_delts": 1555,
+        "core": 588,
+        "upper_chest": 45
+      }
+    },
+    "powerbuilding:unknown": {
+      "programCount": 443,
+      "daysPerWeek": {
+        "count": 443,
+        "median": 4,
+        "q1": 3,
+        "q3": 5,
+        "min": 1,
+        "max": 8
+      },
+      "exercisesPerSession": {
+        "count": 15615,
+        "median": 6,
+        "q1": 4,
+        "q3": 7,
+        "min": 1,
+        "max": 16
+      },
+      "sets": {
+        "count": 87768,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 15
+      },
+      "reps": {
+        "count": 87768,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -86400,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 2006
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 1529
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 938
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 539
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 497
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 388
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 362
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 284
+        },
+        {
+          "name": "Pull-Up (Weighted)",
+          "count": 251
+        },
+        {
+          "name": "Seated Shoulder Press (Dumbbell)",
+          "count": 245
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 21157,
+        "isolation": 27903,
+        "conditioning": 2309,
+        "secondary_compound": 14803,
+        "accessory_compound": 7068,
+        "unknown": 11869,
+        "core": 2517,
+        "mobility": 142
+      },
+      "movementDistribution": {
+        "squat": 11001,
+        "horizontal_push": 10780,
+        "unknown": 13992,
+        "hinge": 6035,
+        "elbow_flexion": 9391,
+        "vertical_pull": 5608,
+        "horizontal_pull": 8849,
+        "elbow_extension": 5765,
+        "vertical_push": 4025,
+        "shoulder_abduction": 3856,
+        "anti_extension": 782,
+        "knee_flexion": 1796,
+        "calf_raise": 2565,
+        "lunge": 1260,
+        "spinal_flexion": 1662,
+        "anti_rotation": 73,
+        "loaded_carry": 186,
+        "mobility": 142
+      },
+      "muscleDirectSets": {
+        "quads": 33041,
+        "glutes": 22686.5,
+        "chest": 28225.5,
+        "triceps": 35033,
+        "front_delts": 19528,
+        "full_body": 5752,
+        "hamstrings": 18637,
+        "back": 6269.5,
+        "biceps": 41564.5,
+        "forearms": 12753,
+        "lats": 24194.5,
+        "upper_back": 20895.5,
+        "shoulders": 11144,
+        "side_delts": 10676,
+        "core": 6723,
+        "rear_delts": 6045,
+        "calves": 7554,
+        "upper_chest": 627
+      }
+    },
+    "powerbuilding:upper_lower": {
+      "programCount": 45,
+      "daysPerWeek": {
+        "count": 45,
+        "median": 4,
+        "q1": 4,
+        "q3": 5,
+        "min": 3,
+        "max": 8
+      },
+      "exercisesPerSession": {
+        "count": 1845,
+        "median": 5,
+        "q1": 4,
+        "q3": 7,
+        "min": 1,
+        "max": 11
+      },
+      "sets": {
+        "count": 9816,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 6
+      },
+      "reps": {
+        "count": 9816,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -2250,
+        "max": 50
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 220
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 153
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 91
+        },
+        {
+          "name": "Bench Press (Dumbbell)",
+          "count": 83
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 77
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 74
+        },
+        {
+          "name": "Pull-Up (Weighted)",
+          "count": 62
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 49
+        },
+        {
+          "name": "Bulgarian Split Squat (Dumbbell)",
+          "count": 48
+        },
+        {
+          "name": "Run",
+          "count": 48
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 2152,
+        "unknown": 1087,
+        "accessory_compound": 884,
+        "isolation": 3411,
+        "core": 218,
+        "secondary_compound": 1868,
+        "conditioning": 196
+      },
+      "movementDistribution": {
+        "squat": 1558,
+        "unknown": 1251,
+        "lunge": 142,
+        "elbow_extension": 608,
+        "calf_raise": 427,
+        "spinal_flexion": 154,
+        "horizontal_push": 1149,
+        "vertical_pull": 625,
+        "horizontal_pull": 963,
+        "elbow_flexion": 1043,
+        "shoulder_abduction": 479,
+        "hinge": 690,
+        "anti_extension": 64,
+        "loaded_carry": 32,
+        "vertical_push": 375,
+        "knee_flexion": 256
+      },
+      "muscleDirectSets": {
+        "quads": 4542,
+        "glutes": 2909,
+        "triceps": 3662.5,
+        "calves": 1193,
+        "core": 642,
+        "chest": 3217,
+        "front_delts": 2059.5,
+        "lats": 2559,
+        "biceps": 4400.5,
+        "upper_back": 2041.5,
+        "forearms": 1369,
+        "side_delts": 1309,
+        "hamstrings": 2248,
+        "back": 750.5,
+        "full_body": 393,
+        "rear_delts": 507,
+        "shoulders": 902
+      }
+    },
+    "strength:circuit": {
+      "programCount": 1,
+      "daysPerWeek": {
+        "count": 1,
+        "median": 4,
+        "q1": 4,
+        "q3": 4,
+        "min": 4,
+        "max": 4
+      },
+      "exercisesPerSession": {
+        "count": 16,
+        "median": 4,
+        "q1": 3.5,
+        "q3": 4,
+        "min": 2,
+        "max": 4
+      },
+      "sets": {
+        "count": 56,
+        "median": 3,
+        "q1": 2.5,
+        "q3": 3,
+        "min": 1,
+        "max": 3
+      },
+      "reps": {
+        "count": 56,
+        "median": 12,
+        "q1": 10,
+        "q3": 12,
+        "min": 10,
+        "max": 15
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Goblet Squat",
+          "count": 6
+        },
+        {
+          "name": "Kettlebell Front Squat",
+          "count": 6
+        },
+        {
+          "name": "Snatch (Kettlebell)",
+          "count": 4
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 12,
+        "secondary_compound": 18,
+        "core": 12,
+        "isolation": 6,
+        "unknown": 8
+      },
+      "movementDistribution": {
+        "squat": 12,
+        "vertical_pull": 6,
+        "horizontal_push": 6,
+        "spinal_flexion": 12,
+        "horizontal_pull": 6,
+        "elbow_flexion": 6,
+        "unknown": 8
+      },
+      "muscleDirectSets": {
+        "quads": 24,
+        "glutes": 12,
+        "lats": 27,
+        "biceps": 36,
+        "chest": 18,
+        "triceps": 9,
+        "front_delts": 9,
+        "core": 36,
+        "upper_back": 18,
+        "forearms": 9
+      }
+    },
+    "strength:full_body": {
+      "programCount": 3,
+      "daysPerWeek": {
+        "count": 3,
+        "median": 3,
+        "q1": 3,
+        "q3": 4,
+        "min": 3,
+        "max": 5
+      },
+      "exercisesPerSession": {
+        "count": 87,
+        "median": 5,
+        "q1": 3,
+        "q3": 7,
+        "min": 3,
+        "max": 7
+      },
+      "sets": {
+        "count": 416,
+        "median": 3,
+        "q1": 3,
+        "q3": 3,
+        "min": 2,
+        "max": 5
+      },
+      "reps": {
+        "count": 416,
+        "median": 12,
+        "q1": 10,
+        "q3": 12,
+        "min": 1,
+        "max": 20
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 24
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 12
+        },
+        {
+          "name": "Seated Overhead Press (Dumbbell)",
+          "count": 12
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 8
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 6
+        },
+        {
+          "name": "Barbell Row",
+          "count": 5
+        },
+        {
+          "name": "Incline Bench Press (Smith Machine)",
+          "count": 5
+        },
+        {
+          "name": "Pull-Up (Assisted)",
+          "count": 5
+        },
+        {
+          "name": "Hack Squat",
+          "count": 4
+        },
+        {
+          "name": "Walking Lunge (Dumbbell)",
+          "count": 4
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 118,
+        "secondary_compound": 68,
+        "isolation": 124,
+        "accessory_compound": 43,
+        "unknown": 55,
+        "conditioning": 8
+      },
+      "movementDistribution": {
+        "squat": 63,
+        "horizontal_push": 68,
+        "vertical_pull": 27,
+        "hinge": 25,
+        "calf_raise": 8,
+        "elbow_flexion": 23,
+        "vertical_push": 20,
+        "horizontal_pull": 47,
+        "unknown": 63,
+        "lunge": 8,
+        "shoulder_abduction": 13,
+        "knee_flexion": 29,
+        "elbow_extension": 22
+      },
+      "muscleDirectSets": {
+        "quads": 239,
+        "glutes": 150,
+        "chest": 207,
+        "triceps": 199,
+        "front_delts": 129,
+        "lats": 146.5,
+        "biceps": 193,
+        "hamstrings": 162,
+        "back": 27.5,
+        "calves": 24,
+        "forearms": 45,
+        "shoulders": 60,
+        "upper_back": 137.5,
+        "full_body": 24,
+        "rear_delts": 37,
+        "side_delts": 45,
+        "upper_chest": 18
+      }
+    },
+    "strength:home_bodyweight": {
+      "programCount": 1,
+      "daysPerWeek": {
+        "count": 1,
+        "median": 3,
+        "q1": 3,
+        "q3": 3,
+        "min": 3,
+        "max": 3
+      },
+      "exercisesPerSession": {
+        "count": 36,
+        "median": 7,
+        "q1": 7,
+        "q3": 7,
+        "min": 7,
+        "max": 7
+      },
+      "sets": {
+        "count": 252,
+        "median": 3,
+        "q1": 3,
+        "q3": 3,
+        "min": 1,
+        "max": 3
+      },
+      "reps": {
+        "count": 252,
+        "median": 12,
+        "q1": 10,
+        "q3": 12,
+        "min": 6,
+        "max": 20
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Push Up",
+          "count": 36
+        }
+      ],
+      "roleDistribution": {
+        "secondary_compound": 108,
+        "main_lift": 36,
+        "core": 36,
+        "unknown": 72
+      },
+      "movementDistribution": {
+        "horizontal_push": 72,
+        "squat": 36,
+        "vertical_pull": 36,
+        "anti_extension": 36,
+        "unknown": 72
+      },
+      "muscleDirectSets": {
+        "chest": 216,
+        "triceps": 108,
+        "front_delts": 108,
+        "quads": 108,
+        "glutes": 54,
+        "lats": 108,
+        "biceps": 54,
+        "core": 36
+      }
+    },
+    "strength:powerlifting": {
+      "programCount": 7,
+      "daysPerWeek": {
+        "count": 7,
+        "median": 4,
+        "q1": 3.5,
+        "q3": 5,
+        "min": 3,
+        "max": 6
+      },
+      "exercisesPerSession": {
+        "count": 222,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 2,
+        "max": 9
+      },
+      "sets": {
+        "count": 1111,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 6
+      },
+      "reps": {
+        "count": 1111,
+        "median": 10,
+        "q1": 6,
+        "q3": 12,
+        "min": -120,
+        "max": 30
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 59
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 55
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 30
+        },
+        {
+          "name": "Larsen Press (Barbell)",
+          "count": 11
+        },
+        {
+          "name": "Bench Press (Paused)",
+          "count": 9
+        },
+        {
+          "name": "Hack Squat",
+          "count": 8
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 8
+        },
+        {
+          "name": "Pendlay Row",
+          "count": 8
+        },
+        {
+          "name": "Pull-Up (Weighted)",
+          "count": 8
+        },
+        {
+          "name": "Sumo Deadlift (Barbell)",
+          "count": 8
+        }
+      ],
+      "roleDistribution": {
+        "unknown": 82,
+        "secondary_compound": 220,
+        "accessory_compound": 74,
+        "isolation": 316,
+        "main_lift": 398,
+        "core": 21
+      },
+      "movementDistribution": {
+        "unknown": 82,
+        "vertical_pull": 80,
+        "horizontal_pull": 100,
+        "shoulder_abduction": 57,
+        "elbow_flexion": 112,
+        "squat": 194,
+        "horizontal_push": 209,
+        "hinge": 132,
+        "elbow_extension": 58,
+        "knee_flexion": 17,
+        "calf_raise": 13,
+        "vertical_push": 29,
+        "lunge": 7,
+        "spinal_flexion": 21
+      },
+      "muscleDirectSets": {
+        "lats": 350,
+        "biceps": 526.5,
+        "upper_back": 243,
+        "side_delts": 159,
+        "forearms": 148,
+        "quads": 538,
+        "glutes": 352.5,
+        "chest": 507,
+        "triceps": 434,
+        "front_delts": 292,
+        "hamstrings": 347,
+        "back": 149,
+        "calves": 47,
+        "shoulders": 77,
+        "core": 59,
+        "rear_delts": 42
+      }
+    },
+    "strength:unknown": {
+      "programCount": 34,
+      "daysPerWeek": {
+        "count": 34,
+        "median": 4,
+        "q1": 4,
+        "q3": 5,
+        "min": 2,
+        "max": 7
+      },
+      "exercisesPerSession": {
+        "count": 1129,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 1,
+        "max": 9
+      },
+      "sets": {
+        "count": 5761,
+        "median": 3,
+        "q1": 2,
+        "q3": 4,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 5761,
+        "median": 10,
+        "q1": 8,
+        "q3": 12,
+        "min": -1200,
+        "max": 100
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 91
+        },
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 69
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 69
+        },
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 39
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 38
+        },
+        {
+          "name": "Bench Press (Paused)",
+          "count": 37
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 32
+        },
+        {
+          "name": "Lat Pulldown",
+          "count": 31
+        },
+        {
+          "name": "Box Squat (Barbell)",
+          "count": 30
+        },
+        {
+          "name": "Seated Shoulder Press (Dumbbell)",
+          "count": 30
+        }
+      ],
+      "roleDistribution": {
+        "secondary_compound": 940,
+        "isolation": 1596,
+        "unknown": 1018,
+        "core": 185,
+        "main_lift": 1250,
+        "accessory_compound": 505,
+        "conditioning": 261,
+        "mobility": 6
+      },
+      "movementDistribution": {
+        "vertical_pull": 395,
+        "elbow_flexion": 520,
+        "unknown": 1194,
+        "anti_extension": 92,
+        "horizontal_push": 667,
+        "vertical_push": 212,
+        "shoulder_abduction": 169,
+        "horizontal_pull": 565,
+        "lunge": 119,
+        "loaded_carry": 85,
+        "spinal_flexion": 85,
+        "elbow_extension": 354,
+        "hinge": 338,
+        "squat": 709,
+        "knee_flexion": 81,
+        "calf_raise": 162,
+        "anti_rotation": 8,
+        "mobility": 6
+      },
+      "muscleDirectSets": {
+        "lats": 1828,
+        "biceps": 2686,
+        "forearms": 847.5,
+        "core": 486,
+        "chest": 2078,
+        "triceps": 2439,
+        "front_delts": 1348,
+        "shoulders": 618,
+        "side_delts": 487,
+        "upper_back": 1436.5,
+        "rear_delts": 401,
+        "quads": 2484,
+        "glutes": 1601.5,
+        "full_body": 641,
+        "hamstrings": 1230,
+        "back": 473.5,
+        "calves": 494
+      }
+    },
+    "strength:upper_lower": {
+      "programCount": 4,
+      "daysPerWeek": {
+        "count": 4,
+        "median": 4.5,
+        "q1": 4,
+        "q3": 5,
+        "min": 4,
+        "max": 5
+      },
+      "exercisesPerSession": {
+        "count": 176,
+        "median": 6,
+        "q1": 6,
+        "q3": 8,
+        "min": 1,
+        "max": 8
+      },
+      "sets": {
+        "count": 1154,
+        "median": 3,
+        "q1": 3,
+        "q3": 4,
+        "min": 1,
+        "max": 4
+      },
+      "reps": {
+        "count": 1154,
+        "median": 10,
+        "q1": 9,
+        "q3": 12,
+        "min": -60,
+        "max": 40
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Incline Bench Press (Barbell)",
+          "count": 19
+        },
+        {
+          "name": "Incline Bench Press (Dumbbell)",
+          "count": 18
+        },
+        {
+          "name": "Leg Press (45 Degrees)",
+          "count": 18
+        },
+        {
+          "name": "Smith Row",
+          "count": 18
+        },
+        {
+          "name": "Leg Press",
+          "count": 16
+        },
+        {
+          "name": "Standing Shoulder Press (Dumbbell)",
+          "count": 16
+        },
+        {
+          "name": "Dip (Weighted)",
+          "count": 12
+        },
+        {
+          "name": "High Bar Squat (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Overhead Press (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Romanian Deadlift (Barbell)",
+          "count": 12
+        }
+      ],
+      "roleDistribution": {
+        "accessory_compound": 119,
+        "main_lift": 159,
+        "secondary_compound": 163,
+        "isolation": 514,
+        "conditioning": 36,
+        "unknown": 147,
+        "core": 16
+      },
+      "movementDistribution": {
+        "horizontal_pull": 120,
+        "horizontal_push": 111,
+        "vertical_pull": 32,
+        "elbow_flexion": 173,
+        "unknown": 183,
+        "squat": 154,
+        "elbow_extension": 67,
+        "calf_raise": 40,
+        "knee_flexion": 59,
+        "vertical_push": 47,
+        "hinge": 66,
+        "lunge": 17,
+        "shoulder_abduction": 69,
+        "spinal_flexion": 16
+      },
+      "muscleDirectSets": {
+        "upper_back": 291,
+        "lats": 228,
+        "biceps": 740,
+        "chest": 357,
+        "triceps": 464,
+        "front_delts": 229,
+        "forearms": 284.5,
+        "full_body": 108,
+        "quads": 387,
+        "glutes": 196.5,
+        "calves": 120,
+        "hamstrings": 328,
+        "shoulders": 119,
+        "upper_chest": 36,
+        "back": 72,
+        "side_delts": 257,
+        "core": 32,
+        "rear_delts": 126
+      }
+    },
+    "unknown:circuit": {
+      "programCount": 1,
+      "daysPerWeek": {
+        "count": 1,
+        "median": 6,
+        "q1": 6,
+        "q3": 6,
+        "min": 6,
+        "max": 6
+      },
+      "exercisesPerSession": {
+        "count": 72,
+        "median": 6,
+        "q1": 5,
+        "q3": 7,
+        "min": 1,
+        "max": 8
+      },
+      "sets": {
+        "count": 388,
+        "median": 4,
+        "q1": 3,
+        "q3": 5,
+        "min": 1,
+        "max": 10
+      },
+      "reps": {
+        "count": 388,
+        "median": 10,
+        "q1": 8,
+        "q3": 10,
+        "min": 2,
+        "max": 12
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Bench Press (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Burpee",
+          "count": 12
+        },
+        {
+          "name": "Power Clean",
+          "count": 12
+        },
+        {
+          "name": "Run",
+          "count": 12
+        },
+        {
+          "name": "Squat (Barbell)",
+          "count": 12
+        },
+        {
+          "name": "Squat Thruster",
+          "count": 12
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 92,
+        "secondary_compound": 40,
+        "unknown": 72,
+        "isolation": 40,
+        "conditioning": 76,
+        "accessory_compound": 68
+      },
+      "movementDistribution": {
+        "horizontal_push": 20,
+        "vertical_push": 12,
+        "horizontal_pull": 72,
+        "vertical_pull": 16,
+        "unknown": 136,
+        "squat": 36,
+        "hinge": 48,
+        "lunge": 12,
+        "calf_raise": 4,
+        "elbow_extension": 8,
+        "loaded_carry": 12,
+        "elbow_flexion": 12
+      },
+      "muscleDirectSets": {
+        "chest": 81,
+        "triceps": 90.5,
+        "front_delts": 62.5,
+        "shoulders": 44,
+        "upper_back": 322,
+        "lats": 211,
+        "biceps": 215,
+        "rear_delts": 56,
+        "full_body": 244,
+        "quads": 233,
+        "glutes": 238,
+        "hamstrings": 189,
+        "back": 85.5,
+        "calves": 12,
+        "forearms": 48
+      }
+    },
+    "unknown:unknown": {
+      "programCount": 5,
+      "daysPerWeek": {
+        "count": 5,
+        "median": 5,
+        "q1": 4,
+        "q3": 6,
+        "min": 4,
+        "max": 6
+      },
+      "exercisesPerSession": {
+        "count": 159,
+        "median": 5,
+        "q1": 3,
+        "q3": 6,
+        "min": 3,
+        "max": 7
+      },
+      "sets": {
+        "count": 775,
+        "median": 3,
+        "q1": 2,
+        "q3": 3,
+        "min": 1,
+        "max": 5
+      },
+      "reps": {
+        "count": 775,
+        "median": 9,
+        "q1": 6,
+        "q3": 11,
+        "min": -120,
+        "max": 50
+      },
+      "commonFirstExercises": [
+        {
+          "name": "Squat (Barbell)",
+          "count": 16
+        },
+        {
+          "name": "Bicep Curl (Dumbbell)",
+          "count": 13
+        },
+        {
+          "name": "Deadlift (Paused)",
+          "count": 13
+        },
+        {
+          "name": "Dip (Bodyweight)",
+          "count": 13
+        },
+        {
+          "name": "AD Press",
+          "count": 12
+        },
+        {
+          "name": "Behind The Neck Press (Seated)",
+          "count": 12
+        },
+        {
+          "name": "Decline Skullcrusher",
+          "count": 12
+        },
+        {
+          "name": "JM Press",
+          "count": 12
+        },
+        {
+          "name": "Trap Bar Deadlift",
+          "count": 12
+        },
+        {
+          "name": "Deadlift (Barbell)",
+          "count": 8
+        }
+      ],
+      "roleDistribution": {
+        "main_lift": 185,
+        "secondary_compound": 151,
+        "isolation": 246,
+        "accessory_compound": 56,
+        "unknown": 104,
+        "core": 8,
+        "conditioning": 25
+      },
+      "movementDistribution": {
+        "squat": 110,
+        "horizontal_push": 90,
+        "vertical_pull": 54,
+        "knee_flexion": 26,
+        "hinge": 74,
+        "horizontal_pull": 66,
+        "unknown": 116,
+        "spinal_flexion": 8,
+        "vertical_push": 12,
+        "shoulder_abduction": 9,
+        "elbow_extension": 79,
+        "elbow_flexion": 100,
+        "calf_raise": 5,
+        "loaded_carry": 13,
+        "lunge": 13
+      },
+      "muscleDirectSets": {
+        "quads": 359,
+        "glutes": 278.5,
+        "chest": 233,
+        "triceps": 341,
+        "front_delts": 140,
+        "lats": 218,
+        "biceps": 435.5,
+        "hamstrings": 276.5,
+        "back": 92.5,
+        "upper_back": 171,
+        "core": 24,
+        "shoulders": 47,
+        "side_delts": 27,
+        "rear_delts": 42,
+        "forearms": 164,
+        "full_body": 67,
+        "calves": 15
+      }
+    }
+  },
+  "normalizationNotes": [
+    "Raw list-like goal and level strings are tokenized conservatively; multi-goal records become mixed unless powerbuilding is explicit.",
+    "Exercise roles, muscles and movement patterns are heuristic labels for analysis only; ambiguous exercise names remain unknown.",
+    "Compound secondary muscles are counted as fractional exposure in aggregate volume estimates, not full direct sets.",
+    "Split classification uses title/description/equipment text and should be treated as a candidate label, not ground truth."
+  ],
+  "limitations": [
+    "Dataset popularity or frequency is not evidence of effectiveness.",
+    "The detailed CSV has malformed negative rep values and mobility-test rows that are not normal prescription data.",
+    "Rest intervals, explicit RPE/RIR and progression models are sparsely represented or absent in the structured columns.",
+    "Descriptions may contain copyrighted program names; documents intentionally summarize patterns rather than reproduce complete programs.",
+    "Yoga and Pilates are not meaningfully supported by this resistance-training dataset."
+  ],
+  "scientificSources": [
+    {
+      "title": "Progression Models in Resistance Training for Healthy Adults",
+      "authors": "American College of Sports Medicine",
+      "year": 2009,
+      "sourceType": "Position stand / guideline",
+      "identifier": "doi:10.1249/MSS.0b013e3181915670; PMID:19204579",
+      "relevance": "General resistance-training progression variables, frequency, volume, intensity and rest guidance."
+    },
+    {
+      "title": "Effects of Resistance Training Frequency on Measures of Muscle Hypertrophy",
+      "authors": "Schoenfeld, Ogborn, Krieger",
+      "year": 2016,
+      "sourceType": "Systematic review and meta-analysis",
+      "identifier": "doi:10.1007/s40279-016-0543-8; PMID:27102172",
+      "relevance": "Frequency and hypertrophy interpretation; useful but not a rigid rule when volume is equated."
+    },
+    {
+      "title": "Dose-response relationship between weekly resistance training volume and increases in muscle mass",
+      "authors": "Schoenfeld, Ogborn, Krieger",
+      "year": 2017,
+      "sourceType": "Systematic review and meta-analysis",
+      "identifier": "doi:10.1080/02640414.2016.1210197",
+      "relevance": "Volume ranges and dose-response framing for hypertrophy guardrails."
+    },
+    {
+      "title": "Strength and Hypertrophy Adaptations Between Low- vs. High-Load Resistance Training",
+      "authors": "Schoenfeld, Grgic, Ogborn, Krieger",
+      "year": 2017,
+      "sourceType": "Systematic review and meta-analysis",
+      "identifier": "doi:10.1519/JSC.0000000000002200; PMID:28834797",
+      "relevance": "Load ranges for strength versus hypertrophy; supports context instead of one fixed rep range."
+    },
+    {
+      "title": "The effects of short versus long inter-set rest intervals in resistance training on measures of muscle hypertrophy",
+      "authors": "Grgic, Lazinica, Mikulic, Krieger, Schoenfeld",
+      "year": 2017,
+      "sourceType": "Systematic review",
+      "identifier": "doi:10.1080/17461391.2017.1340524; PMID:28641044",
+      "relevance": "Rest interval recommendations should distinguish dataset absence from evidence-informed product guidance."
+    }
+  ]
+}

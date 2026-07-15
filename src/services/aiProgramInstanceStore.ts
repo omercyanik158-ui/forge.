@@ -49,6 +49,20 @@ export async function loadAIProgramInstanceById(id: string): Promise<AIProgramPl
   return instances.find((item) => item.id === id) ?? null;
 }
 
+export async function resolvePrimaryAIProgramId(): Promise<string | null> {
+  const instances = await loadAIProgramInstances();
+  if (instances.length === 0) return null;
+
+  const prioritized = [...instances].sort((left, right) => {
+    return right.generatedAt.localeCompare(left.generatedAt);
+  });
+
+  const newestTimestamp = prioritized[0]?.generatedAt;
+  const ambiguous = prioritized.filter((item) => item.generatedAt === newestTimestamp);
+  if (ambiguous.length > 1) return null;
+  return prioritized[0]?.id ?? null;
+}
+
 export async function clearAIProgramInstances(): Promise<void> {
   await removeStoredValue(STORAGE_KEYS.aiProgramInstances);
 }

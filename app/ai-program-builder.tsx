@@ -22,6 +22,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GlassCard } from "@/components/GlassCard";
+import { ProgramInfluenceCard } from "@/components/ProgramInfluenceCard";
 import { useAppLocalization } from "@/providers/localization-context";
 import {
   ANALYTICS_EVENTS,
@@ -29,8 +30,10 @@ import {
   trackScreen,
 } from "@/services/analyticsService";
 import { getExerciseById, searchExercises } from "@/services/exerciseCatalog";
+import { buildOrReuseRecommendedAIProgram } from "@/services/programRecommendationEngine";
 import { buildAIProgramDecisionBlueprint } from "@/services/aiProgramDecisionEngine";
 import { orchestrateAIProgram } from "@/services/aiProgramOrchestrator";
+import { USE_TEMPLATE_PROGRAM_ENGINE } from "@/services/templateProgramEngine";
 import {
   GYM_EQUIPMENT,
   HOME_EQUIPMENT,
@@ -80,6 +83,7 @@ import type {
   AIProgramGoal,
   AIProgramLocation,
   AIProgramPainLimitation,
+  AIProgramPreferredStyle,
   AIProgramPriorityMuscle,
   AIProgramRecoveryQuality,
   AIProgramSleepContext,
@@ -142,6 +146,15 @@ const EXPERIENCE_OPTIONS: AIProgramExperience[] = [
 ];
 const LOCATION_OPTIONS: AIProgramLocation[] = ["gym", "home", "both"];
 const RECOVERY_OPTIONS: AIProgramRecoveryQuality[] = ["great", "okay", "poor"];
+const PROGRAM_STYLE_OPTIONS: AIProgramPreferredStyle[] = [
+  "auto",
+  "full_body",
+  "upper_lower",
+  "push_pull_legs",
+  "hybrid_athletic",
+  "body_part",
+  "minimalist_home",
+];
 
 const GOAL_ICONS: Record<AIProgramGoal, keyof typeof Ionicons.glyphMap> = {
   build_muscle: "barbell-outline",
@@ -169,13 +182,25 @@ const EXPERIENCE_ICONS: Record<
   intermediate: "trending-up-outline",
   advanced: "flash-outline",
 };
+const PROGRAM_STYLE_ICONS: Record<
+  AIProgramPreferredStyle,
+  keyof typeof Ionicons.glyphMap
+> = {
+  auto: "sparkles-outline",
+  full_body: "body-outline",
+  upper_lower: "swap-vertical-outline",
+  push_pull_legs: "git-branch-outline",
+  hybrid_athletic: "flash-outline",
+  body_part: "scan-outline",
+  minimalist_home: "home-outline",
+};
 
 type StepGroup = {
   steps: (typeof STEP_ORDER)[number][];
   labelKey: string;
 };
 const STEP_GROUPS: StepGroup[] = [
-  { steps: ["goal", "days", "duration"], labelKey: "ai_program.group_goal" },
+  { steps: ["goal", "style", "days", "duration"], labelKey: "ai_program.group_goal" },
   {
     steps: ["location", "equipment"],
     labelKey: "ai_program.group_environment",
@@ -197,6 +222,44 @@ const SLEEP_OPTIONS: AIProgramSleepContext[] = [
 ];
 const STRESS_OPTIONS: AIProgramStressContext[] = ["low", "medium", "high"];
 
+function programStyleLabel(style: AIProgramPreferredStyle): { tr: string; en: string } {
+  switch (style) {
+    case "auto":
+      return { tr: "FORGE seçsin", en: "Let FORGE choose" };
+    case "full_body":
+      return { tr: "Full body", en: "Full body" };
+    case "upper_lower":
+      return { tr: "Upper/Lower", en: "Upper/Lower" };
+    case "push_pull_legs":
+      return { tr: "Push Pull Legs", en: "Push Pull Legs" };
+    case "hybrid_athletic":
+      return { tr: "Hibrit atletik", en: "Athletic hybrid" };
+    case "body_part":
+      return { tr: "Bölgesel hipertrofi", en: "Body-part hypertrophy" };
+    case "minimalist_home":
+      return { tr: "Minimal ev programı", en: "Minimal home plan" };
+  }
+}
+
+function programStyleBody(style: AIProgramPreferredStyle): { tr: string; en: string } {
+  switch (style) {
+    case "auto":
+      return { tr: "Hedef, seviye, gün sayısı ve toparlanmaya göre arketipi motor seçer.", en: "The engine picks the archetype from your goal, level, days, and recovery." };
+    case "full_body":
+      return { tr: "Her seansta tüm vücuda temas eden, sade ve takip etmesi kolay yapı.", en: "A simple structure touching the whole body each session." };
+    case "upper_lower":
+      return { tr: "Üst ve alt vücut günlerini ayıran klasik güç/hipertrofi düzeni.", en: "A classic upper and lower body structure for strength or hypertrophy." };
+    case "push_pull_legs":
+      return { tr: "İtiş, çekiş ve bacak akışı; yeterli gün ve recovery varsa daha iyi çalışır.", en: "Push, pull, legs flow; best with enough days and recovery." };
+    case "hybrid_athletic":
+      return { tr: "Full body, upper/lower ve aksesuar günlerini karıştıran daha dinamik yapı.", en: "A more dynamic mix of full body, upper/lower, and accessory days." };
+    case "body_part":
+      return { tr: "Kas grubu vurgusu yüksek, daha ileri hipertrofi hissi veren yapı.", en: "A higher-emphasis hypertrophy structure by muscle group." };
+    case "minimalist_home":
+      return { tr: "Evde az ekipmanla uygulanacak kısa ve net full body akışları.", en: "Short, clear full-body flows for limited home equipment." };
+  }
+}
+
 export default function AIProgramBuilderScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -213,6 +276,8 @@ export default function AIProgramBuilderScreen() {
   );
   const [savingPlan, setSavingPlan] = useState(false);
   const [planSaved, setPlanSaved] = useState(false);
+  const [forceNewVariation, setForceNewVariation] = useState(false);
+  const [previousTemplateId, setPreviousTemplateId] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const [processingIndex, setProcessingIndex] = useState<number>(-1);
   const [exercisePickerMode, setExercisePickerMode] = useState<
@@ -270,6 +335,7 @@ export default function AIProgramBuilderScreen() {
         profile,
         coachPreferences,
         plan: regeneratePlan,
+        physiqueSummary: latestPhysiqueSummary,
       });
       const validation = validateAIProgramAnswers(nextDraft.answers);
       const hydratedDraft = mergeAIProgramDraft(nextDraft, {
@@ -372,23 +438,39 @@ export default function AIProgramBuilderScreen() {
         profile,
         cycle,
       });
-      const decisionBlueprint =
-        buildAIProgramDecisionBlueprint(decisionContext);
-    const readyDraft = mergeAIProgramDraft(nextDraft, {
+      const decisionBlueprint = USE_TEMPLATE_PROGRAM_ENGINE
+        ? null
+        : buildAIProgramDecisionBlueprint(decisionContext);
+      const recommendedPlan = USE_TEMPLATE_PROGRAM_ENGINE
+        ? (
+          await buildOrReuseRecommendedAIProgram({
+            draftId: nextDraft.id,
+            userId: profile?.name ?? "local_user",
+            answers: nextDraft.answers,
+            physiqueSummary: nextDraft.answers.useLatestPhysiqueAnalysis
+              ? nextDraft.latestPhysiqueSummary
+              : undefined,
+            forceNewVariation,
+            previousTemplateId,
+          })
+        ).plan
+        : orchestrateAIProgram({
+          draftId: nextDraft.id,
+          context: decisionContext,
+          blueprint: decisionBlueprint!,
+        }).plan;
+      const readyDraft = mergeAIProgramDraft(nextDraft, {
         decisionContext,
-        decisionBlueprint,
+        decisionBlueprint: recommendedPlan.sourceBlueprint,
         currentStep: "summary",
       });
-      const orchestration = orchestrateAIProgram({
-        draftId: nextDraft.id,
-        context: decisionContext,
-        blueprint: decisionBlueprint,
-      });
-      setGeneratedPlan(orchestration.plan);
+      setGeneratedPlan(recommendedPlan);
+      setForceNewVariation(false);
+      setPreviousTemplateId(undefined);
       setDraft(readyDraft);
       successFeedback();
     })();
-  }, [draft, processingIndex]);
+  }, [draft, forceNewVariation, previousTemplateId, processingIndex]);
 
   const updateDraft = useCallback(
     async (updater: (current: AIProgramDraft) => AIProgramDraft) => {
@@ -503,7 +585,7 @@ export default function AIProgramBuilderScreen() {
     );
   }, [draft, isProcessing, isReady, isSummary, requestExit, updateDraft]);
 
-  const startGeneration = useCallback(async () => {
+  const startGeneration = useCallback(async (options?: { forceNewVariation?: boolean; previousTemplateId?: string }) => {
     if (!draft) return;
     const currentValidation = validateAIProgramAnswers(draft.answers);
     if (currentValidation.blocking.length > 0) {
@@ -516,6 +598,8 @@ export default function AIProgramBuilderScreen() {
 
     setGeneratedPlan(null);
     setPlanSaved(false);
+    setForceNewVariation(!!options?.forceNewVariation);
+    setPreviousTemplateId(options?.previousTemplateId);
     await updateDraft((current) =>
       mergeAIProgramDraft(current, {
         generationStatus: "processing",
@@ -876,6 +960,12 @@ export default function AIProgramBuilderScreen() {
                   }),
                 );
               }}
+              onNewVariation={() =>
+                void startGeneration({
+                  forceNewVariation: true,
+                  previousTemplateId: generatedPlan.selectedTemplateId,
+                })
+              }
             />
           ) : (
             <GlassCard variant="panel" style={styles.card}>
@@ -963,6 +1053,60 @@ export default function AIProgramBuilderScreen() {
                     />
                   ))}
                 </ChipGrid>
+              </StepCard>
+            ) : null}
+
+            {draft.currentStep === "style" ? (
+              <StepCard
+                title={t({ tr: "Program tarzı", en: "Program style" })}
+                body={t({
+                  tr: "İstersen tarzı sen seç; istersen FORGE hedef, recovery ve ekipmana göre arketipi belirlesin.",
+                  en: "Choose a style yourself, or let FORGE pick the archetype from your goal, recovery, and equipment.",
+                })}
+                colors={colors}
+              >
+                <View style={styles.styleGrid}>
+                  {PROGRAM_STYLE_OPTIONS.map((style) => {
+                    const active = (draft.answers.preferredProgramStyle ?? "auto") === style;
+                    return (
+                      <TouchableOpacity
+                        key={style}
+                        accessibilityRole="button"
+                        activeOpacity={0.82}
+                        onPress={() =>
+                          void updateDraft((current) =>
+                            mergeAIProgramDraft(current, {
+                              answers: { preferredProgramStyle: style },
+                            }),
+                          )
+                        }
+                        style={[
+                          styles.styleOption,
+                          {
+                            backgroundColor: active ? `${colors.primary}14` : colors.surfaceContainerLowest,
+                            borderColor: active ? colors.primary : colors.outlineVariant,
+                          },
+                        ]}
+                      >
+                        <View style={styles.styleOptionHeader}>
+                          <View style={[styles.styleOptionIcon, { backgroundColor: active ? colors.primary : `${colors.primary}14` }]}>
+                            <Ionicons
+                              name={PROGRAM_STYLE_ICONS[style]}
+                              size={17}
+                              color={active ? colors.onPrimary : colors.primary}
+                            />
+                          </View>
+                          <Text style={[styles.styleOptionTitle, { color: colors.onSurface }]}>
+                            {t(programStyleLabel(style))}
+                          </Text>
+                        </View>
+                        <Text style={[styles.styleOptionBody, { color: colors.onSurfaceVariant }]}>
+                          {t(programStyleBody(style))}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </StepCard>
             ) : null}
 
@@ -1397,6 +1541,38 @@ export default function AIProgramBuilderScreen() {
                   {t("ai_program.summary_body")}
                 </Text>
                 <SummaryBlock draft={draft} t={t} colors={colors} />
+                <ProgramInfluenceCard
+                  influence={draft.decisionContext?.userProfile.programInfluence}
+                  title={t({
+                    tr: "Bu analiz programı nasıl etkiledi?",
+                    en: "How this analysis shapes the program",
+                  })}
+                />
+                {draft.decisionContext?.userProfile.safetyFlags.includes("cycle_context_present") ? (
+                  <View
+                    style={[
+                      styles.notice,
+                      { backgroundColor: `${colors.secondary}16` },
+                    ]}
+                  >
+                    <Ionicons
+                      name="moon-outline"
+                      size={18}
+                      color={colors.secondary}
+                    />
+                    <Text
+                      style={[
+                        styles.noticeText,
+                        { color: colors.onSurface },
+                      ]}
+                    >
+                      {t({
+                        tr: "Döngü bilgisi toparlanma yönetiminde dikkate alındı; hedef, gün sayısı ve ekipman kararlarını override etmez.",
+                        en: "Cycle context was considered for recovery management; it does not override goal, days, or equipment choices.",
+                      })}
+                    </Text>
+                  </View>
+                ) : null}
                 {validation.cautions.length > 0 ? (
                   <View style={styles.warningList}>
                     {validation.cautions.map((code) => (
@@ -1786,18 +1962,26 @@ function SummaryBlock({
   colors,
 }: {
   draft: AIProgramDraft;
-  t: (key: string) => string;
+  t: (key: string | { tr: string; en: string }) => string;
   colors: ReturnType<typeof useAppTheme>["colors"];
 }) {
   const rows = [
     [
-      "ai_program.summary_goal",
+      t("ai_program.summary_goal"),
       draft.answers.mainGoal
         ? t(`ai_program.goal_${draft.answers.mainGoal}`)
         : "—",
     ],
     [
-      "ai_program.summary_days",
+      t({ tr: "Program tarzı", en: "Program style" }),
+      t(programStyleLabel(draft.answers.preferredProgramStyle ?? "auto")),
+    ],
+    [
+      t({ tr: "Seçilen arketip", en: "Selected archetype" }),
+      draft.decisionBlueprint?.programArchetypeLabel ?? "—",
+    ],
+    [
+      t("ai_program.summary_days"),
       draft.answers.trainingDays
         ? t("ai_program.days_value").replace(
             "{days}",
@@ -1806,7 +1990,7 @@ function SummaryBlock({
         : "—",
     ],
     [
-      "ai_program.summary_duration",
+      t("ai_program.summary_duration"),
       draft.answers.sessionDurationMin
         ? t("ai_program.duration_value").replace(
             "{minutes}",
@@ -1815,19 +1999,19 @@ function SummaryBlock({
         : "—",
     ],
     [
-      "ai_program.summary_location",
+      t("ai_program.summary_location"),
       draft.answers.location
         ? t(`ai_program.location_${draft.answers.location}`)
         : "—",
     ],
     [
-      "ai_program.summary_experience",
+      t("ai_program.summary_experience"),
       draft.answers.experience
         ? t(`ai_program.experience_${draft.answers.experience}`)
         : "—",
     ],
     [
-      "ai_program.summary_priority",
+      t("ai_program.summary_priority"),
       draft.answers.priorityMuscles.length
         ? draft.answers.priorityMuscles
             .map((item) => t(`ai_program.priority_${item}`))
@@ -1835,13 +2019,13 @@ function SummaryBlock({
         : t("ai_program.none"),
     ],
     [
-      "ai_program.summary_recovery",
+      t("ai_program.summary_recovery"),
       draft.answers.recoveryQuality
         ? t(`ai_program.recovery_${draft.answers.recoveryQuality}`)
         : "—",
     ],
     [
-      "ai_program.summary_physique",
+      t("ai_program.summary_physique"),
       draft.answers.useLatestPhysiqueAnalysis && draft.latestPhysiqueSummary
         ? t("ai_program.summary_physique_used")
         : t("ai_program.summary_physique_not_used"),
@@ -1850,9 +2034,9 @@ function SummaryBlock({
 
   return (
     <View style={styles.summaryGrid}>
-      {rows.map(([labelKey, value]) => (
+      {rows.map(([label, value]) => (
         <View
-          key={labelKey}
+          key={label}
           style={[
             styles.summaryTile,
             {
@@ -1864,7 +2048,7 @@ function SummaryBlock({
           <Text
             style={[styles.summaryLabel, { color: colors.onSurfaceVariant }]}
           >
-            {t(labelKey)}
+            {label}
           </Text>
           <Text style={[styles.summaryValue, { color: colors.onSurface }]}>
             {value}
@@ -1884,15 +2068,17 @@ function ProgramReadyCard({
   onSave,
   onReset,
   onReview,
+  onNewVariation,
 }: {
   plan: AIProgramPlan;
-  t: (key: string) => string;
+  t: (key: string | { tr: string; en: string }) => string;
   colors: ReturnType<typeof useAppTheme>["colors"];
   savingPlan: boolean;
   planSaved: boolean;
   onSave: () => void;
   onReset: () => void;
   onReview: () => void;
+  onNewVariation: () => void;
 }) {
   const firstWeek = plan.weeks[0];
   const validationErrors = plan.validation.issues.filter(
@@ -1961,6 +2147,52 @@ function ProgramReadyCard({
           {repairText(coachNote)}
         </Text>
       </View>
+
+      <View style={[styles.readyCoachNote, { backgroundColor: `${colors.primary}10` }]}>
+        <Ionicons name="git-branch-outline" size={18} color={colors.primary} />
+        <Text numberOfLines={4} style={[styles.readyCoachText, { color: colors.onSurface }]}>
+          {t({ tr: "Neden bu program tarzı?", en: "Why this program style?" })} {repairText(plan.sourceBlueprint.programArchetypeRationale[0] ?? plan.explanation.structureRationale[0] ?? "")}
+        </Text>
+      </View>
+
+      {plan.sourceBlueprint.alternativesConsidered.length > 0 ? (
+        <View style={styles.readyAlternativeBlock}>
+          <Text style={[styles.readyGroupLabel, { color: colors.onSurfaceVariant }]}>
+            {t({ tr: "Alternatifler", en: "Alternatives" })}
+          </Text>
+          {plan.sourceBlueprint.alternativesConsidered.slice(0, 2).map((alternative) => (
+            <View
+              key={alternative.label}
+              style={[
+                styles.readyAlternativeCard,
+                {
+                  backgroundColor: colors.surfaceContainerLowest,
+                  borderColor: colors.outlineVariant,
+                },
+              ]}
+            >
+              <View style={styles.readyAlternativeCopy}>
+                <Text numberOfLines={1} style={[styles.readyAlternativeTitle, { color: colors.onSurface }]}>
+                  {repairText(alternative.label)}
+                </Text>
+                <Text numberOfLines={2} style={[styles.readyAlternativeBody, { color: colors.onSurfaceVariant }]}>
+                  {repairText(alternative.tradeoffs[0] ?? alternative.rationale[0] ?? "")}
+                </Text>
+              </View>
+              <View style={[styles.readyAlternativeScore, { backgroundColor: `${colors.primary}12` }]}>
+                <Text style={[styles.readyAlternativeScoreText, { color: colors.primary }]}>
+                  {Math.round(alternative.score)}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      <ProgramInfluenceCard
+        influence={plan.influenceSummary}
+        title="Analizden gelen program etkisi"
+      />
 
       {firstWeek ? (
         <View style={styles.readyWeekBlock}>
@@ -2082,6 +2314,25 @@ function ProgramReadyCard({
             style={[styles.readySecondaryButtonText, { color: colors.onSurface }]}
           >
             {t("ai_program.ready_review")}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.82}
+          onPress={onNewVariation}
+          style={[
+            styles.readySecondaryButton,
+            {
+              borderColor: colors.outlineVariant,
+              backgroundColor: colors.surfaceContainerLowest,
+            },
+          ]}
+        >
+          <Ionicons name="shuffle-outline" size={17} color={colors.onSurface} />
+          <Text
+            numberOfLines={1}
+            style={[styles.readySecondaryButtonText, { color: colors.onSurface }]}
+          >
+            {t({ tr: "Yeni varyasyon iste", en: "Request new variation" })}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -2410,6 +2661,28 @@ const styles = createDynamicStyles(() => ({
     gap: 10,
   },
   readyCoachText: { ...typography.bodySm, lineHeight: 19, flex: 1 },
+  readyAlternativeBlock: { gap: 6 },
+  readyAlternativeCard: {
+    minHeight: 58,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  readyAlternativeCopy: { flex: 1, minWidth: 0, gap: 2 },
+  readyAlternativeTitle: { ...typography.labelMd },
+  readyAlternativeBody: { ...typography.bodyXs, lineHeight: 17 },
+  readyAlternativeScore: {
+    minWidth: 38,
+    height: 30,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  readyAlternativeScoreText: { ...typography.labelMd },
   readyWeekBlock: { gap: 6 },
   readyGroupLabel: { ...typography.labelCaps },
   readyDayList: { gap: 6 },
@@ -2480,6 +2753,23 @@ const styles = createDynamicStyles(() => ({
     gap: 10,
   },
   noticeText: { ...typography.bodySm, flex: 1, lineHeight: 19 },
+  styleGrid: { gap: 10 },
+  styleOption: {
+    borderWidth: 1,
+    borderRadius: radius.xl,
+    padding: spacing.smPlus,
+    gap: 8,
+  },
+  styleOptionHeader: { flexDirection: "row", alignItems: "center", gap: 9 },
+  styleOptionIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  styleOptionTitle: { ...typography.labelMd },
+  styleOptionBody: { ...typography.bodySm, lineHeight: 18 },
   chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {
     minHeight: 42,

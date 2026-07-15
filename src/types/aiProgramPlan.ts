@@ -1,9 +1,10 @@
-import type { AIProgramDecisionContext } from './aiProgram';
+import type { AIProgramDecisionContext, ProgramInfluenceSummary } from './aiProgram';
 import type { AIProgramDecisionBlueprint } from './aiProgramDecision';
 import type { SessionVolumeBlueprint } from './aiProgramVolume';
 import type { AssembledExercise, SessionAssemblyPlan } from './aiProgramAssembly';
 import type { ProgressionPlan } from './aiProgramProgression';
 import type { WarmupItem } from '@/types';
+import type { AppliedAdaptation, ProgramRequest } from '@/services/templateProgramEngine';
 
 /**
  * Faz 8 — Program Orchestration, Validation & Explainability
@@ -86,6 +87,8 @@ export type AIProgramPlan = {
   weeks: AIGeneratedWeek[];
   /** Açıklama artifacti (neden bu program). */
   explanation: AIProgramExplanation;
+  /** Fizik analizi programa dahil edildiyse kullanıcının göreceği etki özeti. */
+  influenceSummary?: ProgramInfluenceSummary;
   /** Programın geçerlilik durumu (validator çıktısı). */
   validation: AIProgramValidationResult;
   /** Üretimde kullanılan karar/motor çıktıları (debug + audit). */
@@ -102,13 +105,24 @@ export type AIProgramPlan = {
     priorityMuscles: string[];
     painLimitations: string[];
     physiqueAnalysisUsed: boolean;
+    programInfluence?: ProgramInfluenceSummary;
     confidence: string;
   };
+  /** Template engine metadata: same request can reuse the same selected/adapted program. */
+  requestFingerprint?: string;
+  selectedTemplateId?: string;
+  selectedTemplateVersion?: number;
+  adaptationVersion?: number;
+  requestSnapshot?: ProgramRequest;
+  appliedAdaptations?: AppliedAdaptation[];
 };
 
 export type AIProgramExplanation = {
   headline: string;
   whyThisPlan: string[];
+  archetypeRationale: string[];
+  progressionModelRationale: string[];
+  roleDistributionRationale: string[];
   structureRationale: string[];
   volumeRationale: string[];
   selectionRationale: string[];

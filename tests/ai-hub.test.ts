@@ -37,6 +37,59 @@ describe('AI Hub result validation', () => {
     expect(result.eksikBolgeler).toHaveLength(6);
     expect(result.tahminiYagOrani).toBe(60);
   });
+
+  it('parses physique V2 and derives legacy focus fields from the roadmap', () => {
+    const result = parsePhysiqueAnalysisResult({
+      analysisVersion: 2,
+      coachSummary: 'Yan omuz ve lat odağı V-taper görünümünü artırabilir.',
+      generalDurum: 'Eski özet',
+      eksikBolgeler: ['Eski alan'],
+      odaklanmasiGerekenHareketler: [],
+      tahminiYagOrani: 18,
+      kasKutlesiYorumu: 'Orta',
+      guvenPuani: 86,
+      pozKalitesiYorumu: 'Net',
+      vTaper: {
+        shoulderWaistLook: 'average',
+        latWidthLook: 'weak',
+        waistDominance: 'medium',
+        impactLevel: 'very_high',
+        comment: 'Omuz-bel oranını yan omuz ve lat geliştirmek belirginleştirebilir.',
+      },
+      muscleBalance: {
+        chest: [],
+        shoulders: [{ region: 'Yan omuz', developmentLevel: 'weak', proportion: 'high', symmetry: 'medium', aestheticImpact: 'very_high', priority: 'high', note: 'Görselde yan omuz daha fazla hacim alabilir.' }],
+        arms: [],
+        back: [{ region: 'Lat', developmentLevel: 'weak', proportion: 'high', symmetry: 'medium', aestheticImpact: 'high', priority: 'high', note: 'Lat genişliği V-taper için önemli.' }],
+        legs: [],
+        abs: [],
+      },
+      symmetry: [{ title: 'Omuz seviyesi', description: 'Fotoğrafta sağ omuz biraz düşük görünüyor.', confidence: 'medium' }],
+      proportion: [],
+      posture: [{ title: 'Rounded shoulder eğilimi', description: 'Görselde omuzlar öne kapanmış görünüyor; bu tıbbi tanı değildir.', confidence: 'medium' }],
+      fatDistribution: [{ title: 'Alt karın', description: 'Görsel yağ dağılımı alt karın/bel çevresinde daha belirgin görünüyor.', confidence: 'medium' }],
+      strengths: ['Göğüs hacmi iyi'],
+      improvementAreas: ['Yan omuz', 'Lat'],
+      priorityRoadmap: [
+        { rank: 1, targetArea: 'Yan omuz', targetMuscle: 'shoulders', aestheticImpact: 'very_high', reason: 'Omuz genişliği V-taperı belirginleştirir.', exerciseEmphasis: ['Lateral Raise'], volumeSignal: 'moderate_high' },
+        { rank: 2, targetArea: 'Lat genişliği', targetMuscle: 'lats', aestheticImpact: 'high', reason: 'Lat genişliği üst gövde formunu artırır.', exerciseEmphasis: ['Lat Pulldown'], volumeSignal: 'moderate' },
+      ],
+      programSignals: {
+        focusMuscles: ['shoulders', 'lats'],
+        volumeBias: 'moderate_high',
+        splitBiasHint: 'posterior_focus',
+        exerciseEmphasis: ['Lateral Raise', 'Lat Pulldown'],
+        postureCautions: ['rounded_shoulders_visual'],
+        confidenceLevel: 'high',
+      },
+    });
+
+    expect(result.analysisVersion).toBe(2);
+    expect(result.generalDurum).toBe('Yan omuz ve lat odağı V-taper görünümünü artırabilir.');
+    expect(result.eksikBolgeler).toEqual(['Yan omuz', 'Lat genişliği']);
+    expect(result.odaklanmasiGerekenHareketler.map((item) => item.hareketAdi)).toEqual(['Lateral Raise', 'Lat Pulldown']);
+    expect(result.programSignals?.focusMuscles).toEqual(['shoulders', 'lats']);
+  });
 });
 
 describe('AI Hub text comparisons', () => {

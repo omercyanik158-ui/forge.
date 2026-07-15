@@ -21,11 +21,22 @@ type Props = {
     pose: string;
     confidence: string;
     confidenceNote: string;
+    strengths?: string;
+    improvements?: string;
+    priorities?: string;
+    vTaper?: string;
+    posture?: string;
+    fatDistribution?: string;
   };
 };
 
 export function PhysiqueResultCard({ result, labels }: Props) {
   const { colors } = useAppTheme();
+  const priorityRoadmap = result.priorityRoadmap ?? [];
+  const strengths = result.strengths ?? [];
+  const improvements = result.improvementAreas ?? [];
+  const posture = result.posture ?? [];
+  const fatDistribution = result.fatDistribution ?? [];
 
   return (
     <GlassCard variant="panel" style={styles.card}>
@@ -56,10 +67,82 @@ export function PhysiqueResultCard({ result, labels }: Props) {
       </View>
 
       <Text selectable style={[styles.summary, { color: colors.onSurface }]}>
-        {result.generalDurum}
+        {result.coachSummary ?? result.generalDurum}
       </Text>
 
-      {result.eksikBolgeler.length ? (
+      {strengths.length || improvements.length ? (
+        <View style={styles.dualGrid}>
+          {strengths.length ? (
+            <View style={[styles.miniPanel, { backgroundColor: colors.surfaceContainerLow }]}>
+              <Text style={[styles.commentTitle, { color: colors.secondary }]}>
+                {labels.strengths ?? "Güçlü yönler"}
+              </Text>
+              {strengths.slice(0, 3).map((item) => (
+                <Text key={item} style={[styles.bulletText, { color: colors.onSurface }]}>
+                  ✓ {item}
+                </Text>
+              ))}
+            </View>
+          ) : null}
+          {improvements.length ? (
+            <View style={[styles.miniPanel, { backgroundColor: colors.surfaceContainerLow }]}>
+              <Text style={[styles.commentTitle, { color: colors.secondary }]}>
+                {labels.improvements ?? "Geliştirilecek alanlar"}
+              </Text>
+              {improvements.slice(0, 3).map((item) => (
+                <Text key={item} style={[styles.bulletText, { color: colors.onSurface }]}>
+                  • {item}
+                </Text>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+
+      {result.vTaper ? (
+        <View style={[styles.comment, { backgroundColor: colors.surfaceContainerLow }]}>
+          <Text style={[styles.commentTitle, { color: colors.secondary }]}>
+            {labels.vTaper ?? "V-Taper görünümü"}
+          </Text>
+          <Text selectable style={[styles.commentText, { color: colors.onSurface }]}>
+            {result.vTaper.comment}
+          </Text>
+          <Text style={[styles.pose, { color: colors.onSurfaceVariant }]}>
+            Etki: {formatImpact(result.vTaper.impactLevel)}
+          </Text>
+        </View>
+      ) : null}
+
+      {priorityRoadmap.length ? (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.onSurfaceVariant }]}>
+            {labels.priorities ?? "Öncelik sıralaması"}
+          </Text>
+          {priorityRoadmap.map((item) => (
+            <View
+              key={`${item.rank}-${item.targetArea}`}
+              style={[styles.priorityRow, { borderBottomColor: colors.outlineVariant }]}
+            >
+              <View style={[styles.exerciseIndex, { backgroundColor: colors.surfaceContainerHigh }]}>
+                <Text style={[styles.exerciseIndexText, { color: colors.secondary }]}>
+                  {item.rank}
+                </Text>
+              </View>
+              <View style={styles.exerciseCopy}>
+                <Text style={[styles.exerciseName, { color: colors.onSurface }]}>
+                  {item.targetArea} · {formatImpact(item.aestheticImpact)}
+                </Text>
+                <Text style={[styles.exerciseWhy, { color: colors.onSurfaceVariant }]}>
+                  {item.reason}
+                </Text>
+                <Text style={[styles.exerciseWhy, { color: colors.secondary }]}>
+                  {item.exerciseEmphasis.slice(0, 3).join(", ")}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      ) : result.eksikBolgeler.length ? (
         <View style={styles.section}>
           <Text
             style={[styles.sectionTitle, { color: colors.onSurfaceVariant }]}
@@ -122,6 +205,35 @@ export function PhysiqueResultCard({ result, labels }: Props) {
         ))}
       </View>
 
+      {posture.length || fatDistribution.length ? (
+        <View style={styles.dualGrid}>
+          {posture.length ? (
+            <View style={[styles.miniPanel, { backgroundColor: colors.surfaceContainerLow }]}>
+              <Text style={[styles.commentTitle, { color: colors.secondary }]}>
+                {labels.posture ?? "Postür notu"}
+              </Text>
+              {posture.slice(0, 2).map((item) => (
+                <Text key={item.title} style={[styles.bulletText, { color: colors.onSurface }]}>
+                  {item.title}: {item.description}
+                </Text>
+              ))}
+            </View>
+          ) : null}
+          {fatDistribution.length ? (
+            <View style={[styles.miniPanel, { backgroundColor: colors.surfaceContainerLow }]}>
+              <Text style={[styles.commentTitle, { color: colors.secondary }]}>
+                {labels.fatDistribution ?? "Yağ dağılımı"}
+              </Text>
+              {fatDistribution.slice(0, 2).map((item) => (
+                <Text key={item.title} style={[styles.bulletText, { color: colors.onSurface }]}>
+                  {item.title}: {item.description}
+                </Text>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+
       <View
         style={[
           styles.comment,
@@ -152,6 +264,13 @@ export function PhysiqueResultCard({ result, labels }: Props) {
       </Text>
     </GlassCard>
   );
+}
+
+function formatImpact(value: string): string {
+  if (value === "very_high") return "Çok yüksek";
+  if (value === "high") return "Yüksek";
+  if (value === "medium") return "Orta";
+  return "Düşük";
 }
 
 const styles = createDynamicStyles(() => ({
@@ -188,6 +307,9 @@ const styles = createDynamicStyles(() => ({
   summary: { ...typography.bodyMd },
   section: { gap: spacing.xs + 1 },
   sectionTitle: { ...typography.labelCaps, textTransform: "uppercase" },
+  dualGrid: { gap: spacing.sm },
+  miniPanel: { padding: spacing.sm, borderRadius: radius.lg, gap: 5 },
+  bulletText: { ...typography.bodyXs },
   badges: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs - 1 },
   badge: {
     borderRadius: radius.full,
@@ -212,6 +334,12 @@ const styles = createDynamicStyles(() => ({
   exerciseCopy: { flex: 1, gap: 2 },
   exerciseName: { ...typography.labelMd },
   exerciseWhy: { ...typography.bodyXs },
+  priorityRow: {
+    flexDirection: "row",
+    gap: spacing.xs + 2,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+  },
   comment: { padding: spacing.sm, borderRadius: radius.lg, gap: 4 },
   commentTitle: { ...typography.labelCaps },
   commentText: { ...typography.bodySm },

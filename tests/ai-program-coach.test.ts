@@ -6,6 +6,9 @@ function mockExplanation(): AIProgramExplanation {
   return {
     headline: 'Upper/Lower · 4 gün · build muscle odaklı 5 haftalık blok',
     whyThisPlan: ['4 gün seçtin ve FORGE 4 günü öneriyor.', 'Hedefin hypertrophy.'],
+    archetypeRationale: ['Upper/Lower Hypertrophy bu kullanıcı için sürdürülebilir bulundu.'],
+    progressionModelRationale: ['Double progression hypertrophy için seçildi.'],
+    roleDistributionRationale: ['Kas dağılımı hypertrophy-region-driven kuruldu.'],
     structureRationale: ['Upper/Lower split yorgunluk yönetimi iyi.'],
     volumeRationale: ['Haftalık 40 set tavanı.', 'Göğüs: haftada 12 set.'],
     selectionRationale: ['Hareketler compound önce dizildi.'],

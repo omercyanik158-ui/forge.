@@ -47,10 +47,10 @@ describe('antrenman analizi', () => {
       difficulty: 'Orta',
       completedAt,
       source: 'custom',
-      exerciseIds: ['Barbell_Bench_Press_-_Medium_Grip', 'Bent_Over_Barbell_Row'],
+      exerciseIds: ['csv-bench-press-barbell', 'csv-barbell-row'],
       setEntries: [
-        ...Array.from({ length: 4 }, (_, order) => ({ order: order + 1, kind: 'working' as const, exerciseId: 'Barbell_Bench_Press_-_Medium_Grip', kg: 60, reps: 8, completedAt })),
-        { order: 5, kind: 'working', exerciseId: 'Bent_Over_Barbell_Row', kg: 50, reps: 8, completedAt },
+        ...Array.from({ length: 4 }, (_, order) => ({ order: order + 1, kind: 'working' as const, exerciseId: 'csv-bench-press-barbell', kg: 60, reps: 8, completedAt })),
+        { order: 5, kind: 'working', exerciseId: 'csv-barbell-row', kg: 50, reps: 8, completedAt },
       ],
     };
     const analysis = analyzeWeeklyTraining([log]);

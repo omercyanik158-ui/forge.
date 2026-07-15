@@ -1,6 +1,7 @@
 import type { AssembledDay } from './aiProgramAssembly';
 import type { SessionVolumeBlueprint } from './aiProgramVolume';
-import type { AIProgramExperience, AIProgramGoal } from './aiProgram';
+import type { AIProgramExperience, AIProgramFamily, AIProgramGoal, AIProgramGoalClassification } from './aiProgram';
+import type { AIProgramProgressionModel } from './aiProgramDecision';
 
 /**
  * Faz 7 — Progression & Fatigue
@@ -39,6 +40,10 @@ export type ProgressionPlan = {
   weekCount: number;
   deloadWeeks: number[];
   fatigueModel: FatigueModelSnapshot;
+  model: AIProgramProgressionModel;
+  family: AIProgramFamily;
+  goalClassification: AIProgramGoalClassification;
+  progressionNotes: string[];
 };
 
 export type ProgressionEngineInput = {
@@ -46,4 +51,7 @@ export type ProgressionEngineInput = {
   effort: SessionVolumeBlueprint['effort'];
   experience: AIProgramExperience;
   goal: AIProgramGoal;
+  family?: AIProgramFamily;
+  goalClassification?: AIProgramGoalClassification;
+  progressionModel?: AIProgramProgressionModel;
 };

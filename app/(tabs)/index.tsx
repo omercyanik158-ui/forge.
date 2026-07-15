@@ -20,10 +20,7 @@ import { useFocusEffect, useRouter, useScrollToTop } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { TopBar } from "@/components/TopBar";
 import { GlassCard } from "@/components/GlassCard";
-import { ProgressRing } from "@/components/ProgressRing";
 import { MacroBar } from "@/components/MacroBar";
-import { AnalysisSummaryCard } from "@/components/AnalysisSummaryCard";
-import { PremiumFeatureCard } from "@/components/PremiumFeatureCard";
 import { useAppLocalization } from "@/providers/localization-context";
 import { getStreakCount } from "@/services/achievementStore";
 import {
@@ -35,10 +32,6 @@ import {
 } from "@/services/calculations";
 import { dateKey } from "@/services/dateUtils";
 import { formatNumber } from "@/services/localization";
-import {
-  loadNutritionSummary,
-  type NutritionSummary,
-} from "@/services/mealInsights";
 import { loadMealsForDate } from "@/services/mealStore";
 import { loadProfile } from "@/services/profileStore";
 import {
@@ -46,10 +39,12 @@ import {
   type TrainingAnalysis,
 } from "@/services/trainingAnalysis";
 import { weeklyWorkoutSummary } from "@/services/workoutStore";
-import { canAccessTrainingInsights } from "@/services/subscription";
 import { formatPersonName } from "@/services/textUtils";
-import type { CoachPreferences, Meal, UserProfile } from "@/types";
-import { selectAutomaticHomeCards } from "@/services/coachPreferences";
+import {
+  loadBodyProgress,
+  type BodyProgressSnapshot,
+} from "@/services/bodyProgress";
+import type { Meal, UserProfile } from "@/types";
 
 type WeeklyWorkout = {
   count: number;
@@ -66,19 +61,13 @@ export default function DashboardScreen() {
   const { t } = useAppLocalization();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [meals, setMeals] = useState<Meal[]>([]);
-  const [summary, setSummary] = useState<NutritionSummary | null>(null);
   const [analysis, setAnalysis] = useState<TrainingAnalysis | null>(null);
+  const [bodyProgress, setBodyProgress] = useState<BodyProgressSnapshot | null>(null);
   const [weeklyTraining, setWeeklyTraining] = useState<WeeklyWorkout>({
     count: 0,
     minutes: 0,
     kcal: 0,
   });
-  const [homeCards, setHomeCards] = useState<CoachPreferences["homeCards"]>([
-    "energy",
-    "coach",
-    "weekly",
-    "analysis",
-  ]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -90,22 +79,22 @@ export default function DashboardScreen() {
       const results = await Promise.allSettled([
         loadProfile(),
         loadMealsForDate(dateKey()),
-        loadNutritionSummary(),
         weeklyWorkoutSummary(),
         loadTrainingAnalysis(),
+        loadBodyProgress(),
       ] as const);
 
       const loadedProfile =
         results[0].status === "fulfilled" ? results[0].value : null;
       const dailyMeals =
         results[1].status === "fulfilled" ? results[1].value : [];
-      const nutritionSummary =
-        results[2].status === "fulfilled" ? results[2].value : null;
       const workouts =
-        results[3].status === "fulfilled"
-          ? results[3].value
+        results[2].status === "fulfilled"
+          ? results[2].value
           : { count: 0, minutes: 0, kcal: 0 };
       const trainingAnalysis =
+        results[3].status === "fulfilled" ? results[3].value : null;
+      const progressSnapshot =
         results[4].status === "fulfilled" ? results[4].value : null;
 
       const failedResult = results.find(
@@ -125,19 +114,9 @@ export default function DashboardScreen() {
 
       setProfile(loadedProfile);
       setMeals(dailyMeals);
-      setSummary(nutritionSummary);
       setWeeklyTraining(workouts);
       setAnalysis(trainingAnalysis);
-      setHomeCards(
-        selectAutomaticHomeCards({
-          hasMealsToday: dailyMeals.length > 0,
-          weeklyMealCount: nutritionSummary?.weekly.mealCount ?? 0,
-          weeklyWorkoutCount: workouts.count,
-          streakCount: getStreakCount(loadedProfile?.streak),
-          hasAnalysis: Boolean(trainingAnalysis),
-          canAccessAnalysis: canAccessTrainingInsights(loadedProfile),
-        }),
-      );
+      setBodyProgress(progressSnapshot);
     } catch (error) {
       console.warn("[Dashboard] Ana sayfa yenilenemedi:", error);
       setLoadError(
@@ -164,7 +143,6 @@ export default function DashboardScreen() {
   const totals = mealTotals(meals);
   const goal = profile ? calorieGoal(profile) : DEFAULT_DAILY_CALORIE_GOAL;
   const remaining = Math.max(goal - totals.kcal, 0);
-  const progress = goal > 0 ? Math.min((totals.kcal / goal) * 100, 100) : 0;
   const macros = profile ? macroGoals(profile) : macroGoalsFromCalories(goal);
   const proteinPct =
     macros.proteinG > 0
@@ -177,7 +155,12 @@ export default function DashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <TopBar />
+      <TopBar
+        showAvatar
+        showAction
+        actionIcon="settings-outline"
+        onActionPress={() => router.push("/settings-privacy")}
+      />
       <ScrollView
         ref={scrollRef}
         style={[styles.scroll, { backgroundColor: colors.background }]}
@@ -222,128 +205,78 @@ export default function DashboardScreen() {
             if (action === "coach") router.push("/personal-coach");
           }}
         />
-        {homeCards.map((card) => {
-          if (card === "energy") {
-            return (
-              <CaloriesCard
-                key="energy"
-                consumed={totals.kcal}
-                goal={goal}
-                remaining={remaining}
-                progress={progress}
-                proteinPct={proteinPct}
-                carbsPct={carbsPct}
-                fatPct={fatPct}
-                onAddMeal={() => router.push("/nutrition")}
-              />
-            );
-          }
-          if (card === "coach") {
-            return (
-              <CoachHomeCard
-                key="coach"
-                onPress={() => router.push("/personal-coach")}
-              />
-            );
-          }
-          if (card === "weekly") {
-            return (
-              <WeeklyPulseCard
-                key="weekly"
-                streak={getStreakCount(profile?.streak)}
-                workoutCount={weeklyTraining.count}
-                workoutMinutes={weeklyTraining.minutes}
-                weeklyMeals={summary?.weekly.mealCount ?? 0}
-                onOpenWorkout={() => router.push("/workout-progress")}
-                onOpenGoals={() => router.push("/goals")}
-              />
-            );
-          }
-          if (
-            card === "analysis" &&
-            analysis &&
-            canAccessTrainingInsights(profile)
-          ) {
-            return (
-              <AnalysisSummaryCard
-                key="analysis"
-                analysis={analysis}
-                onOpenDetails={() => router.push("/workout-progress")}
-              />
-            );
-          }
-          if (card === "analysis") {
-            return (
-              <PremiumFeatureCard
-                key="analysis"
-                title={t({
-                  tr: "Haftalık antrenman değerlendirmesi",
-                  en: "Weekly training analysis",
-                })}
-                body={t({
-                  tr: "Kas dağılımını, eksik kalan bölgeleri ve itiş/çekiş dengesini premium ile aç.",
-                  en: "Unlock muscle distribution, lagging body parts, and push/pull balance with premium.",
-                })}
-                note={t({
-                  tr: "Premium ile haftalık kas dengesi, eksik bölge analizi ve daha net yönlendirmeler açılır.",
-                  en: "Premium unlocks weekly muscle balance, lagging area insights, and clearer guidance.",
-                })}
-                ctaLabel={t({ tr: "Premium'u incele", en: "Explore premium" })}
-                onPress={() => router.push("/premium")}
-              />
-            );
-          }
-          return null;
-        })}
-        <SummaryPeriodsCard
-          summary={summary}
-          onOpenDetails={() => router.push("/calorie-insights")}
+        <CoachHomeCard
+          analysis={analysis}
+          onPress={() => router.push("/personal-coach")}
+        />
+        <CaloriesCard
+          consumed={totals.kcal}
+          goal={goal}
+          remaining={remaining}
+          proteinPct={proteinPct}
+          carbsPct={carbsPct}
+          fatPct={fatPct}
+        />
+        <WeeklyAnalysisSection
+          snapshot={bodyProgress}
+          onOpenDetails={() => router.push("/body-progress")}
+          onStartAnalysis={() => router.push({ pathname: "/ai", params: { mode: "physique" } })}
+        />
+        <WeeklyStatsGrid
+          streak={getStreakCount(profile?.streak)}
+          workoutCount={weeklyTraining.count}
+          weeklyCalories={weeklyTraining.kcal}
+          onOpenProgress={() => router.push("/body-progress")}
+        />
+        <RecentDevelopmentsCard
+          proteinPct={proteinPct}
+          workoutCount={weeklyTraining.count}
         />
       </ScrollView>
     </View>
   );
 }
 
-function CoachHomeCard({ onPress }: { onPress: () => void }) {
+function CoachHomeCard({
+  analysis,
+  onPress,
+}: {
+  analysis: TrainingAnalysis | null;
+  onPress: () => void;
+}) {
   const { colors } = useAppTheme();
   const { t } = useAppLocalization();
+  const note = analysis?.headlineDetail
+    ?? t({
+      tr: "Protein alımın son 3 gündür hedefin altında kalıyor.",
+      en: "Your protein intake has been under target for the last 3 days.",
+    });
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.84}>
-      <GlassCard variant="panel" style={styles.coachCard}>
+      <GlassCard
+        variant="panel"
+        style={[styles.coachCard, { borderColor: colors.primary }]}
+      >
         <View
           style={[
             styles.headingIcon,
-            { backgroundColor: `${colors.tertiary}18` },
+            { backgroundColor: `${colors.primary}14` },
           ]}
         >
-          <Ionicons name="sparkles-outline" size={18} color={colors.tertiary} />
+          <Ionicons name="sparkles" size={18} color={colors.primary} />
         </View>
         <View style={styles.coachCopy}>
-          <View
-            style={[
-              styles.coachNoteBadge,
-              { backgroundColor: `${colors.tertiary}14` },
-            ]}
-          >
-            <Text style={[styles.coachNoteBadgeText, { color: colors.tertiary }]}>
-              AI KOÇ NOTU
-            </Text>
-          </View>
-          <Text style={[styles.weeklyTitle, { color: colors.onSurface }]}>
-            {t({ tr: "Bugünün koç önerisi", en: "Today's coach note" })}
+          <Text style={[styles.coachNoteBadgeText, { color: colors.primary }]}>
+            {t({ tr: "AI KOÇ NOTU", en: "AI COACH NOTE" })}
           </Text>
           <Text
+            numberOfLines={2}
             style={[styles.summaryBody, { color: colors.onSurfaceVariant }]}
           >
-            {t({
-              tr: "Haftalık ritmine göre bugünkü en doğru sonraki adımı gör.",
-              en: "See the best next step for today's rhythm.",
-            })}
+            {note}
           </Text>
         </View>
-        <View style={[styles.coachArrow, { backgroundColor: colors.tertiary }]}>
-          <Ionicons name="arrow-forward" size={18} color={colors.onTertiary} />
-        </View>
+        <Ionicons name="chevron-forward" size={20} color={colors.onSurfaceVariant} />
       </GlassCard>
     </TouchableOpacity>
   );
@@ -533,20 +466,16 @@ function CaloriesCard({
   consumed,
   goal,
   remaining,
-  progress,
   proteinPct,
   carbsPct,
   fatPct,
-  onAddMeal,
 }: {
   consumed: number;
   goal: number;
   remaining: number;
-  progress: number;
   proteinPct: number;
   carbsPct: number;
   fatPct: number;
-  onAddMeal: () => void;
 }) {
   const { colors } = useAppTheme();
   const { t } = useAppLocalization();
@@ -558,24 +487,10 @@ function CaloriesCard({
         { backgroundColor: colors.surface, borderColor: colors.outlineVariant },
       ]}
     >
-      <View style={[styles.glow, { backgroundColor: `${colors.primary}22` }]} />
       <View style={styles.calorieCardHeader}>
-        <View>
-          <Text style={[styles.calorieCardTitle, { color: colors.onSurface }]}>
-            {t({ tr: "Günlük enerji", en: "Daily energy" })}
-          </Text>
-          <Text
-            style={[
-              styles.calorieCardSubtitle,
-              { color: colors.onSurfaceVariant },
-            ]}
-          >
-            {t({
-              tr: "Bugünkü hedefin ve makro dengesi",
-              en: "Your goal and macro balance for today",
-            })}
-          </Text>
-        </View>
+        <Text style={[styles.calorieCardTitle, { color: colors.onSurface }]}>
+          {t({ tr: "Günlük enerji", en: "Daily energy" })}
+        </Text>
         <View
           style={[
             styles.calorieStatusChip,
@@ -588,15 +503,13 @@ function CaloriesCard({
           </Text>
         </View>
       </View>
-      <View style={styles.ringWrapper}>
-        <View style={styles.ringFrame}>
-          <ProgressRing
-            size={176}
-            progress={progress}
-            centerValue={formatNumber(Math.round(remaining))}
-            centerLabel={t({ tr: "KALORİ KALDI", en: "CALORIES LEFT" })}
-          />
-        </View>
+      <View style={styles.energyNumberBlock}>
+        <Text style={[styles.energyNumber, { color: colors.onSurface }]}>
+          {formatNumber(Math.round(remaining))}
+        </Text>
+        <Text style={[styles.energyLabel, { color: colors.onSurfaceVariant }]}>
+          {t({ tr: "KALORİ KALDI", en: "CALORIES LEFT" })}
+        </Text>
       </View>
       <View style={styles.macros}>
         <Macro
@@ -671,32 +584,6 @@ function CaloriesCard({
           </View>
         </View>
       </View>
-      {consumed === 0 ? (
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel={t({
-            tr: "İlk öğününü ekle",
-            en: "Add your first meal",
-          })}
-          onPress={onAddMeal}
-          activeOpacity={0.84}
-          style={[
-            styles.calorieEmptyAction,
-            { backgroundColor: colors.primary },
-          ]}
-        >
-          <Ionicons
-            name="add-circle-outline"
-            size={18}
-            color={colors.onPrimary}
-          />
-          <Text
-            style={[styles.calorieEmptyActionText, { color: colors.onPrimary }]}
-          >
-            {t({ tr: "İlk öğününü ekle", en: "Add your first meal" })}
-          </Text>
-        </TouchableOpacity>
-      ) : null}
     </GlassCard>
   );
 }
@@ -729,237 +616,162 @@ function Macro({
   );
 }
 
-function SummaryPeriodsCard({
-  summary,
+function WeeklyAnalysisSection({
+  snapshot,
   onOpenDetails,
+  onStartAnalysis,
 }: {
-  summary: NutritionSummary | null;
+  snapshot: BodyProgressSnapshot | null;
   onOpenDetails: () => void;
+  onStartAnalysis: () => void;
 }) {
   const { colors } = useAppTheme();
   const { t } = useAppLocalization();
-  if (!summary) return null;
+  const latestScore = snapshot?.latestPhysiqueScore ?? null;
 
   return (
-    <GlassCard variant="panel" style={styles.summaryCard}>
-      <View style={styles.summaryHeader}>
-        <View style={styles.summaryHeadingRow}>
-          <View
-            style={[
-              styles.headingIcon,
-              { backgroundColor: `${colors.primary}14` },
-            ]}
-          >
-            <Ionicons
-              name="stats-chart-outline"
-              size={17}
-              color={colors.primary}
-            />
-          </View>
-          <View>
-            <Text style={[styles.summaryTitle, { color: colors.onSurface }]}>
-              {t({ tr: "Kalori ", en: "Calorie " })}
-              <Text style={{ color: colors.primary }}>
-                {t({ tr: "ritmi", en: "rhythm" })}
-              </Text>
-            </Text>
-            <Text
-              style={[styles.summaryBody, { color: colors.onSurfaceVariant }]}
-            >
-              {t({
-                tr: "Günlük, haftalık ve aylık görünüm",
-                en: "Daily, weekly, and monthly view",
-              })}
-            </Text>
-          </View>
+    <View style={styles.weeklyAnalysisSection}>
+      <View style={styles.sectionHeader}>
+        <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>
+          {t({ tr: "Haftalık Analiz", en: "Weekly Analysis" })}
+        </Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          activeOpacity={0.8}
+          onPress={onOpenDetails}
+          style={styles.sectionAction}
+        >
+          <Text style={[styles.sectionActionText, { color: colors.primary }]}>
+            {t({ tr: "Detay", en: "Details" })}
+          </Text>
+          <Ionicons name="chevron-forward" size={15} color={colors.primary} />
+        </TouchableOpacity>
+      </View>
+      <GlassCard variant="panel" style={styles.analysisRowCard}>
+        <View style={[styles.analysisIcon, { backgroundColor: `${colors.primary}12` }]}>
+          <Ionicons name="body-outline" size={20} color={colors.primary} />
+        </View>
+        <View style={styles.analysisCopy}>
+          <Text style={[styles.analysisTitle, { color: colors.onSurface }]}>
+            {t({ tr: "Vücut Analizi", en: "Physique Analysis" })}
+          </Text>
+          <Text style={[styles.analysisBody, { color: colors.onSurfaceVariant }]}>
+            {latestScore
+              ? t({
+                  tr: `Son skor ${Math.round(latestScore.score)} / 100`,
+                  en: `Latest score ${Math.round(latestScore.score)} / 100`,
+                })
+              : t({ tr: "Henüz veri yok", en: "No data yet" })}
+          </Text>
         </View>
         <TouchableOpacity
           accessibilityRole="button"
-          accessibilityLabel={t({
-            tr: "Kalori ritmi detayını aç",
-            en: "Open calorie rhythm details",
-          })}
-          onPress={onOpenDetails}
-          activeOpacity={0.8}
-          style={styles.summaryAction}
+          activeOpacity={0.84}
+          onPress={latestScore ? onOpenDetails : onStartAnalysis}
+          style={[styles.analysisAction, { backgroundColor: `${colors.primary}12` }]}
         >
-          <Text style={[styles.summaryActionText, { color: colors.secondary }]}>
-            {t({ tr: "Detay", en: "Details" })}
+          <Text style={[styles.analysisActionText, { color: colors.primary }]}>
+            {latestScore ? t({ tr: "TAKİP ET", en: "TRACK" }) : t({ tr: "ANALİZ BAŞLAT", en: "START ANALYSIS" })}
           </Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.secondary} />
         </TouchableOpacity>
-      </View>
-      <View style={styles.summaryGrid}>
-        <PeriodMiniCard
-          label={summary.daily.label}
-          value={`${Math.round(summary.daily.kcal)}`}
-          mealCount={summary.daily.mealCount}
-          accent={colors.secondary}
-        />
-        <PeriodMiniCard
-          label={summary.weekly.label}
-          value={`${Math.round(summary.weekly.kcal)}`}
-          mealCount={summary.weekly.mealCount}
-          accent={colors.primary}
-        />
-        <PeriodMiniCard
-          label={summary.monthly.label}
-          value={`${Math.round(summary.monthly.kcal)}`}
-          mealCount={summary.monthly.mealCount}
-          accent={colors.tertiary}
-        />
-      </View>
-    </GlassCard>
-  );
-}
-
-function PeriodMiniCard({
-  label,
-  value,
-  mealCount,
-  accent,
-}: {
-  label: string;
-  value: string;
-  mealCount: number;
-  accent: string;
-}) {
-  const { colors } = useAppTheme();
-  const { t } = useAppLocalization();
-
-  return (
-    <View
-      style={[styles.periodCard, { backgroundColor: colors.surfaceContainer }]}
-    >
-      <Text style={[styles.periodLabel, { color: accent }]}>{label}</Text>
-      <Text style={[styles.periodValue, { color: colors.onSurface }]}>
-        {formatNumber(Number(value))}
-      </Text>
-      <Text style={[styles.periodMeta, { color: colors.onSurfaceVariant }]}>
-        {mealCount} {t({ tr: "öğün", en: "meals" })}
-      </Text>
+      </GlassCard>
     </View>
   );
 }
 
-function WeeklyPulseCard({
+function WeeklyStatsGrid({
   streak,
   workoutCount,
-  workoutMinutes,
-  weeklyMeals,
-  onOpenWorkout,
-  onOpenGoals,
+  weeklyCalories,
+  onOpenProgress,
 }: {
   streak: number;
   workoutCount: number;
-  workoutMinutes: number;
-  weeklyMeals: number;
-  onOpenWorkout: () => void;
-  onOpenGoals: () => void;
+  weeklyCalories: number;
+  onOpenProgress: () => void;
 }) {
-  const { colors } = useAppTheme();
   const { t } = useAppLocalization();
 
   return (
-    <GlassCard variant="panel" style={styles.pulseCard}>
-      <View style={styles.sectionHeader}>
-        <View style={styles.summaryHeadingRow}>
-          <View
-            style={[
-              styles.headingIcon,
-              { backgroundColor: `${colors.primary}14` },
-            ]}
-          >
-            <Ionicons
-              name="trending-up-outline"
-              size={18}
-              color={colors.primary}
-            />
-          </View>
-          <Text style={[styles.weeklyTitle, { color: colors.onSurface }]}>
-            {t({ tr: "Bu haftaki ", en: "This week's " })}
-            <Text style={{ color: colors.primary }}>
-              {t({ tr: "ilerleyiş", en: "progress" })}
-            </Text>
-          </Text>
-        </View>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel={t({ tr: "Hedefleri aç", en: "Open goals" })}
-          activeOpacity={0.8}
-          onPress={onOpenGoals}
-          style={styles.sectionAction}
-        >
-          <Text style={[styles.sectionActionText, { color: colors.secondary }]}>
-            {t({ tr: "Hedefler", en: "Goals" })}
-          </Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.secondary} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.pulseGrid}>
-        <PulseStat
-          label={t({ tr: "Seri", en: "Streak" })}
-          value={`${streak} ${t({ tr: "gün", en: "days" })}`}
-          accent={colors.tertiary}
-        />
-        <PulseStat
-          label={t({ tr: "Antrenman", en: "Workouts" })}
-          value={`${workoutCount} ${t({ tr: "seans", en: "sessions" })}`}
-          accent={colors.secondary}
-        />
-        <PulseStat
-          label={t({ tr: "Toplam süre", en: "Total time" })}
-          value={`${workoutMinutes} ${t({ tr: "dk", en: "min" })}`}
-          accent={colors.primary}
-        />
-        <PulseStat
-          label={t({ tr: "Beslenme", en: "Nutrition" })}
-          value={`${weeklyMeals} ${t({ tr: "öğün", en: "meals" })}`}
-          accent={colors.primary}
-        />
-      </View>
-      <TouchableOpacity
-        accessibilityRole="button"
-        accessibilityLabel={t({
-          tr: "Antrenman ilerleme ekranını aç",
-          en: "Open workout progress screen",
-        })}
-        style={[styles.pulseButton, { backgroundColor: colors.secondary }]}
-        onPress={onOpenWorkout}
-        activeOpacity={0.85}
-      >
-        <Ionicons
-          name="analytics-outline"
-          size={18}
-          color={colors.onSecondary}
-        />
-        <Text style={[styles.pulseButtonText, { color: colors.onSecondary }]}>
-          {t({ tr: "İlerleme ekranına git", en: "Go to progress" })}
-        </Text>
-      </TouchableOpacity>
-    </GlassCard>
+    <View style={styles.weeklyStatsGrid}>
+      <MetricTile
+        icon="flame-outline"
+        value={`${streak}`}
+        label={t({ tr: "ANTRENMAN\nSERİSİ", en: "WORKOUT\nSTREAK" })}
+        onPress={onOpenProgress}
+      />
+      <MetricTile
+        icon="bar-chart"
+        value={weeklyCalories > 0 ? formatNumber(Math.round(weeklyCalories / 7)) : `${workoutCount}`}
+        label={weeklyCalories > 0 ? t({ tr: "HAF. KALORİ\nORT.", en: "WEEKLY CAL\nAVG." }) : t({ tr: "HAF. ANTRENMAN\nSAYISI", en: "WEEKLY WORKOUT\nCOUNT" })}
+        onPress={onOpenProgress}
+      />
+    </View>
   );
 }
 
-function PulseStat({
-  label,
+function MetricTile({
+  icon,
   value,
-  accent,
+  label,
+  onPress,
 }: {
-  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
   value: string;
-  accent: string;
+  label: string;
+  onPress: () => void;
 }) {
   const { colors } = useAppTheme();
 
   return (
-    <View
-      style={[styles.pulseStat, { backgroundColor: colors.surfaceContainer }]}
-    >
-      <Text style={[styles.pulseStatLabel, { color: accent }]}>{label}</Text>
-      <Text style={[styles.pulseStatValue, { color: colors.onSurface }]}>
-        {value}
+    <TouchableOpacity accessibilityRole="button" activeOpacity={0.84} onPress={onPress} style={[styles.metricTile, { backgroundColor: colors.surface, borderColor: colors.outlineVariant }]}>
+      <Ionicons name={icon} size={22} color={colors.primary} />
+      <View style={styles.metricTileCopy}>
+        <Text style={[styles.metricTileValue, { color: colors.onSurface }]}>{value}</Text>
+        <Text style={[styles.metricTileLabel, { color: colors.onSurfaceVariant }]}>{label}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function RecentDevelopmentsCard({
+  proteinPct,
+  workoutCount,
+}: {
+  proteinPct: number;
+  workoutCount: number;
+}) {
+  const { colors } = useAppTheme();
+  const { t } = useAppLocalization();
+  const proteinMessage = proteinPct >= 75
+    ? t({ tr: "Protein alımı hedefine daha yakın.", en: "Protein intake is closer to target." })
+    : t({ tr: "Protein alımı hedefinin altında kalıyor.", en: "Protein intake is staying below target." });
+  const workoutMessage = workoutCount >= 2
+    ? t({ tr: "Antrenman istikrarı bu hafta arttı.", en: "Training consistency improved this week." })
+    : t({ tr: "Bu hafta antrenman ritmi henüz kuruluyor.", en: "Training rhythm is still building this week." });
+
+  return (
+    <View style={styles.recentSection}>
+      <Text style={[styles.recentHeading, { color: colors.onSurfaceVariant }]}>
+        {t({ tr: "SON GELİŞMELER", en: "LATEST UPDATES" })}
       </Text>
+      <GlassCard variant="panel" style={styles.recentCard}>
+        <RecentDevelopmentItem text={proteinMessage} meta={t({ tr: "DÜN", en: "YESTERDAY" })} />
+        <View style={[styles.recentDivider, { backgroundColor: colors.outlineVariant }]} />
+        <RecentDevelopmentItem text={workoutMessage} meta={t({ tr: "2 GÜN ÖNCE", en: "2 DAYS AGO" })} />
+      </GlassCard>
+    </View>
+  );
+}
+
+function RecentDevelopmentItem({ text, meta }: { text: string; meta: string }) {
+  const { colors } = useAppTheme();
+
+  return (
+    <View style={styles.recentItem}>
+      <View style={[styles.recentDot, { backgroundColor: colors.primary }]} />
+      <Text style={[styles.recentText, { color: colors.onSurface }]}>{text}</Text>
+      <Text style={[styles.recentMeta, { color: colors.onSurfaceVariant }]}>{meta}</Text>
     </View>
   );
 }
@@ -972,7 +784,7 @@ const styles = createDynamicStyles(() => ({
     maxWidth: layout.maxContentWidth,
     alignSelf: "center",
     paddingHorizontal: spacing.containerMargin,
-    gap: spacing.sectionGap,
+    gap: 18,
   },
   initialLoading: {
     minHeight: 56,
@@ -1040,9 +852,9 @@ const styles = createDynamicStyles(() => ({
   },
   priorityButtonText: { ...typography.buttonLg },
   caloriesCard: {
-    paddingHorizontal: spacing.mdPlus,
-    paddingTop: spacing.mdPlus,
-    paddingBottom: spacing.md,
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 16,
     alignItems: "center",
     overflow: "hidden",
   },
@@ -1074,6 +886,14 @@ const styles = createDynamicStyles(() => ({
     gap: spacing.xs - 3,
   },
   calorieStatusText: { ...typography.labelXs },
+  energyNumberBlock: {
+    minHeight: 166,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  energyNumber: { ...typography.statsNumber, fontSize: 31, lineHeight: 36 },
+  energyLabel: { ...typography.labelCaps, fontSize: 10, letterSpacing: 1.2 },
   ringWrapper: {
     marginTop: spacing.sm,
     marginBottom: spacing.xs,
@@ -1192,10 +1012,11 @@ const styles = createDynamicStyles(() => ({
   },
   pulseButtonText: { ...typography.buttonLg },
   coachCard: {
-    padding: spacing.cardPadding,
+    padding: 14,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
+    borderWidth: 1.5,
   },
   coachCopy: { flex: 1, gap: 4 },
   coachNoteBadge: {
@@ -1218,6 +1039,53 @@ const styles = createDynamicStyles(() => ({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  sectionTitle: { ...typography.sectionTitle, fontSize: 20, lineHeight: 26 },
+  weeklyAnalysisSection: { gap: 10 },
+  analysisRowCard: {
+    minHeight: 58,
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  analysisIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  analysisCopy: { flex: 1, gap: 2 },
+  analysisTitle: { ...typography.cardTitle, fontSize: 18, lineHeight: 23 },
+  analysisBody: { ...typography.bodyXs },
+  analysisAction: {
+    minHeight: 42,
+    borderRadius: radius.lg,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  analysisActionText: { ...typography.labelXs, fontSize: 10, letterSpacing: 0.4 },
+  weeklyStatsGrid: { flexDirection: "row", gap: 12 },
+  metricTile: {
+    flex: 1,
+    minHeight: 124,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    padding: 14,
+    justifyContent: "space-between",
+  },
+  metricTileCopy: { gap: 2 },
+  metricTileValue: { ...typography.statsNumber, fontSize: 31, lineHeight: 35 },
+  metricTileLabel: { ...typography.labelCaps, fontSize: 9, lineHeight: 12 },
+  recentSection: { gap: 9 },
+  recentHeading: { ...typography.labelCaps, letterSpacing: 1.8 },
+  recentCard: { paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
+  recentItem: { minHeight: 34, flexDirection: "row", alignItems: "center", gap: 10 },
+  recentDot: { width: 7, height: 7, borderRadius: radius.full },
+  recentText: { ...typography.bodySm, flex: 1 },
+  recentMeta: { ...typography.labelXs, fontSize: 9 },
+  recentDivider: { height: 1, marginLeft: 17 },
   sectionAction: {
     minHeight: 44,
     flexDirection: "row",

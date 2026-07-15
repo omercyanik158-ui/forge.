@@ -1,4 +1,5 @@
-import { EXERCISES } from '@/data/exercises';
+import { CSV_EXERCISES } from '@/data/trainingCatalog.generated';
+import { FORGE_REVIEWED_EXERCISES } from '@/workout-programming/data/exerciseIdMap';
 import type { ExerciseLibraryItem } from '@/types';
 import { normalizedText } from './textUtils';
 
@@ -13,9 +14,14 @@ export type SearchableExercise = {
 let exerciseById: Map<string, ExerciseLibraryItem> | null = null;
 let searchableExercises: SearchableExercise[] | null = null;
 
+const ALL_EXERCISES: ExerciseLibraryItem[] = [
+  ...CSV_EXERCISES,
+  ...FORGE_REVIEWED_EXERCISES,
+];
+
 function getExerciseByIdIndex(): Map<string, ExerciseLibraryItem> {
   if (!exerciseById) {
-    exerciseById = new Map(EXERCISES.map((exercise) => [exercise.id, exercise]));
+    exerciseById = new Map(ALL_EXERCISES.map((exercise) => [exercise.id, exercise]));
   }
 
   return exerciseById;
@@ -23,7 +29,7 @@ function getExerciseByIdIndex(): Map<string, ExerciseLibraryItem> {
 
 export function getSearchableExercises(): SearchableExercise[] {
   if (!searchableExercises) {
-    searchableExercises = EXERCISES.map((exercise) => ({
+    searchableExercises = ALL_EXERCISES.map((exercise) => ({
       exercise,
       name: normalizedText(exercise.displayName),
       group: normalizedText(exercise.muscleGroup),
@@ -45,7 +51,7 @@ export function hasExercise(id: string): boolean {
 
 export function searchExercises(query: string): ExerciseLibraryItem[] {
   const normalizedQuery = normalizedText(query).trim();
-  if (!normalizedQuery) return EXERCISES;
+  if (!normalizedQuery) return ALL_EXERCISES;
 
   return getSearchableExercises()
     .filter((entry) =>

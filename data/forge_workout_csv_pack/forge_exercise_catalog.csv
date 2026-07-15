@@ -1,0 +1,68 @@
+exercise_id,exercise_name,movement_pattern,primary_muscles,equipment,default_role
+ab_wheel,Ab Wheel Rollout,anti_extension,core,ab_wheel,core
+assisted_pull_up,Assisted Pull-Up,vertical_pull,"lats,biceps",assisted_machine,secondary_compound
+back_squat,Back Squat,squat,quads,"barbell,rack",main_lift
+band_pulldown,Resistance-Band Pulldown,vertical_pull,"lats,biceps",resistance_band,accessory_compound
+band_row,Resistance-Band Row,horizontal_pull,"upper_back,lats,biceps",resistance_band,accessory_compound
+barbell_curl,Barbell Curl,elbow_flexion,biceps,barbell,isolation
+barbell_row,Barbell Row,horizontal_pull,"upper_back,lats,biceps",barbell,secondary_compound
+bench_press,Barbell Bench Press,horizontal_push,"chest,triceps,front_delts","barbell,bench,rack",main_lift
+bike_intervals,Stationary Bike Intervals,conditioning,cardio,stationary_bike,conditioning
+bodyweight_squat,Bodyweight Squat,squat,"quads,glutes",bodyweight,secondary_compound
+bulgarian_split_squat,Bulgarian Split Squat,lunge,"quads,glutes","dumbbell,bench",accessory_compound
+cable_curl,Cable Curl,elbow_flexion,biceps,cable,isolation
+cable_fly,Cable Fly,chest_adduction,chest,cable,isolation
+cable_lateral_raise,Cable Lateral Raise,shoulder_abduction,side_delts,cable,isolation
+chest_supported_row,Chest-Supported Row,horizontal_pull,"upper_back,lats,biceps",machine_or_dumbbell,secondary_compound
+close_grip_bench,Close-Grip Bench Press,horizontal_push,"triceps,chest","barbell,bench,rack",secondary_compound
+conventional_deadlift,Conventional Deadlift,hinge,"glutes,hamstrings,back",barbell,main_lift
+dead_bug,Dead Bug,anti_extension,core,bodyweight,core
+dumbbell_bench_press,Dumbbell Bench Press,horizontal_push,"chest,triceps","dumbbell,bench",secondary_compound
+dumbbell_rdl,Dumbbell Romanian Deadlift,hinge,"hamstrings,glutes",dumbbell,secondary_compound
+dumbbell_shoulder_press,Dumbbell Shoulder Press,vertical_push,"front_delts,triceps","dumbbell,bench",secondary_compound
+face_pull,Face Pull,horizontal_abduction,"rear_delts,upper_back",cable,isolation
+farmer_carry,Farmer Carry,loaded_carry,"grip,core",dumbbell_or_kettlebell,conditioning
+front_squat,Front Squat,squat,quads,"barbell,rack",secondary_compound
+goblet_squat,Goblet Squat,squat,quads,dumbbell,secondary_compound
+hack_squat,Hack Squat,squat,quads,machine,secondary_compound
+hammer_curl,Hammer Curl,elbow_flexion,"biceps,forearms",dumbbell,isolation
+hanging_leg_raise,Hanging Leg Raise,hip_flexion,core,pullup_bar,core
+hip_thrust,Barbell Hip Thrust,hinge,glutes,"barbell,bench",secondary_compound
+incline_barbell_press,Incline Barbell Press,incline_push,"upper_chest,triceps,front_delts","barbell,incline_bench,rack",secondary_compound
+incline_dumbbell_curl,Incline Dumbbell Curl,elbow_flexion,biceps,"dumbbell,incline_bench",isolation
+incline_dumbbell_press,Incline Dumbbell Press,incline_push,"upper_chest,triceps,front_delts","dumbbell,incline_bench",secondary_compound
+incline_walk,Incline Treadmill Walk,conditioning,cardio,treadmill,conditioning
+inverted_row,Inverted Row,horizontal_pull,"upper_back,lats,biceps",bar_or_rings,accessory_compound
+lat_pulldown,Lat Pulldown,vertical_pull,"lats,biceps",cable,secondary_compound
+lateral_raise,Dumbbell Lateral Raise,shoulder_abduction,side_delts,dumbbell,isolation
+leg_curl,Leg Curl,knee_flexion,hamstrings,machine,isolation
+leg_extension,Leg Extension,knee_extension,quads,machine,isolation
+leg_press,Leg Press,squat,quads,machine,secondary_compound
+low_to_high_cable_fly,Low-to-High Cable Fly,chest_adduction,upper_chest,cable,isolation
+machine_chest_press,Machine Chest Press,horizontal_push,"chest,triceps",machine,secondary_compound
+machine_shoulder_press,Machine Shoulder Press,vertical_push,"front_delts,triceps",machine,secondary_compound
+neutral_grip_pulldown,Neutral-Grip Pulldown,vertical_pull,"lats,biceps",cable,secondary_compound
+nordic_curl,Nordic Curl,knee_flexion,hamstrings,bodyweight,isolation
+one_arm_dumbbell_row,One-Arm Dumbbell Row,horizontal_pull,"lats,upper_back,biceps","dumbbell,bench",secondary_compound
+overhead_press,Barbell Overhead Press,vertical_push,"front_delts,triceps","barbell,rack",main_lift
+overhead_triceps_extension,Overhead Triceps Extension,elbow_extension,triceps,cable_or_dumbbell,isolation
+pallof_press,Pallof Press,anti_rotation,core,cable_or_band,core
+paused_bench_press,Paused Bench Press,horizontal_push,"chest,triceps,front_delts","barbell,bench,rack",main_lift
+pike_push_up,Pike Push-Up,vertical_push,"front_delts,triceps",bodyweight,accessory_compound
+plank,Plank,anti_extension,core,bodyweight,core
+pull_up,Pull-Up,vertical_pull,"lats,biceps",pullup_bar,secondary_compound
+push_up,Push-Up,horizontal_push,"chest,triceps",bodyweight,accessory_compound
+reverse_lunge,Reverse Lunge,lunge,"quads,glutes",dumbbell,accessory_compound
+reverse_pec_deck,Reverse Pec Deck,horizontal_abduction,"rear_delts,upper_back",machine,isolation
+romanian_deadlift,Romanian Deadlift,hinge,"hamstrings,glutes",barbell,secondary_compound
+seated_cable_row,Seated Cable Row,horizontal_pull,"upper_back,lats,biceps",cable,secondary_compound
+seated_calf_raise,Seated Calf Raise,calf_raise,calves,machine,isolation
+single_leg_glute_bridge,Single-Leg Glute Bridge,hinge,"glutes,hamstrings",bodyweight,accessory_compound
+skull_crusher,Skull Crusher,elbow_extension,triceps,"ez_bar,bench",isolation
+split_squat,Split Squat,lunge,"quads,glutes",bodyweight,accessory_compound
+standing_calf_raise,Standing Calf Raise,calf_raise,calves,machine,isolation
+step_up,Step Up,lunge,"quads,glutes","dumbbell,bench",accessory_compound
+straight_arm_pulldown,Straight-Arm Pulldown,shoulder_extension,lats,cable,isolation
+trap_bar_deadlift,Trap Bar Deadlift,hinge,"glutes,quads,hamstrings",trap_bar,main_lift
+triceps_pushdown,Triceps Pushdown,elbow_extension,triceps,cable,isolation
+weighted_dip,Weighted Dip,vertical_push,"chest,triceps","dip_station,weight",secondary_compound

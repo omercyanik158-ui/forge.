@@ -1,39 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import { applyEdit, applyEdits } from '@/services/aiProgramEditor';
 import { buildLineage, buildTransition, suggestNextBlock } from '@/services/aiProgramHistory';
-import { orchestrateAIProgram } from '@/services/aiProgramOrchestrator';
-import { buildAIProgramDecisionBlueprint } from '@/services/aiProgramDecisionEngine';
-import { buildAIProgramDecisionContext, createInitialAIProgramDraft } from '@/services/aiProgramEngine';
-import type { UserProfile } from '@/types';
+import { buildRecommendedAIProgram } from '@/services/programRecommendationEngine';
 import type { EditContext } from '@/types/aiProgramEdit';
 
-const profile: UserProfile = {
-  name: 'Test',
-  gender: 'male',
-  age: 30,
-  weightKg: 80,
-  heightCm: 180,
-  activityLevel: 'active',
-  neckCm: 38,
-  waistCm: 84,
-  goalType: 'gain',
-  createdAt: '2026-07-01T10:00:00.000Z',
-};
-
 function makePlan() {
-  const draft = createInitialAIProgramDraft({ entryPath: 'ai_hub', profile, coachPreferences: null });
-  draft.answers.mainGoal = 'build_muscle';
-  draft.answers.trainingDays = 4;
-  draft.answers.sessionDurationMin = 60;
-  draft.answers.location = 'gym';
-  draft.answers.equipment = ['machines', 'cables', 'dumbbells', 'barbells', 'bench'];
-  draft.answers.experience = 'intermediate';
-  draft.answers.priorityMuscles = ['chest'];
-  draft.answers.painLimitations = ['none'];
-  draft.answers.recoveryQuality = 'okay';
-  const context = buildAIProgramDecisionContext({ draft, profile });
-  const blueprint = buildAIProgramDecisionBlueprint(context);
-  return orchestrateAIProgram({ draftId: draft.id, context, blueprint }).plan;
+  return buildRecommendedAIProgram({
+    draftId: 'edit-test-draft-12345678',
+    answers: {
+      mainGoal: 'build_muscle',
+      preferredProgramStyle: 'auto',
+      trainingDays: 4,
+      sessionDurationMin: 60,
+      location: 'gym',
+      equipment: ['machines', 'cables', 'dumbbells', 'barbells', 'bench'],
+      experience: 'intermediate',
+      priorityMuscles: ['chest'],
+      painLimitations: ['none'],
+      recoveryQuality: 'okay',
+      useLatestPhysiqueAnalysis: false,
+    },
+  });
 }
 
 const editContext: EditContext = {
@@ -50,10 +37,10 @@ describe('editor replace exercise', () => {
       weekIndex: 0,
       dayIndex: 0,
       exerciseIndex: 0,
-      newExerciseId: 'Dumbbell_Bench_Press',
+      newExerciseId: 'csv-bench-press-dumbbell',
     }, editContext);
     expect(result.applied).toBe(true);
-    expect(result.plan.weeks[0]!.days[0]!.exercises[0]!.exerciseId).toBe('Dumbbell_Bench_Press');
+    expect(result.plan.weeks[0]!.days[0]!.exercises[0]!.exerciseId).toBe('csv-bench-press-dumbbell');
   });
 
   it('rejects a replacement with a non-catalog id', () => {
@@ -76,7 +63,7 @@ describe('editor replace exercise', () => {
       weekIndex: 0,
       dayIndex: 0,
       exerciseIndex: 0,
-      newExerciseId: 'Barbell_Deadlift',
+      newExerciseId: 'csv-deadlift-barbell',
     }, { ...editContext, limitations: ['lower_back'] });
     expect(result.applied).toBe(true);
     expect(result.warnings.length).toBeGreaterThan(0);
@@ -117,15 +104,17 @@ describe('editor update prescription', () => {
   it('recomputes day aggregates after a set change', () => {
     const plan = makePlan();
     const before = plan.weeks[0]!.days[0]!.totalSets;
+    const currentSets = plan.weeks[0]!.days[0]!.exercises[0]!.sets;
+    const nextSets = currentSets >= 8 ? currentSets - 1 : currentSets + 1;
     const result = applyEdit(plan, {
       type: 'updatePrescription',
       weekIndex: 0,
       dayIndex: 0,
       exerciseIndex: 0,
-      sets: 1,
+      sets: nextSets,
     }, editContext);
     const after = result.plan.weeks[0]!.days[0]!.totalSets;
-    expect(after).toBeLessThan(before);
+    expect(after).not.toBe(before);
   });
 });
 

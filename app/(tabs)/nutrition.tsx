@@ -17,7 +17,6 @@ import {
   View,
 } from "react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { Image as ExpoImage } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -32,7 +31,7 @@ import {
   calorieGoal,
   mealTotals,
 } from "@/services/calculations";
-import { dateKey, formatDateLabel } from "@/services/dateUtils";
+import { dateKey } from "@/services/dateUtils";
 import {
   formatDate,
   formatLiquidValue,
@@ -44,6 +43,7 @@ import {
 import { loadNutritionSummary } from "@/services/mealInsights";
 import { deleteMeal, loadMealsForDate } from "@/services/mealStore";
 import { loadProfile } from "@/services/profileStore";
+import { formatPersonName } from "@/services/textUtils";
 import {
   addWater,
   loadWaterForWeight,
@@ -119,8 +119,7 @@ export default function NutritionScreen() {
   const router = useRouter();
   const { colors: themeColors } = useAppTheme();
   const { t } = useAppLocalization();
-  const [selectedDate, setSelectedDate] = useState(dateKey());
-  const [pickerVisible, setPickerVisible] = useState(false);
+  const [selectedDate] = useState(dateKey());
   const [meals, setMeals] = useState<Meal[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [waterMl, setWaterMl] = useState(0);
@@ -157,10 +156,6 @@ export default function NutritionScreen() {
     }, [refresh]),
   );
 
-  const handleSelectDate = useCallback((nextDate: Date) => {
-    setSelectedDate(dateKey(nextDate));
-  }, []);
-
   async function handleDelete(id: string) {
     try {
       await deleteMeal(id);
@@ -194,7 +189,12 @@ export default function NutritionScreen() {
     <View
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
-      <TopBar />
+      <TopBar
+        showAvatar
+        showAction
+        actionIcon="settings-outline"
+        onActionPress={() => router.push("/settings-privacy")}
+      />
       <ScrollView
         ref={scrollRef}
         style={[styles.scroll, { backgroundColor: themeColors.background }]}
@@ -209,31 +209,15 @@ export default function NutritionScreen() {
         showsVerticalScrollIndicator={false}
       >
         <HeaderSection
-          key={selectedDate}
-          selectedDate={selectedDate}
-          selectedDateValue={selectedDateValue}
-          pickerVisible={pickerVisible}
-          onTogglePicker={() => setPickerVisible((current) => !current)}
-          onClosePicker={() => setPickerVisible(false)}
-          onSelectDate={handleSelectDate}
+          name={profile?.name}
+          hasMealsToday={meals.length > 0}
         />
 
-        <SummaryGrid
+        <CaloriesSummary
           consumed={mealTotals(meals)}
           goal={profile ? calorieGoal(profile) : DEFAULT_DAILY_CALORIE_GOAL}
           weeklyMealCount={weeklyMealCount}
-          waterMl={waterMl}
-          waterGoalMl={waterGoalMl}
-          weightKg={profile?.weightKg}
-          onAddWater={handleAddWater}
-          onResetWater={handleResetWater}
           onOpenInsights={() => router.push("/calorie-insights")}
-          onOpenWater={() =>
-            router.push({
-              pathname: "/water-tracking",
-              params: { date: selectedDate },
-            })
-          }
         />
 
         <GlassCard
@@ -274,10 +258,7 @@ export default function NutritionScreen() {
                       { color: themeColors.onSurface },
                     ]}
                   >
-                    {t("migrated.nutrition_007")}
-                    <Text style={{ color: themeColors.primary }}>
-                      {t("migrated.nutrition_008")}
-                    </Text>
+                    {t({ tr: "Öğünler", en: "Meals" })}
                   </Text>
                   <Text
                     style={[
@@ -285,7 +266,10 @@ export default function NutritionScreen() {
                       { color: themeColors.onSurfaceVariant },
                     ]}
                   >
-                    {t("migrated.nutrition_009")}
+                    {t({
+                      tr: "Günlük kayıtların ve besin dağılımın tek panelde.",
+                      en: "Your daily logs and nutrition distribution in one panel.",
+                    })}
                   </Text>
                 </View>
               </View>
@@ -379,7 +363,7 @@ export default function NutritionScreen() {
                     { color: themeColors.onSurface },
                   ]}
                 >
-                  {t("migrated.nutrition_014")}
+                  {t({ tr: "Henüz öğün eklenmedi", en: "No meals added yet" })}
                 </Text>
                 <Text
                   style={[
@@ -387,7 +371,10 @@ export default function NutritionScreen() {
                     { color: themeColors.onSurfaceVariant },
                   ]}
                 >
-                  {t("migrated.nutrition_015")}
+                  {t({
+                    tr: "İlk kaydını ekleyerek koçunun sana rehberlik etmesini sağla.",
+                    en: "Add your first log so your coach can guide you.",
+                  })}
                 </Text>
                 <TouchableOpacity
                   accessibilityRole="button"
@@ -415,7 +402,7 @@ export default function NutritionScreen() {
                       { color: themeColors.onPrimary },
                     ]}
                   >
-                    {t("migrated.nutrition_017")}
+                    {t({ tr: "İlk öğününü ekle", en: "Add your first meal" })}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -473,36 +460,48 @@ export default function NutritionScreen() {
           </View>
         </GlassCard>
 
+        <WaterCard
+          waterMl={waterMl}
+          goalMl={waterGoalMl}
+          weightKg={profile?.weightKg}
+          onAddWater={handleAddWater}
+          onReset={handleResetWater}
+          onOpenDetails={() =>
+            router.push({
+              pathname: "/water-tracking",
+              params: { date: selectedDate },
+            })
+          }
+        />
+
         <TipCard />
       </ScrollView>
     </View>
   );
 }
 
+function nutritionGreetingForHour(
+  hour: number,
+  t: (messages: { tr: string; en: string }) => string,
+): string {
+  if (hour < 5) return t({ tr: "İyi geceler", en: "Good night" });
+  if (hour < 12) return t({ tr: "Günaydın", en: "Good morning" });
+  if (hour < 18) return t({ tr: "İyi günler", en: "Good afternoon" });
+  if (hour < 22) return t({ tr: "İyi akşamlar", en: "Good evening" });
+  return t({ tr: "İyi geceler", en: "Good night" });
+}
+
 function HeaderSection({
-  selectedDate,
-  selectedDateValue,
-  pickerVisible,
-  onTogglePicker,
-  onClosePicker,
-  onSelectDate,
+  name,
+  hasMealsToday,
 }: {
-  selectedDate: string;
-  selectedDateValue: Date;
-  pickerVisible: boolean;
-  onTogglePicker: () => void;
-  onClosePicker: () => void;
-  onSelectDate: (date: Date) => void;
+  name?: string;
+  hasMealsToday: boolean;
 }) {
-  const { colors: themeColors, mode } = useAppTheme();
-  const { t, resolved } = useAppLocalization();
-  const [draftDate, setDraftDate] = useState(selectedDateValue);
-  const relativeLabel = formatDateLabel(selectedDate);
-  const fullLabel = formatDate(selectedDateValue, {
-    day: "numeric",
-    month: "long",
-    weekday: "short",
-  });
+  const { colors: themeColors } = useAppTheme();
+  const { t } = useAppLocalization();
+  const displayName = formatPersonName(name) || t({ tr: "Sporcu", en: "Athlete" });
+  const greeting = nutritionGreetingForHour(new Date().getHours(), t);
 
   return (
     <View style={styles.headerBlock}>
@@ -513,217 +512,16 @@ function HeaderSection({
             { color: themeColors.onSurface },
           ]}
         >
-          {t("migrated.nutrition_018")}
+          {greeting}, {displayName}
         </Text>
         <Text
-          style={[typography.labelMd, { color: themeColors.onSurfaceVariant }]}
+          style={[styles.heroSubtitle, { color: themeColors.onSurfaceVariant }]}
         >
-          {t("migrated.nutrition_019")}
+          {hasMealsToday
+            ? t({ tr: "Bugünkü öğün ve su ritmini buradan takip et.", en: "Track today's meals and hydration rhythm here." })
+            : t({ tr: "Bugün ilk öğününü eklemek önceliğin.", en: "Adding your first meal is today's priority." })}
         </Text>
       </View>
-
-      <TouchableOpacity
-        accessibilityRole="button"
-        accessibilityLabel={`${t("migrated.nutrition_020")}, ${relativeLabel}`}
-        style={[
-          styles.dateChip,
-          {
-            backgroundColor: themeColors.surfaceContainerLow,
-            borderColor: themeColors.outlineVariant,
-          },
-        ]}
-        onPress={onTogglePicker}
-        activeOpacity={0.82}
-      >
-        <View
-          style={[
-            styles.dateChipIcon,
-            { backgroundColor: `${themeColors.primary}12` },
-          ]}
-        >
-          <Ionicons
-            name="calendar-outline"
-            size={18}
-            color={themeColors.primary}
-          />
-        </View>
-        <View style={styles.dateChipCopy}>
-          <Text
-            style={[styles.dateChipLabel, { color: themeColors.onSurface }]}
-          >
-            {relativeLabel}
-          </Text>
-          <Text
-            style={[
-              styles.dateChipSub,
-              { color: themeColors.onSurfaceVariant },
-            ]}
-          >
-            {fullLabel}
-          </Text>
-        </View>
-        <Ionicons
-          name={pickerVisible ? "chevron-up" : "chevron-down"}
-          size={18}
-          color={themeColors.onSurfaceVariant}
-        />
-      </TouchableOpacity>
-
-      {pickerVisible ? (
-        <GlassCard
-          variant="panel"
-          style={[
-            styles.datePickerPanel,
-            {
-              backgroundColor: themeColors.surfaceContainerLowest,
-              borderColor: themeColors.outlineVariant,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.datePickerSurface,
-              {
-                backgroundColor: themeColors.surfaceContainerLow,
-                borderColor: `${themeColors.primary}18`,
-              },
-            ]}
-          >
-            <DateTimePicker
-              value={draftDate}
-              mode="date"
-              maximumDate={new Date()}
-              locale={resolved.localeTag}
-              display={process.env.EXPO_OS === "ios" ? "inline" : "default"}
-              themeVariant={mode === "dark" ? "dark" : "light"}
-              accentColor={themeColors.primary}
-              textColor={themeColors.onSurface}
-              design={
-                process.env.EXPO_OS === "android" ? "material" : undefined
-              }
-              title={
-                process.env.EXPO_OS === "android"
-                  ? t("migrated.nutrition_020")
-                  : undefined
-              }
-              positiveButton={
-                process.env.EXPO_OS === "android"
-                  ? {
-                      label: t("migrated.nutrition_021"),
-                      textColor: themeColors.primary,
-                    }
-                  : undefined
-              }
-              negativeButton={
-                process.env.EXPO_OS === "android"
-                  ? {
-                      label: t("migrated.nutrition_022"),
-                      textColor: themeColors.onSurfaceVariant,
-                    }
-                  : undefined
-              }
-              onChange={(event, nextDate) => {
-                if (process.env.EXPO_OS !== "ios") onClosePicker();
-                if (event.type === "dismissed" || !nextDate) return;
-                if (process.env.EXPO_OS === "ios") setDraftDate(nextDate);
-                else onSelectDate(nextDate);
-              }}
-            />
-          </View>
-          {process.env.EXPO_OS === "ios" ? (
-            <View style={styles.datePickerFooter}>
-              <TouchableOpacity
-                accessibilityRole="button"
-                style={[
-                  styles.datePickerButton,
-                  {
-                    backgroundColor: themeColors.surfaceContainerLow,
-                    borderColor: themeColors.outlineVariant,
-                  },
-                ]}
-                onPress={() => setDraftDate(new Date())}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[
-                    styles.datePickerButtonText,
-                    { color: themeColors.onSurface },
-                  ]}
-                >
-                  {t("migrated.nutrition_023")}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityRole="button"
-                style={[
-                  styles.datePickerButton,
-                  {
-                    backgroundColor: themeColors.primary,
-                    borderColor: themeColors.primary,
-                  },
-                ]}
-                onPress={() => {
-                  onSelectDate(draftDate);
-                  onClosePicker();
-                }}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[
-                    styles.datePickerButtonText,
-                    { color: themeColors.onPrimary },
-                  ]}
-                >
-                  {t("migrated.nutrition_021")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : null}
-        </GlassCard>
-      ) : null}
-    </View>
-  );
-}
-
-function SummaryGrid({
-  consumed,
-  goal,
-  weeklyMealCount,
-  waterMl,
-  waterGoalMl,
-  weightKg,
-  onAddWater,
-  onResetWater,
-  onOpenInsights,
-  onOpenWater,
-}: {
-  consumed: { kcal: number; protein: number; carbs: number; fat: number };
-  goal: number;
-  weeklyMealCount: number;
-  waterMl: number;
-  waterGoalMl: number;
-  weightKg?: number;
-  onAddWater: (amountMl: number) => void;
-  onResetWater: () => void;
-  onOpenInsights: () => void;
-  onOpenWater: () => void;
-}) {
-  return (
-    <View style={styles.summaryWrapper}>
-      <CaloriesSummary
-        consumed={consumed}
-        goal={goal}
-        weeklyMealCount={weeklyMealCount}
-        onOpenInsights={onOpenInsights}
-      />
-      <WaterCard
-        waterMl={waterMl}
-        goalMl={waterGoalMl}
-        weightKg={weightKg}
-        onAddWater={onAddWater}
-        onReset={onResetWater}
-        onOpenDetails={onOpenWater}
-      />
     </View>
   );
 }
@@ -781,10 +579,7 @@ function CaloriesSummary({
                   { color: themeColors.onSurface },
                 ]}
               >
-                {t("migrated.nutrition_024")}
-                <Text style={{ color: themeColors.primary }}>
-                  {t("migrated.nutrition_025")}
-                </Text>
+                {t({ tr: "Kalori Özeti", en: "Calorie Summary" })}
               </Text>
               <Text
                 style={[
@@ -792,7 +587,10 @@ function CaloriesSummary({
                   { color: themeColors.onSurfaceVariant },
                 ]}
               >
-                {t("migrated.nutrition_026")}
+                {t({
+                  tr: "Günlük tüketimin ve makro dağılımın.",
+                  en: "Your daily intake and macro distribution.",
+                })}
               </Text>
             </View>
           </View>
@@ -809,7 +607,7 @@ function CaloriesSummary({
             <Text
               style={[styles.calorieDetailText, { color: themeColors.primary }]}
             >
-              {t("migrated.nutrition_028")}
+                {t({ tr: "Detay", en: "Details" })}
             </Text>
             <Ionicons
               name="chevron-forward"
@@ -967,10 +765,7 @@ function WaterCard({
               <Text
                 style={[styles.waterTitle, { color: themeColors.onSurface }]}
               >
-                {t("migrated.nutrition_032")}
-                <Text style={{ color: themeColors.tertiary }}>
-                  {t("migrated.nutrition_033")}
-                </Text>
+                {t({ tr: "Su takibi", en: "Water tracking" })}
               </Text>
               <Text
                 style={[
@@ -978,7 +773,7 @@ function WaterCard({
                   { color: themeColors.onSurfaceVariant },
                 ]}
               >
-                {t("migrated.nutrition_034")}
+                {t({ tr: "Bugünkü sıvı hedefin", en: "Today's hydration goal" })}
               </Text>
             </View>
           </View>
@@ -995,7 +790,7 @@ function WaterCard({
             <Text
               style={[styles.waterDetailText, { color: themeColors.tertiary }]}
             >
-              {t("migrated.nutrition_028")}
+              {t({ tr: "Detay", en: "Details" })}
             </Text>
             <Ionicons
               name="chevron-forward"
@@ -1257,15 +1052,15 @@ function TipCard() {
         </View>
         <View style={styles.tipCopy}>
           <Text style={[styles.tipTitle, { color: themeColors.onSurface }]}>
-            {t("migrated.nutrition_040")}
-            <Text style={{ color: themeColors.tertiary }}>
-              {t("migrated.nutrition_041")}
-            </Text>
+            {t({ tr: "Beslenme İpucu", en: "Nutrition Tip" })}
           </Text>
           <Text
             style={[styles.tipBody, { color: themeColors.onSurfaceVariant }]}
           >
-            {t("migrated.nutrition_042")}
+            {t({
+              tr: "Sabah kahvaltısında protein ağırlıklı beslenmek gün boyu tokluk hissini artıracaktır.",
+              en: "A protein-forward breakfast can help increase fullness throughout the day.",
+            })}
           </Text>
         </View>
       </View>
@@ -1281,10 +1076,11 @@ const styles = createDynamicStyles(() => ({
     maxWidth: layout.maxContentWidth,
     alignSelf: "center",
     paddingHorizontal: spacing.containerMargin,
-    gap: spacing.gutter,
+    gap: 18,
   },
-  headerBlock: { gap: spacing.smPlus },
+  headerBlock: { gap: 12 },
   headerCopy: { gap: 4 },
+  heroSubtitle: { ...typography.bodySm },
   dateChip: {
     minHeight: 64,
     borderRadius: radius["2xl"],
@@ -1328,8 +1124,7 @@ const styles = createDynamicStyles(() => ({
     justifyContent: "center",
   },
   datePickerButtonText: { ...typography.buttonSm },
-  summaryWrapper: { gap: spacing.gutter },
-  caloriesCard: { padding: spacing.xl, overflow: "hidden" },
+  caloriesCard: { padding: 20, overflow: "hidden" },
   caloriesGlow: {
     position: "absolute",
     top: -40,
@@ -1386,19 +1181,19 @@ const styles = createDynamicStyles(() => ({
   caloriesRow: {
     flexDirection: "row",
     alignItems: "baseline",
-    gap: spacing.md,
-    marginTop: spacing.md,
+    gap: 6,
+    marginTop: 22,
   },
-  caloriesBar: { marginTop: spacing.xl },
+  caloriesBar: { marginTop: 10 },
   macroSummary: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: spacing.xl,
-    paddingTop: spacing.xl,
+    marginTop: 18,
+    paddingTop: 18,
     borderTopColor: `${colors.outlineVariant}33`,
     borderTopWidth: 1,
   },
-  waterCard: { padding: spacing.lg, overflow: "hidden" },
+  waterCard: { padding: 20, overflow: "hidden" },
   waterGlow: {
     position: "absolute",
     width: 144,
@@ -1507,7 +1302,7 @@ const styles = createDynamicStyles(() => ({
     alignItems: "center",
     gap: spacing.xs - 1,
   },
-  mealsPanel: { padding: spacing.cardPadding, overflow: "hidden" },
+  mealsPanel: { padding: 20, overflow: "hidden" },
   mealsPanelGlow: {
     position: "absolute",
     width: 148,
@@ -1558,13 +1353,13 @@ const styles = createDynamicStyles(() => ({
   },
   mealsEmpty: {
     alignItems: "center",
-    paddingVertical: spacing.section,
+    paddingVertical: 44,
     paddingHorizontal: spacing.sm,
-    gap: spacing.xs,
+    gap: 10,
   },
   emptyMealIcon: {
-    width: 54,
-    height: 54,
+    width: 58,
+    height: 58,
     borderRadius: radius["2xl"],
     alignItems: "center",
     justifyContent: "center",
@@ -1622,7 +1417,7 @@ const styles = createDynamicStyles(() => ({
     paddingVertical: 4,
     borderRadius: radius.sm,
   },
-  tipCard: { padding: spacing.cardPadding, overflow: "hidden" },
+  tipCard: { padding: 20, overflow: "hidden" },
   tipGlow: {
     position: "absolute",
     width: 118,
