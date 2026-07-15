@@ -5,7 +5,7 @@ import { instantiateUserProgram } from '@/workout-programming/instantiation/inst
 import { normalizeProgramRequest } from '@/workout-programming/selection/normalizeProgramRequest';
 import {
   USE_TEMPLATE_PROGRAM_ENGINE,
-  matchTemplates,
+  matchTemplatesWithRelaxation,
   type ProgramRequest,
   type TemplateEngineResult,
   type TemplateMatchResult,
@@ -16,6 +16,12 @@ export type ProgramRecommendation = {
   score: number;
   reasons: string[];
   breakdown: TemplateMatchResult['breakdown'];
+};
+
+export type ProgramSelectionExplanationItem = {
+  id: string;
+  label: string;
+  tone: 'positive' | 'neutral' | 'warning';
 };
 
 type RecommendationInput = {
@@ -40,7 +46,7 @@ function buildRequest(input: Omit<RecommendationInput, 'basePlan'>): ProgramRequ
 
 export function recommendPrograms(input: Omit<RecommendationInput, 'basePlan' | 'draftId'>): ProgramRecommendation[] {
   const request = buildRequest(input);
-  const { compatible } = matchTemplates(request);
+  const { compatible, relaxationsApplied } = matchTemplatesWithRelaxation(request);
 
   return compatible.slice(0, 3).map((match) => ({
     templateId: match.templateId,
@@ -53,8 +59,56 @@ export function recommendPrograms(input: Omit<RecommendationInput, 'basePlan' | 
       ...(input.answers.useLatestPhysiqueAnalysis && input.physiqueSummary?.focusMuscles.length
         ? ['Vücut analizi odak kasları değerlendirmeye dahil edildi.']
         : []),
+      ...relaxationsApplied,
     ],
   }));
+}
+
+export function getProgramSelectionExplanation(result: TemplateEngineResult): ProgramSelectionExplanationItem[] {
+  const items: ProgramSelectionExplanationItem[] = [
+    {
+      id: 'goal',
+      label: `Hedefin için uygun program ailesi seçildi.`,
+      tone: result.match.breakdown.goal > 0 ? 'positive' : 'warning',
+    },
+    {
+      id: 'days',
+      label: `${result.request.daysPerWeek} günlük takvimine uyuyor.`,
+      tone: result.match.breakdown.days > 0 ? 'positive' : 'warning',
+    },
+    {
+      id: 'level',
+      label: `${result.request.level} seviyene göre filtrelendi.`,
+      tone: result.match.breakdown.level > 0 ? 'positive' : 'neutral',
+    },
+    {
+      id: 'equipment',
+      label: `Seçtiğin ekipman profiliyle uyumlu.`,
+      tone: result.match.breakdown.equipment > 0 ? 'positive' : 'warning',
+    },
+  ];
+  if (result.request.preferredSplit) {
+    items.push({
+      id: 'split',
+      label: `Tercih ettiğin split dikkate alındı.`,
+      tone: result.match.breakdown.split > 0 ? 'positive' : 'neutral',
+    });
+  }
+  if (result.adaptations.length > 0) {
+    items.push({
+      id: 'adaptation',
+      label: `Seçili odak alanlarına göre kontrollü ayarlama yapıldı.`,
+      tone: 'positive',
+    });
+  }
+  if (result.matchMode === 'relaxed_match') {
+    items.unshift({
+      id: 'relaxed_match',
+      label: 'Tam eşleşme yoktu; en yakın güvenli plan seçildi.',
+      tone: 'neutral',
+    });
+  }
+  return items;
 }
 
 export function buildRecommendedAIProgram(input: RecommendationInput): AIProgramPlan {

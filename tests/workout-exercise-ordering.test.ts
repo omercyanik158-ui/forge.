@@ -7,10 +7,11 @@ import { orderWorkoutExercises } from '@/workout-programming';
 const baseExercise = {
   targetRir: 2,
   restSeconds: 90,
+  progressionRuleId: 'double_progression',
   required: false,
   notes: '',
   equipment: [],
-} satisfies Pick<ForgeGeneratedExercise, 'targetRir' | 'restSeconds' | 'required' | 'notes' | 'equipment'>;
+} satisfies Pick<ForgeGeneratedExercise, 'targetRir' | 'restSeconds' | 'progressionRuleId' | 'required' | 'notes' | 'equipment'>;
 
 function exercise(input: {
   id: string;

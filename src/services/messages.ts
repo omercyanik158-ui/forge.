@@ -98,6 +98,18 @@ export const messages = {
     tr: "Antrenmana dönüş",
     en: "Return to training",
   },
+  "ai_program.goal_home_workout": {
+    tr: "Ev antrenmanı",
+    en: "Home workout",
+  },
+  "ai_program.goal_yoga": {
+    tr: "Yoga",
+    en: "Yoga",
+  },
+  "ai_program.goal_pilates": {
+    tr: "Pilates",
+    en: "Pilates",
+  },
   "ai_program.days_title": {
     tr: "Haftada kaç gün ayırabilirsin?",
     en: "How many days per week can you train?",

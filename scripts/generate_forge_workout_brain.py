@@ -160,6 +160,8 @@ def validate_and_transform():
         errors.append("Template count does not match manifest.")
     if len(exercises) != manifest["exercise_row_count"]:
         errors.append("Exercise row count does not match manifest.")
+    if len(progression_rules) != manifest["progression_rule_count"]:
+        errors.append("Progression rule count does not match manifest.")
 
     template_ids = [row["template_id"] for row in templates]
     duplicate_template_ids = sorted({item for item in template_ids if template_ids.count(item) > 1})
@@ -181,6 +183,10 @@ def validate_and_transform():
         by_template.setdefault(row["template_id"], []).append(row)
         if row["exercise_id"] not in catalog_ids:
             errors.append(f"Exercise not in canonical catalog: {row['template_id']} -> {row['exercise_id']}")
+        if not row.get("progression_rule_id"):
+            errors.append(f"Missing exercise progression rule: {row['template_id']} -> {row['exercise_id']}")
+        elif row["progression_rule_id"] not in progression_ids:
+            errors.append(f"Unknown exercise progression rule: {row['template_id']} -> {row['exercise_id']} -> {row['progression_rule_id']}")
         sets = int(row["sets"])
         reps_min = int(row["reps_min"])
         reps_max = int(row["reps_max"])
@@ -283,6 +289,7 @@ def validate_and_transform():
                         "repsMax": int(row["reps_max"]),
                         "targetRir": float(row["target_rir"]),
                         "restSeconds": int(row["rest_seconds"]),
+                        "progressionRuleId": row["progression_rule_id"],
                         "required": parse_bool(row["required"]),
                         "notes": row["notes"],
                     }

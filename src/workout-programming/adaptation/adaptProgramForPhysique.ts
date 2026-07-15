@@ -1,21 +1,17 @@
 import { FORGE_ADAPTATION_RULES } from '../generated/adaptationRules.generated';
 import type { ProgramRequest } from '@/services/templateProgramEngine';
+import { normalizePhysiqueFocusAreas, selectPhysiqueFocusAreas } from './physiqueFocusRules';
 
 export function getEligiblePhysiqueFocusMuscles(request: ProgramRequest, compatibleFocusMuscles: readonly string[], maxFocusMuscles: number): string[] {
-  const seen = new Set<string>();
-  return [
-    ...request.physiqueFocus
-      .filter((item) => item.confidence >= 0.6)
-      .map((item) => item.muscle),
-    ...request.focusMuscles,
-  ]
-    .filter((muscle) => compatibleFocusMuscles.includes(muscle))
-    .filter((muscle) => {
-      if (seen.has(muscle)) return false;
-      seen.add(muscle);
-      return true;
-    })
-    .slice(0, maxFocusMuscles);
+  const normalized = normalizePhysiqueFocusAreas({
+    manualFocusMuscles: request.focusMuscles,
+    physiqueFocus: request.physiqueFocus,
+  });
+  return selectPhysiqueFocusAreas({
+    focusAreas: normalized.focusAreas,
+    compatibleFocusMuscles,
+    maxFocusMuscles,
+  }).selected.map((item) => item.muscle);
 }
 
 export function getAdaptationRulesForFocus(goal: string, focusMuscle: string) {

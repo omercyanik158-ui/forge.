@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadAIProgramInstances } from './aiProgramInstanceStore';
+import { loadActiveAIProgramRecord } from './activeAIProgramStore';
 import { loadSessionFeedback } from './aiProgramFeedbackStore';
 import { loadCoachAdjustments } from './coachAdjustmentStore';
+import { loadProgressionDecisions, loadProgressionStates } from '@/workout-programming/progression/progressionDecisionRepository';
 import { STORAGE_KEYS } from './storageRegistry';
 import { loadSyncMetadata, saveSyncMetadata } from './authStorage';
 import { saveStoredValue } from './safeStorage';
@@ -54,6 +56,8 @@ const STORAGE_MAPPING: Record<SnapshotKey, string> = {
   coachPreferences: STORAGE_KEYS.coachPreferences,
   aiProgramPhysiqueSeed: STORAGE_KEYS.aiProgramPhysiqueSeed,
   aiProgramInstances: STORAGE_KEYS.aiProgramInstances,
+  activeAIProgram: STORAGE_KEYS.activeAIProgram,
+  progressionDecisions: STORAGE_KEYS.progressionDecisions,
   aiProgramFeedback: STORAGE_KEYS.aiProgramFeedback,
   coachAdjustments: STORAGE_KEYS.coachAdjustments,
   userPrograms: STORAGE_KEYS.userPrograms,
@@ -82,6 +86,8 @@ const DEFAULT_SNAPSHOT: CloudSnapshotV1 = {
   coachPreferences: null,
   aiProgramPhysiqueSeed: null,
   aiProgramInstances: [],
+  activeAIProgram: null,
+  progressionDecisions: { decisions: [], states: [] },
   aiProgramFeedback: [],
   coachAdjustments: [],
   userPrograms: [],
@@ -127,13 +133,21 @@ function decodeEnvelope<T>(raw: string | null): T | null {
   }
 }
 
+function hasMeaningfulValue(value: unknown): boolean {
+  if (value == null) return false;
+  if (Array.isArray(value)) return value.some(hasMeaningfulValue);
+  if (typeof value === 'object') return Object.values(value).some(hasMeaningfulValue);
+  return true;
+}
+
 function hasMeaningfulData(snapshot: CloudSnapshotV1): boolean {
   return Object.entries(snapshot).some(([key, value]) => {
     if (key === 'version') return false;
-    if (value == null) return false;
-    if (Array.isArray(value)) return value.length > 0;
-    if (typeof value === 'object') return Object.keys(value).length > 0;
-    return true;
+    if (key === 'activeAIProgram') {
+      const record = isObjectRecord(value) ? value as { activeProgramId?: unknown } : null;
+      return typeof record?.activeProgramId === 'string' && record.activeProgramId.length > 0;
+    }
+    return hasMeaningfulValue(value);
   });
 }
 
@@ -220,6 +234,8 @@ function mergeSnapshot(localSnapshot: CloudSnapshotV1, remoteSnapshot: CloudSnap
   const remoteFeedback = normalizeTypedArray(remoteSnapshot.aiProgramFeedback, isSessionFeedback);
   const localAdjustments = normalizeTypedArray(localSnapshot.coachAdjustments, isCoachAdjustment);
   const remoteAdjustments = normalizeTypedArray(remoteSnapshot.coachAdjustments, isCoachAdjustment);
+  const localProgression = localSnapshot.progressionDecisions ?? { decisions: [], states: [] };
+  const remoteProgression = remoteSnapshot.progressionDecisions ?? { decisions: [], states: [] };
   return {
     version: SNAPSHOT_VERSION,
     profile: mergeProfiles(localSnapshot.profile, remoteSnapshot.profile),
@@ -243,6 +259,11 @@ function mergeSnapshot(localSnapshot: CloudSnapshotV1, remoteSnapshot: CloudSnap
     coachPreferences: (pickLatest(remoteSnapshot.coachPreferences, localSnapshot.coachPreferences) ?? remoteSnapshot.coachPreferences ?? localSnapshot.coachPreferences),
     aiProgramPhysiqueSeed: (pickLatest(remoteSnapshot.aiProgramPhysiqueSeed, localSnapshot.aiProgramPhysiqueSeed) ?? remoteSnapshot.aiProgramPhysiqueSeed ?? localSnapshot.aiProgramPhysiqueSeed),
     aiProgramInstances: mergeArrayValues(localPrograms, remotePrograms) as CloudSnapshotV1['aiProgramInstances'],
+    activeAIProgram: (pickLatest(remoteSnapshot.activeAIProgram, localSnapshot.activeAIProgram) ?? remoteSnapshot.activeAIProgram ?? localSnapshot.activeAIProgram),
+    progressionDecisions: {
+      decisions: mergeArrayValues(localProgression.decisions, remoteProgression.decisions) as typeof localProgression.decisions,
+      states: mergeArrayValues(localProgression.states, remoteProgression.states) as typeof localProgression.states,
+    },
     aiProgramFeedback: mergeArrayValues(localFeedback, remoteFeedback) as CloudSnapshotV1['aiProgramFeedback'],
     coachAdjustments: mergeArrayValues(localAdjustments, remoteAdjustments) as CloudSnapshotV1['coachAdjustments'],
     userPrograms: mergeArrayValues(localSnapshot.userPrograms, remoteSnapshot.userPrograms) as CloudSnapshotV1['userPrograms'],
@@ -257,8 +278,11 @@ export async function exportLocalSnapshot(): Promise<CloudSnapshotV1> {
     }),
   );
 
-  const [aiProgramInstances, aiProgramFeedback, coachAdjustments] = await Promise.all([
+  const [aiProgramInstances, activeAIProgram, progressionDecisions, progressionStates, aiProgramFeedback, coachAdjustments] = await Promise.all([
     loadAIProgramInstances(),
+    loadActiveAIProgramRecord(),
+    loadProgressionDecisions(),
+    loadProgressionStates(),
     loadSessionFeedback(),
     loadCoachAdjustments(),
   ]);
@@ -274,6 +298,8 @@ export async function exportLocalSnapshot(): Promise<CloudSnapshotV1> {
   return {
     ...baseSnapshot,
     aiProgramInstances,
+    activeAIProgram,
+    progressionDecisions: { decisions: progressionDecisions, states: progressionStates },
     aiProgramFeedback,
     coachAdjustments,
   };

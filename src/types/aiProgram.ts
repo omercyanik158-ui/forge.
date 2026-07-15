@@ -25,7 +25,10 @@ export type AIProgramGoal =
   | 'strength'
   | 'athletic_performance'
   | 'general_fitness'
-  | 'return_to_training';
+  | 'return_to_training'
+  | 'home_workout'
+  | 'yoga'
+  | 'pilates';
 
 export type AIProgramSecondaryGoal = 'none' | 'strength' | 'conditioning' | 'mobility' | 'body_composition';
 

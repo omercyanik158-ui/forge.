@@ -31,9 +31,10 @@ import {
 } from "@/services/analyticsService";
 import { getExerciseById, searchExercises } from "@/services/exerciseCatalog";
 import { buildOrReuseRecommendedAIProgram } from "@/services/programRecommendationEngine";
-import { buildAIProgramDecisionBlueprint } from "@/services/aiProgramDecisionEngine";
-import { orchestrateAIProgram } from "@/services/aiProgramOrchestrator";
-import { USE_TEMPLATE_PROGRAM_ENGINE } from "@/services/templateProgramEngine";
+import {
+  USE_TEMPLATE_PROGRAM_ENGINE,
+  WORKOUT_LIBRARY_VERSION,
+} from "@/services/templateProgramEngine";
 import {
   GYM_EQUIPMENT,
   HOME_EQUIPMENT,
@@ -54,6 +55,10 @@ import {
   loadAIProgramInstanceById,
   saveAIProgramInstance,
 } from "@/services/aiProgramInstanceStore";
+import {
+  loadActiveAIProgram,
+  setActiveAIProgramId,
+} from "@/services/activeAIProgramStore";
 import { loadCoachPreferences } from "@/services/coachPreferences";
 import {
   loadCycleTracking,
@@ -129,7 +134,7 @@ const LIMITATION_OPTIONS: AIProgramPainLimitation[] = [
   "ankle",
   "other",
 ];
-const GOAL_OPTIONS: AIProgramGoal[] = [
+const BASE_GOAL_OPTIONS: AIProgramGoal[] = [
   "build_muscle",
   "lose_fat",
   "recomposition",
@@ -138,6 +143,17 @@ const GOAL_OPTIONS: AIProgramGoal[] = [
   "general_fitness",
   "return_to_training",
 ];
+
+const LIBRARY_300_GOAL_OPTIONS: AIProgramGoal[] = [
+  "home_workout",
+  "yoga",
+  "pilates",
+];
+
+const GOAL_OPTIONS: AIProgramGoal[] =
+  WORKOUT_LIBRARY_VERSION === "300"
+    ? [...BASE_GOAL_OPTIONS, ...LIBRARY_300_GOAL_OPTIONS]
+    : BASE_GOAL_OPTIONS;
 const EXPERIENCE_OPTIONS: AIProgramExperience[] = [
   "beginner",
   "returning",
@@ -164,6 +180,9 @@ const GOAL_ICONS: Record<AIProgramGoal, keyof typeof Ionicons.glyphMap> = {
   athletic_performance: "flash-outline",
   general_fitness: "heart-outline",
   return_to_training: "refresh-outline",
+  home_workout: "home-outline",
+  yoga: "flower-outline",
+  pilates: "body-outline",
 };
 const LOCATION_ICONS: Record<
   AIProgramLocation,
@@ -276,6 +295,8 @@ export default function AIProgramBuilderScreen() {
   );
   const [savingPlan, setSavingPlan] = useState(false);
   const [planSaved, setPlanSaved] = useState(false);
+  const [activeProgram, setActiveProgram] = useState<AIProgramPlan | null>(null);
+  const [activationSheetVisible, setActivationSheetVisible] = useState(false);
   const [forceNewVariation, setForceNewVariation] = useState(false);
   const [previousTemplateId, setPreviousTemplateId] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
@@ -294,13 +315,16 @@ export default function AIProgramBuilderScreen() {
       cycleTracking,
       seed,
       physiqueLogs,
+      active,
     ] = await Promise.all([
       loadProfile(),
       loadCoachPreferences(),
       loadCycleTracking(),
       loadAIProgramPhysiqueSeed(),
       getLogs("physique", 1).catch(() => []),
+      loadActiveAIProgram(),
     ]);
+    setActiveProgram(active);
     const regeneratePlan = params.regenerateFromId
       ? await loadAIProgramInstanceById(params.regenerateFromId)
       : null;
@@ -419,6 +443,7 @@ export default function AIProgramBuilderScreen() {
     if (processingIndex !== PROCESSING_STEPS.length - 1) return;
 
     void (async () => {
+      try {
       const [profile, cycleTracking] = await Promise.all([
         loadProfile(),
         loadCycleTracking(),
@@ -438,12 +463,11 @@ export default function AIProgramBuilderScreen() {
         profile,
         cycle,
       });
-      const decisionBlueprint = USE_TEMPLATE_PROGRAM_ENGINE
-        ? null
-        : buildAIProgramDecisionBlueprint(decisionContext);
-      const recommendedPlan = USE_TEMPLATE_PROGRAM_ENGINE
-        ? (
-          await buildOrReuseRecommendedAIProgram({
+      if (!USE_TEMPLATE_PROGRAM_ENGINE) {
+        throw new Error("Template program engine must be enabled for program recommendations.");
+      }
+      const recommendedPlan = (
+        await buildOrReuseRecommendedAIProgram({
             draftId: nextDraft.id,
             userId: profile?.name ?? "local_user",
             answers: nextDraft.answers,
@@ -453,12 +477,7 @@ export default function AIProgramBuilderScreen() {
             forceNewVariation,
             previousTemplateId,
           })
-        ).plan
-        : orchestrateAIProgram({
-          draftId: nextDraft.id,
-          context: decisionContext,
-          blueprint: decisionBlueprint!,
-        }).plan;
+      ).plan;
       const readyDraft = mergeAIProgramDraft(nextDraft, {
         decisionContext,
         decisionBlueprint: recommendedPlan.sourceBlueprint,
@@ -469,8 +488,26 @@ export default function AIProgramBuilderScreen() {
       setPreviousTemplateId(undefined);
       setDraft(readyDraft);
       successFeedback();
+      } catch {
+        Alert.alert(
+          t({ tr: "Uyumlu program bulunamadı", en: "No compatible program found" }),
+          t({
+            tr: "Seçtiğin hedef, gün sayısı, ekipman veya kısıtlamalarla uyumlu reviewed bir program bulamadık. Gün sayısını, süreyi, split tercihini veya ekipmanını gözden geçirebilirsin.",
+            en: "We couldn't find a reviewed program compatible with your goal, days, equipment or restrictions. Review days, duration, split or equipment.",
+          }),
+        );
+        setProcessingIndex(-1);
+        setDraft((current) =>
+          current
+            ? mergeAIProgramDraft(current, {
+            generationStatus: "idle",
+            currentStep: "summary",
+              })
+            : current,
+        );
+      }
     })();
-  }, [draft, forceNewVariation, previousTemplateId, processingIndex]);
+  }, [draft, forceNewVariation, previousTemplateId, processingIndex, t]);
 
   const updateDraft = useCallback(
     async (updater: (current: AIProgramDraft) => AIProgramDraft) => {
@@ -647,6 +684,7 @@ export default function AIProgramBuilderScreen() {
     setSavingPlan(true);
     try {
       await saveAIProgramInstance(generatedPlan);
+      setActiveProgram(await loadActiveAIProgram());
       setPlanSaved(true);
       successFeedback();
       void trackEvent(ANALYTICS_EVENTS.aiProgramSaved, {
@@ -654,6 +692,29 @@ export default function AIProgramBuilderScreen() {
         daysPerWeek: generatedPlan.daysPerWeek,
         weekCount: generatedPlan.weekCount,
         premium: false,
+      });
+      setActivationSheetVisible(true);
+    } catch {
+      Alert.alert(
+        t("ai_program.save_error_title"),
+        t("ai_program.save_error_body"),
+      );
+    } finally {
+      setSavingPlan(false);
+    }
+  }, [generatedPlan, planSaved, router, t]);
+
+  const handleActivateGeneratedPlan = useCallback(async () => {
+    if (!generatedPlan || savingPlan) return;
+    setSavingPlan(true);
+    try {
+      await saveAIProgramInstance(generatedPlan);
+      await setActiveAIProgramId(generatedPlan.id);
+      setPlanSaved(true);
+      setActivationSheetVisible(false);
+      void trackEvent(ANALYTICS_EVENTS.programActivated, {
+        planId: generatedPlan.id,
+        replacedExisting: !!activeProgram && activeProgram.id !== generatedPlan.id,
       });
       router.replace({
         pathname: "/ai-program-detail",
@@ -667,7 +728,19 @@ export default function AIProgramBuilderScreen() {
     } finally {
       setSavingPlan(false);
     }
-  }, [generatedPlan, planSaved, router, t]);
+  }, [activeProgram, generatedPlan, router, savingPlan, t]);
+
+  const handleOpenSavedPlanWithoutActivating = useCallback(() => {
+    if (!generatedPlan) return;
+    if (!activeProgram) {
+      void setActiveAIProgramId(null);
+    }
+    setActivationSheetVisible(false);
+    router.replace({
+      pathname: "/ai-program-detail",
+      params: { id: generatedPlan.id },
+    });
+  }, [activeProgram, generatedPlan, router]);
 
   const openExercisePicker = useCallback((mode: "preferred" | "avoided") => {
     setExercisePickerMode(mode);
@@ -1898,6 +1971,88 @@ export default function AIProgramBuilderScreen() {
           </View>
         </View>
       </Modal>
+      <Modal
+        visible={activationSheetVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActivationSheetVisible(false)}
+      >
+        <View style={styles.exitSheetBackdrop}>
+          <View
+            style={[
+              styles.exitSheet,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.outlineVariant,
+              },
+            ]}
+          >
+            <View style={styles.exitSheetHeader}>
+              <View
+                style={[
+                  styles.exitSheetIcon,
+                  { backgroundColor: `${colors.primary}14` },
+                ]}
+              >
+                <Ionicons name="shield-checkmark-outline" size={22} color={colors.primary} />
+              </View>
+              <View style={styles.exitSheetCopy}>
+                <Text style={[styles.exitSheetTitle, { color: colors.onSurface }]}>
+                  {activeProgram && activeProgram.id !== generatedPlan?.id
+                    ? t({ tr: "Aktif program değişsin mi?", en: "Replace active program?" })
+                    : t({ tr: "Programı aktif başlat", en: "Start this program" })}
+                </Text>
+                <Text style={[styles.exitSheetBody, { color: colors.onSurfaceVariant }]}>
+                  {activeProgram && activeProgram.id !== generatedPlan?.id
+                    ? t({
+                        tr: `${repairText(activeProgram.title)} aktif kalır. Yeni programı aktif edersen geçmiş antrenman kayıtların korunur, yeni programın progression hedefleri kendi verisiyle başlar.`,
+                        en: `${repairText(activeProgram.title)} stays active unless you replace it. Workout history is preserved; the new program starts with its own progression targets.`,
+                      })
+                    : t({
+                        tr: "Bu program fitness sekmesinde bugünkü antrenman olarak görünecek. İstersen sadece kaydedip daha sonra aktif edebilirsin.",
+                        en: "This program will appear as today's workout in Fitness. You can also keep it saved without activating it.",
+                      })}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.exitSheetActions}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={t({ tr: "Programı aktif et", en: "Activate program" })}
+                activeOpacity={0.84}
+                disabled={savingPlan}
+                onPress={() => void handleActivateGeneratedPlan()}
+                style={[
+                  styles.exitSheetButton,
+                  { backgroundColor: colors.primary, opacity: savingPlan ? 0.6 : 1 },
+                ]}
+              >
+                {savingPlan ? (
+                  <ActivityIndicator color={colors.onPrimary} />
+                ) : (
+                  <Text style={[styles.exitSheetButtonText, { color: colors.onPrimary }]}>
+                    {activeProgram && activeProgram.id !== generatedPlan?.id
+                      ? t({ tr: "Aktif programı değiştir", en: "Replace active program" })
+                      : t({ tr: "Aktif başlat", en: "Activate" })}
+                  </Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={t({ tr: "Aktif etmeden aç", en: "Open without activating" })}
+                activeOpacity={0.82}
+                disabled={savingPlan}
+                onPress={handleOpenSavedPlanWithoutActivating}
+                style={styles.exitSheetTextButton}
+              >
+                <Text style={[styles.exitSheetDestructiveText, { color: colors.onSurfaceVariant }]}>
+                  {t({ tr: "Sadece kaydet", en: "Save only" })}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -2123,6 +2278,25 @@ function ProgramReadyCard({
         {t("ai_program.ready_body")}
       </Text>
 
+      {plan.templateMatchMode === "relaxed_match" ? (
+        <View style={[styles.readyCoachNote, { backgroundColor: `${colors.tertiary}12` }]}>
+          <Ionicons name="information-circle-outline" size={18} color={colors.tertiary} />
+          <View style={styles.readyCoachCopy}>
+            <Text style={[styles.readyCoachText, { color: colors.onSurface }]}>
+              {t({
+                tr: "Tam eşleşme yoktu; en yakın güvenli planı seçtik.",
+                en: "There was no exact match, so we selected the closest safe plan.",
+              })}
+            </Text>
+            {plan.templateRelaxationsApplied?.slice(0, 2).map((item) => (
+              <Text key={item} numberOfLines={2} style={[styles.readySupportText, { color: colors.onSurfaceVariant }]}>
+                {repairText(item)}
+              </Text>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       <View style={styles.readyMetaGrid}>
         <ReadyMetaPill
           icon="calendar-outline"
@@ -2179,11 +2353,7 @@ function ProgramReadyCard({
                   {repairText(alternative.tradeoffs[0] ?? alternative.rationale[0] ?? "")}
                 </Text>
               </View>
-              <View style={[styles.readyAlternativeScore, { backgroundColor: `${colors.primary}12` }]}>
-                <Text style={[styles.readyAlternativeScoreText, { color: colors.primary }]}>
-                  {Math.round(alternative.score)}
-                </Text>
-              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.onSurfaceVariant} />
             </View>
           ))}
         </View>
@@ -2660,6 +2830,7 @@ const styles = createDynamicStyles(() => ({
     alignItems: "flex-start",
     gap: 10,
   },
+  readyCoachCopy: { flex: 1, gap: 4 },
   readyCoachText: { ...typography.bodySm, lineHeight: 19, flex: 1 },
   readyAlternativeBlock: { gap: 6 },
   readyAlternativeCard: {

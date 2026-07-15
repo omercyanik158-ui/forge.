@@ -1,0 +1,23 @@
+{
+  "package": "FORGE Workout Library 300",
+  "schema_version": 2,
+  "template_count": 300,
+  "template_exercise_rows": 6565,
+  "exercise_catalog_count": 127,
+  "progression_rule_count": 7,
+  "distribution": {
+    "strength": 45,
+    "hypertrophy": 90,
+    "powerbuilding": 40,
+    "general_fitness": 45,
+    "home": 30,
+    "yoga": 25,
+    "pilates": 25
+  },
+  "notes": [
+    "Yoga and Pilates are represented as goal=general_fitness with modality=yoga/pilates.",
+    "The existing runtime must be extended to read modality and optional duration/breath prescription columns.",
+    "Every exercise row has an explicit progression_rule_id.",
+    "This pack is deterministic and contains no runtime LLM dependency."
+  ]
+}

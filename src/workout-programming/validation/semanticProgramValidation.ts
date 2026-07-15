@@ -1,6 +1,8 @@
 import { PROGRAM_TEMPLATES, type TemplateEngineResult } from '@/services/templateProgramEngine';
 import { orderProgramWorkouts } from '@/workout-programming/ordering/orderWorkoutExercises';
 import type { ForgeGeneratedExercise, ForgeGeneratedTemplate, ForgeGeneratedWorkoutDay } from '@/workout-programming/types/csvWorkoutBrain';
+import { FORGE_PROGRESSION_RULES } from '@/workout-programming/generated/progressionRules.generated';
+import { inferEquipmentKind, ruleTypeFromGeneratedRule } from '@/workout-programming/progression/progressionUtils';
 
 export type SemanticSeverity = 'error' | 'warning';
 
@@ -45,6 +47,10 @@ const CORE_PATTERNS = new Set(['anti_extension', 'anti_rotation', 'spinal_flexio
 const LOWER_PATTERNS = new Set([...KNEE_PATTERNS, ...POSTERIOR_PATTERNS]);
 const TECHNICAL_ROLES = new Set(['main_lift', 'secondary_compound', 'accessory_compound']);
 const LATE_ROLES = new Set(['isolation', 'core', 'conditioning']);
+const STRENGTH_RULES = new Set(['linear_load', 'percentage_based', 'top_set_backoff']);
+const ACCESSORY_RULES = new Set(['double_progression', 'rep_range', 'linear_reps', 'fixed_load']);
+const HYPERTROPHY_RULES = new Set(['double_progression', 'rep_range', 'linear_reps']);
+const NO_LOAD_RULES = new Set(['linear_reps', 'fixed_load', 'time_based', 'distance_based']);
 
 function addIssue(
   target: SemanticValidationIssue[],
@@ -157,6 +163,58 @@ function validateDayRedundancy(template: ForgeGeneratedTemplate, day: ForgeGener
   }
 }
 
+function validateExerciseProgressionRules(template: ForgeGeneratedTemplate, day: ForgeGeneratedWorkoutDay, errors: SemanticValidationIssue[]): void {
+  for (const exercise of day.exercises) {
+    const ruleId = exercise.progressionRuleId;
+    const itemLocation = location(template, day, exercise.canonicalExerciseId);
+    if (!ruleId) {
+      addIssue(errors, 'error', 'MISSING_EXERCISE_PROGRESSION_RULE', 'Exercise has no explicit progression rule.', itemLocation);
+      continue;
+    }
+    const rule = FORGE_PROGRESSION_RULES.find((candidate) => candidate.progressionRuleId === ruleId);
+    if (!rule) {
+      addIssue(errors, 'error', 'UNKNOWN_PROGRESSION_RULE', `Unknown exercise progression rule: ${ruleId}.`, itemLocation);
+      continue;
+    }
+
+    const ruleType = ruleTypeFromGeneratedRule(ruleId, template.goal, exercise.role);
+    const equipmentKind = inferEquipmentKind(exercise.equipment);
+    const ruleGoals: readonly string[] = rule.appliesTo;
+    const appliesToGoal = ruleGoals.includes(template.goal) || (template.goal === 'general_fitness' && ruleGoals.includes('home'));
+    if (!appliesToGoal) {
+      addIssue(errors, 'error', 'PROGRESSION_RULE_GOAL_MISMATCH', `${ruleId} does not apply to ${template.goal}.`, itemLocation);
+    }
+
+    if (exercise.repsMin > exercise.repsMax || exercise.repsMin < 1) {
+      addIssue(errors, 'error', 'PROGRESSION_RULE_REP_RANGE_MISMATCH', 'Invalid exercise rep range for progression.', itemLocation);
+    }
+
+    if (exercise.role === 'main_lift' && exercise.required && !STRENGTH_RULES.has(ruleType)) {
+      addIssue(errors, 'error', 'PROGRESSION_RULE_ROLE_MISMATCH', 'Required main lift needs a strength-oriented progression rule.', itemLocation);
+    }
+
+    if (exercise.role === 'isolation' && STRENGTH_RULES.has(ruleType)) {
+      addIssue(errors, 'error', 'PROGRESSION_RULE_ROLE_MISMATCH', 'Isolation movement cannot use a main-lift percentage/linear load rule.', itemLocation);
+    }
+
+    if (template.goal === 'hypertrophy' && ['secondary_compound', 'accessory_compound', 'isolation'].includes(exercise.role) && !HYPERTROPHY_RULES.has(ruleType)) {
+      addIssue(errors, 'error', 'PROGRESSION_RULE_GOAL_MISMATCH', 'Hypertrophy exercise needs a hypertrophy-compatible progression rule.', itemLocation);
+    }
+
+    if (template.goal === 'strength' && exercise.role !== 'main_lift' && !ACCESSORY_RULES.has(ruleType) && !STRENGTH_RULES.has(ruleType)) {
+      addIssue(errors, 'error', 'PROGRESSION_RULE_ROLE_MISMATCH', 'Strength accessory uses an incompatible progression family.', itemLocation);
+    }
+
+    if (equipmentKind === 'bodyweight' && !NO_LOAD_RULES.has(ruleType)) {
+      addIssue(errors, 'error', 'PROGRESSION_RULE_EQUIPMENT_MISMATCH', 'Bodyweight exercise cannot receive arbitrary load progression.', itemLocation);
+    }
+
+    if (exercise.role === 'conditioning' && !['time_based', 'distance_based'].includes(ruleType)) {
+      addIssue(errors, 'error', 'PROGRESSION_RULE_EQUIPMENT_MISMATCH', 'Conditioning exercise needs time-based or distance-based progression.', itemLocation);
+    }
+  }
+}
+
 function validateFullBodyDay(template: ForgeGeneratedTemplate, day: ForgeGeneratedWorkoutDay, errors: SemanticValidationIssue[]): void {
   const checks: [string, Set<string>, string][] = [
     ['full_body_missing_lower', LOWER_PATTERNS, 'Full-body day needs a lower-body movement.'],
@@ -252,6 +310,7 @@ export function validateTemplateSemantics(template: ForgeGeneratedTemplate): Sem
   for (const day of template.workouts) {
     validateOrdering(template, day, errors, warnings);
     validateDayRedundancy(template, day, warnings);
+    validateExerciseProgressionRules(template, day, errors);
     if (day.exercises.length > 8) addIssue(warnings, 'warning', 'too_many_exercises', 'Session has more than 8 exercises.', location(template, day));
     const dayMetrics = metrics.dayMetrics.find((item) => item.dayIndex === day.dayIndex);
     if (dayMetrics && dayMetrics.totalSets > 34) {
@@ -303,7 +362,10 @@ export function validateInstantiatedProgramSemantics(result: TemplateEngineResul
   }
 
   const conversionErrors: SemanticValidationIssue[] = [];
-  const expectedWorkouts = orderProgramWorkouts(template, template.workouts);
+  const focusMuscles = result.adaptations
+    .map((adaptation) => adaptation.focusMuscle)
+    .filter((muscle): muscle is NonNullable<typeof muscle> => !!muscle);
+  const expectedWorkouts = orderProgramWorkouts(template, template.workouts, [...new Set(focusMuscles)]);
   const adaptedDays = new Set(result.adaptations.map((adaptation) => adaptation.dayIndex).filter((dayIndex): dayIndex is number => typeof dayIndex === 'number'));
   for (const templateDay of expectedWorkouts) {
     const planDay = firstWeek.days.find((day) => day.dayIndex === templateDay.dayIndex - 1);

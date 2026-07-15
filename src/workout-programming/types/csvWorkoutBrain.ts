@@ -1,6 +1,8 @@
 export type ForgeTemplateGoal = "strength" | "hypertrophy" | "powerbuilding" | "general_fitness";
+export type ForgeTemplateModality = "strength" | "hypertrophy" | "powerbuilding" | "general_fitness" | "home" | "yoga" | "pilates";
 export type ForgeTemplateLevel = "beginner" | "intermediate" | "advanced";
 export type ForgeTemplateStatus = "active" | "draft" | "deprecated";
+export type ForgePrescriptionType = "reps" | "duration" | "breaths" | "rounds";
 
 export type ForgeGeneratedExercise = {
   canonicalExerciseId: string;
@@ -16,6 +18,12 @@ export type ForgeGeneratedExercise = {
   repsMax: number;
   targetRir: number;
   restSeconds: number;
+  progressionRuleId: string;
+  prescriptionType?: ForgePrescriptionType;
+  durationSecondsMin?: number;
+  durationSecondsMax?: number;
+  breathsMin?: number;
+  breathsMax?: number;
   required: boolean;
   notes: string;
 };
@@ -33,6 +41,8 @@ export type ForgeGeneratedTemplate = {
   status: ForgeTemplateStatus;
   nameTr: string;
   goal: ForgeTemplateGoal;
+  modality?: ForgeTemplateModality;
+  libraryTier?: string;
   level: ForgeTemplateLevel;
   split: string;
   daysPerWeek: number;
@@ -107,6 +117,7 @@ export type ForgePhysiqueFocus = {
 export type ForgeNormalizedProgramRequest = {
   userId: string;
   goal: ForgeTemplateGoal;
+  modality?: ForgeTemplateModality;
   level: ForgeTemplateLevel;
   daysPerWeek: number;
   preferredSessionMinutes: number;

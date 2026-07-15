@@ -59,6 +59,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -84,6 +85,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -106,6 +108,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -128,6 +131,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -149,6 +153,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -170,6 +175,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           }
@@ -202,6 +208,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 3.0,
             "restSeconds": 240,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -225,6 +232,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -246,6 +254,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -269,6 +278,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -290,6 +300,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -311,6 +322,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 45,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": "reps_min/reps_max saniye"
           }
@@ -342,6 +354,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -367,6 +380,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -390,6 +404,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -413,6 +428,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -434,6 +450,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": "Replaced triceps isolation to restore posterior-chain exposure on full-body day."
           },
@@ -456,6 +473,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -523,6 +541,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -546,6 +565,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -569,6 +589,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -591,6 +612,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -612,6 +634,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -643,6 +666,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -665,6 +689,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -686,6 +711,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -707,6 +733,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -728,6 +755,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -760,6 +788,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -784,6 +813,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -807,6 +837,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -829,6 +860,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -850,6 +882,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -882,6 +915,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 3.0,
             "restSeconds": 240,
+            "progressionRuleId": "linear_beginner",
             "required": true,
             "notes": ""
           },
@@ -904,6 +938,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 7,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -927,6 +962,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -948,6 +984,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -969,6 +1006,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 45,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": "saniye"
           }
@@ -1032,6 +1070,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 4,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -1057,6 +1096,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -1080,6 +1120,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1101,6 +1142,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1122,6 +1164,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -1154,6 +1197,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 4,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -1177,6 +1221,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -1199,6 +1244,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 7,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1221,6 +1267,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -1243,6 +1290,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -1277,6 +1325,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -1299,6 +1348,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -1321,6 +1371,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1344,6 +1395,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1365,6 +1417,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1387,6 +1440,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -1454,6 +1508,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": "İlk set üst set, kalanlar back-off"
           },
@@ -1477,6 +1532,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1500,6 +1556,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 7,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1522,6 +1579,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1543,6 +1601,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -1574,6 +1633,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": "İlk set üst set, kalanlar back-off"
           },
@@ -1596,6 +1656,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1617,6 +1678,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1638,6 +1700,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1659,6 +1722,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -1691,6 +1755,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -1716,6 +1781,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 7,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1739,6 +1805,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1761,6 +1828,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -1782,6 +1850,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -1814,6 +1883,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -1836,6 +1906,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 7,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1859,6 +1930,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1880,6 +1952,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -1901,6 +1974,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -1965,6 +2039,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 4,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -1987,6 +2062,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2008,6 +2084,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2029,6 +2106,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -2063,6 +2141,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 4,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -2086,6 +2165,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2110,6 +2190,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2132,6 +2213,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -2164,6 +2246,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 4,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -2186,6 +2269,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 7,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2208,6 +2292,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2229,6 +2314,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -2261,6 +2347,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -2286,6 +2373,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2309,6 +2397,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2330,6 +2419,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -2361,6 +2451,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 4.0,
             "restSeconds": 150,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -2386,6 +2477,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 4.0,
             "restSeconds": 150,
+            "progressionRuleId": "undulating_strength",
             "required": true,
             "notes": ""
           },
@@ -2408,6 +2500,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -2431,6 +2524,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2453,6 +2547,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -2516,6 +2611,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 1.0,
             "restSeconds": 300,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": "Top set + back-off"
           },
@@ -2541,6 +2637,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 1.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": "Top set + back-off"
           },
@@ -2564,6 +2661,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2585,6 +2683,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2606,6 +2705,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -2638,6 +2738,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 4,
             "targetRir": 1.0,
             "restSeconds": 300,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -2661,6 +2762,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -2683,6 +2785,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -2705,6 +2808,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -2727,6 +2831,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -2761,6 +2866,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -2784,6 +2890,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2808,6 +2915,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2830,6 +2938,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2851,6 +2960,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -2882,6 +2992,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -2904,6 +3015,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2927,6 +3039,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2948,6 +3061,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -2969,6 +3083,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -3037,6 +3152,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3061,6 +3177,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3084,6 +3201,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3105,6 +3223,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3126,6 +3245,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3147,6 +3267,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -3178,6 +3299,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3200,6 +3322,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3222,6 +3345,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3245,6 +3369,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3267,6 +3392,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3289,6 +3415,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -3319,6 +3446,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3342,6 +3470,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3365,6 +3494,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3387,6 +3517,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3408,6 +3539,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3429,6 +3561,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3451,6 +3584,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -3519,6 +3653,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3543,6 +3678,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3566,6 +3702,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3587,6 +3724,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3608,6 +3746,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3629,6 +3768,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -3660,6 +3800,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3682,6 +3823,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3704,6 +3846,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3727,6 +3870,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3749,6 +3893,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3771,6 +3916,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -3801,6 +3947,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3824,6 +3971,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3847,6 +3995,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3869,6 +4018,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3890,6 +4040,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3911,6 +4062,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -3933,6 +4085,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -4003,6 +4156,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4025,6 +4179,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4047,6 +4202,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4070,6 +4226,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4091,6 +4248,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4112,6 +4270,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4133,6 +4292,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -4163,6 +4323,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4185,6 +4346,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4206,6 +4368,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4227,6 +4390,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4248,6 +4412,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -4281,6 +4446,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4304,6 +4470,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4326,6 +4493,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4348,6 +4516,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4370,6 +4539,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4391,6 +4561,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4413,6 +4584,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -4443,6 +4615,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4465,6 +4638,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4488,6 +4662,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4509,6 +4684,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4530,6 +4706,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -4602,6 +4779,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4625,6 +4803,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4648,6 +4827,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4670,6 +4850,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4691,6 +4872,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4712,6 +4894,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4734,6 +4917,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -4765,6 +4949,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -4787,6 +4972,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4808,6 +4994,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4829,6 +5016,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4850,6 +5038,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4871,6 +5060,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -4902,6 +5092,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -4924,6 +5115,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4947,6 +5139,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4970,6 +5163,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -4992,6 +5186,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5013,6 +5208,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5035,6 +5231,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -5065,6 +5262,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5087,6 +5285,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5110,6 +5309,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5131,6 +5331,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5152,6 +5353,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5173,6 +5375,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           }
@@ -5245,6 +5448,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5268,6 +5472,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5292,6 +5497,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5314,6 +5520,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5335,6 +5542,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5357,6 +5565,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -5388,6 +5597,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -5409,6 +5619,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5432,6 +5643,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5453,6 +5665,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5474,6 +5687,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -5506,6 +5720,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5527,6 +5742,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5549,6 +5765,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5570,6 +5787,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5592,6 +5810,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5613,6 +5832,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5634,6 +5854,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -5665,6 +5886,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -5688,6 +5910,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5711,6 +5934,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5733,6 +5957,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5754,6 +5979,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5775,6 +6001,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -5806,6 +6033,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5827,6 +6055,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5849,6 +6078,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5870,6 +6100,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5891,6 +6122,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -5912,6 +6144,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -5984,6 +6217,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -6008,6 +6242,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6030,6 +6265,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6051,6 +6287,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6072,6 +6309,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6093,6 +6331,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -6124,6 +6363,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -6147,6 +6387,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6169,6 +6410,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6192,6 +6434,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6213,6 +6456,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6235,6 +6479,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -6266,6 +6511,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -6288,6 +6534,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6309,6 +6556,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6330,6 +6578,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6351,6 +6600,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6372,6 +6622,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -6404,6 +6655,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6425,6 +6677,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6447,6 +6700,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6469,6 +6723,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6491,6 +6746,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -6525,6 +6781,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6548,6 +6805,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6570,6 +6828,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6591,6 +6850,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6612,6 +6872,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6633,6 +6894,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 60,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6654,6 +6916,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 60,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -6726,6 +6989,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -6750,6 +7014,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6773,6 +7038,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6794,6 +7060,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6815,6 +7082,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -6846,6 +7114,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -6869,6 +7138,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6891,6 +7161,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6913,6 +7184,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -6935,6 +7207,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -6966,6 +7239,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -6987,6 +7261,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7009,6 +7284,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7030,6 +7306,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7051,6 +7328,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -7085,6 +7363,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7107,6 +7386,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7129,6 +7409,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7150,6 +7431,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7171,6 +7453,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -7203,6 +7486,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7225,6 +7509,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7248,6 +7533,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7270,6 +7556,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7292,6 +7579,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -7322,6 +7610,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7344,6 +7633,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7367,6 +7657,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7388,6 +7679,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7409,6 +7701,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -7481,6 +7774,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7504,6 +7798,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7527,6 +7822,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7549,6 +7845,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7570,6 +7867,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7591,6 +7889,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7613,6 +7912,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -7644,6 +7944,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -7666,6 +7967,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7687,6 +7989,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7708,6 +8011,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7729,6 +8033,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7750,6 +8055,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -7781,6 +8087,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -7803,6 +8110,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7826,6 +8134,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7849,6 +8158,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7871,6 +8181,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7892,6 +8203,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7914,6 +8226,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -7944,6 +8257,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7966,6 +8280,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -7989,6 +8304,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8010,6 +8326,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8031,6 +8348,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8052,6 +8370,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           }
@@ -8124,6 +8443,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -8148,6 +8468,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8171,6 +8492,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8192,6 +8514,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8213,6 +8536,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -8244,6 +8568,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -8267,6 +8592,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8289,6 +8615,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8311,6 +8638,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8333,6 +8661,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -8364,6 +8693,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -8385,6 +8715,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8407,6 +8738,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8428,6 +8760,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8449,6 +8782,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -8483,6 +8817,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8505,6 +8840,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8527,6 +8863,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8548,6 +8885,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8569,6 +8907,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -8601,6 +8940,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8623,6 +8963,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8646,6 +8987,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8668,6 +9010,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8690,6 +9033,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -8720,6 +9064,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8742,6 +9087,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8765,6 +9111,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8786,6 +9133,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8807,6 +9155,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -8878,6 +9227,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -8901,6 +9251,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8924,6 +9275,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -8946,6 +9298,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8967,6 +9320,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -8988,6 +9342,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -9019,6 +9374,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -9041,6 +9397,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9062,6 +9419,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9083,6 +9441,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9104,6 +9463,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -9137,6 +9497,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9160,6 +9521,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9182,6 +9544,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9204,6 +9567,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9226,6 +9590,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9248,6 +9613,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -9280,6 +9646,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -9301,6 +9668,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9323,6 +9691,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9346,6 +9715,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9367,6 +9737,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9388,6 +9759,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -9456,6 +9828,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -9477,6 +9850,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9500,6 +9874,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9521,6 +9896,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9542,6 +9918,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -9576,6 +9953,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -9600,6 +9978,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9622,6 +10001,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9643,6 +10023,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9664,6 +10045,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -9696,6 +10078,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9718,6 +10101,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -9741,6 +10125,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9762,6 +10147,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9783,6 +10169,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9805,6 +10192,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -9837,6 +10225,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 2.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -9861,6 +10250,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9884,6 +10274,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9905,6 +10296,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -9927,6 +10319,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -9959,6 +10352,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 2.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -9981,6 +10375,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10003,6 +10398,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10024,6 +10420,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10045,6 +10442,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -10116,6 +10514,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 1.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -10139,6 +10538,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10162,6 +10562,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 1.0,
             "restSeconds": 150,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -10184,6 +10585,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10205,6 +10607,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10226,6 +10629,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -10257,6 +10661,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 1.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -10279,6 +10684,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10300,6 +10706,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10321,6 +10728,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10342,6 +10750,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -10375,6 +10784,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10398,6 +10808,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10420,6 +10831,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10442,6 +10854,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10464,6 +10877,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10486,6 +10900,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -10518,6 +10933,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 1.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -10539,6 +10955,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10561,6 +10978,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10584,6 +11002,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10605,6 +11024,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10626,6 +11046,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -10694,6 +11115,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 1.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -10715,6 +11137,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10738,6 +11161,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10759,6 +11183,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10780,6 +11205,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -10814,6 +11240,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 1.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -10838,6 +11265,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10860,6 +11288,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10881,6 +11310,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10902,6 +11332,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -10934,6 +11365,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -10956,6 +11388,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -10979,6 +11412,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11000,6 +11434,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11021,6 +11456,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11043,6 +11479,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -11075,6 +11512,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 1.0,
             "restSeconds": 210,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -11099,6 +11537,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11122,6 +11561,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11143,6 +11583,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11165,6 +11606,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 1.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           }
@@ -11197,6 +11639,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 5,
             "targetRir": 1.0,
             "restSeconds": 240,
+            "progressionRuleId": "top_set_backoff",
             "required": true,
             "notes": ""
           },
@@ -11219,6 +11662,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 2.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11241,6 +11685,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11262,6 +11707,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 1.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11283,6 +11729,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -11347,6 +11794,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11369,6 +11817,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11391,6 +11840,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11413,6 +11863,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11435,6 +11886,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 45,
             "targetRir": 3.0,
             "restSeconds": 75,
+            "progressionRuleId": "distance_based_conditioning",
             "required": false,
             "notes": "metre veya saniye"
           }
@@ -11465,6 +11917,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11488,6 +11941,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11511,6 +11965,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11533,6 +11988,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11554,6 +12010,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -11585,6 +12042,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11608,6 +12066,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11630,6 +12089,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "linear_beginner",
             "required": false,
             "notes": ""
           },
@@ -11651,6 +12111,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -11672,6 +12133,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "time_based_conditioning",
             "required": false,
             "notes": "dakika"
           }
@@ -11737,6 +12199,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11759,6 +12222,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11782,6 +12246,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11805,6 +12270,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11826,6 +12292,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 45,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": "saniye"
           }
@@ -11856,6 +12323,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11878,6 +12346,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11900,6 +12369,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11921,6 +12391,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -11953,6 +12424,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11976,6 +12448,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -11998,6 +12471,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12019,6 +12493,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -12040,6 +12515,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -12070,6 +12546,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12092,6 +12569,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12113,6 +12591,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -12136,6 +12615,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12157,6 +12637,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "time_based_conditioning",
             "required": false,
             "notes": "dakika"
           }
@@ -12221,6 +12702,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12244,6 +12726,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12268,6 +12751,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12290,6 +12774,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12311,6 +12796,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           }
@@ -12343,6 +12829,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12366,6 +12853,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12390,6 +12878,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12412,6 +12901,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 90,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12433,6 +12923,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           }
@@ -12466,6 +12957,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12488,6 +12980,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12510,6 +13003,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12534,6 +13028,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": "Added to restore full-body pulling balance."
           },
@@ -12555,6 +13050,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -12577,6 +13073,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 45,
             "targetRir": 3.0,
             "restSeconds": 75,
+            "progressionRuleId": "distance_based_conditioning",
             "required": false,
             "notes": "metre veya saniye"
           }
@@ -12643,6 +13140,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12665,6 +13163,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12688,6 +13187,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": "Added to restore realistic home pulling exposure with a band."
           },
@@ -12710,6 +13210,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12731,6 +13232,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 60,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": "saniye"
           }
@@ -12762,6 +13264,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -12784,6 +13287,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12806,6 +13310,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12827,6 +13332,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12850,6 +13356,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": "Replaced duplicate push-up with pulling work for home balance."
           }
@@ -12881,6 +13388,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 25,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12903,6 +13411,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -12926,6 +13435,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": "Added to restore realistic home pulling exposure with a band."
           },
@@ -12948,6 +13458,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": "Added to restore posterior-chain exposure on the full-body home day."
           },
@@ -12969,6 +13480,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 60,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": "saniye"
           }
@@ -13034,6 +13546,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -13056,6 +13569,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -13079,6 +13593,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13101,6 +13616,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -13122,6 +13638,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           }
@@ -13153,6 +13670,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -13175,6 +13693,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -13197,6 +13716,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13219,6 +13739,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -13240,6 +13761,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 60,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": "saniye"
           }
@@ -13271,6 +13793,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13293,6 +13816,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -13316,6 +13840,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13338,6 +13863,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 20,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13359,6 +13885,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }
@@ -13423,6 +13950,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13446,6 +13974,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13468,6 +13997,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -13490,6 +14020,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13512,6 +14043,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 45,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "distance_based_conditioning",
             "required": false,
             "notes": "metre veya saniye"
           }
@@ -13544,6 +14076,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13567,6 +14100,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13590,6 +14124,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13612,6 +14147,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13633,6 +14169,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           },
@@ -13654,6 +14191,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "time_based_conditioning",
             "required": false,
             "notes": "dakika"
           }
@@ -13686,6 +14224,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13710,6 +14249,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13732,6 +14272,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13755,6 +14296,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13776,6 +14318,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           },
@@ -13797,6 +14340,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "time_based_conditioning",
             "required": false,
             "notes": "dakika"
           }
@@ -13865,6 +14409,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13888,6 +14433,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13911,6 +14457,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 3.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13933,6 +14480,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -13955,6 +14503,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 45,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "distance_based_conditioning",
             "required": false,
             "notes": "metre veya saniye"
           }
@@ -13986,6 +14535,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 8,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -14008,6 +14558,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 3.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -14030,6 +14581,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -14051,6 +14603,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -14072,6 +14625,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 60,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": "saniye"
           }
@@ -14105,6 +14659,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -14127,6 +14682,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 10,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "bodyweight_rep_leverage",
             "required": false,
             "notes": ""
           },
@@ -14150,6 +14706,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -14171,6 +14728,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 18,
             "targetRir": 2.0,
             "restSeconds": 75,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -14192,6 +14750,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 3.0,
             "restSeconds": 60,
+            "progressionRuleId": "time_based_conditioning",
             "required": false,
             "notes": "dakika"
           }
@@ -14224,6 +14783,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 6,
             "targetRir": 3.0,
             "restSeconds": 180,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -14245,6 +14805,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 120,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -14267,6 +14828,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 12,
             "targetRir": 2.0,
             "restSeconds": 150,
+            "progressionRuleId": "double_progression",
             "required": false,
             "notes": ""
           },
@@ -14288,6 +14850,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 90,
+            "progressionRuleId": "rep_range_accessory",
             "required": false,
             "notes": ""
           },
@@ -14309,6 +14872,7 @@ export const FORGE_PROGRAM_TEMPLATES = [
             "repsMax": 15,
             "targetRir": 2.0,
             "restSeconds": 60,
+            "progressionRuleId": "fixed_load_technique",
             "required": false,
             "notes": ""
           }

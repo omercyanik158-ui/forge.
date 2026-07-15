@@ -1,5 +1,6 @@
 import { CSV_EXERCISES } from '@/data/trainingCatalog.generated';
 import { FORGE_REVIEWED_EXERCISES } from '@/workout-programming/data/exerciseIdMap';
+import { FORGE_REVIEWED_EXERCISES_300 } from '@/workout-programming/data/exerciseIdMap300';
 import type { ExerciseLibraryItem } from '@/types';
 import { normalizedText } from './textUtils';
 
@@ -17,6 +18,7 @@ let searchableExercises: SearchableExercise[] | null = null;
 const ALL_EXERCISES: ExerciseLibraryItem[] = [
   ...CSV_EXERCISES,
   ...FORGE_REVIEWED_EXERCISES,
+  ...FORGE_REVIEWED_EXERCISES_300,
 ];
 
 function getExerciseByIdIndex(): Map<string, ExerciseLibraryItem> {

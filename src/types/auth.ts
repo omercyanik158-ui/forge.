@@ -21,6 +21,8 @@ import type { AIProgramPhysiqueSeed } from '@/types/aiProgram';
 import type { AIProgramPlan } from '@/types/aiProgramPlan';
 import type { SessionFeedback } from '@/types/aiProgramFeedback';
 import type { CoachAdjustment } from '@/types/coachAdjustment';
+import type { ActiveAIProgramRecord } from '@/services/activeAIProgramStore';
+import type { ProgressionPersistenceSnapshot } from '@/workout-programming/progression/progressionDecisionRepository';
 
 export type AuthUser = Pick<User, 'id' | 'email' | 'app_metadata' | 'user_metadata'>;
 
@@ -71,6 +73,8 @@ export type CloudSnapshotV1 = {
   coachPreferences: CoachPreferences | null;
   aiProgramPhysiqueSeed: AIProgramPhysiqueSeed | null;
   aiProgramInstances: AIProgramPlan[];
+  activeAIProgram?: ActiveAIProgramRecord | null;
+  progressionDecisions?: ProgressionPersistenceSnapshot;
   aiProgramFeedback: SessionFeedback[];
   coachAdjustments?: CoachAdjustment[];
   userPrograms: UserProgram[];

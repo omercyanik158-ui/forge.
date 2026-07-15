@@ -33,9 +33,12 @@ import {
   type WorkoutInsights,
 } from "@/services/workoutInsights";
 import { loadWorkoutLogs } from "@/services/workoutStore";
+import { loadProgressionDecisions } from "@/workout-programming";
 import { loadProfile } from "@/services/profileStore";
+import { getExerciseById } from "@/services/exerciseCatalog";
 import { canAccessTrainingInsights } from "@/services/subscription";
 import type { WorkoutLog, WorkoutSetLogEntry, UserProfile } from "@/types";
+import type { AppliedProgressionDecision } from "@/types/aiProgramProgression";
 
 type BestSetResult = {
   entry: WorkoutSetLogEntry;
@@ -51,20 +54,23 @@ export default function WorkoutProgressScreen() {
   const [insights, setInsights] = useState<WorkoutInsights | null>(null);
   const [analysis, setAnalysis] = useState<TrainingAnalysis | null>(null);
   const [recentLogs, setRecentLogs] = useState<WorkoutLog[]>([]);
+  const [progressionDecisions, setProgressionDecisions] = useState<AppliedProgressionDecision[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   const refresh = useCallback(async () => {
-    const [loadedInsights, loadedAnalysis, logs, loadedProfile] =
+    const [loadedInsights, loadedAnalysis, logs, loadedProfile, decisions] =
       await Promise.all([
         loadWorkoutInsights(),
         loadTrainingAnalysis(),
         loadWorkoutLogs(),
         loadProfile(),
+        loadProgressionDecisions(),
       ]);
     setInsights(loadedInsights);
     setAnalysis(loadedAnalysis);
     setRecentLogs(logs.slice(0, 6));
     setProfile(loadedProfile);
+    setProgressionDecisions(decisions.slice(0, 8));
   }, []);
 
   useFocusEffect(
@@ -155,6 +161,24 @@ export default function WorkoutProgressScreen() {
                 accent={colors.primary}
               />
             </View>
+
+            <GlassCard variant="panel" style={styles.card}>
+              <Text style={styles.cardTitle}>
+                {t({ tr: "Son koç hedefleri", en: "Recent target updates" })}
+              </Text>
+              {progressionDecisions.length > 0 ? (
+                progressionDecisions.slice(0, 5).map((decision) => (
+                  <ProgressionDecisionRow key={decision.decisionId} decision={decision} />
+                ))
+              ) : (
+                <Text style={styles.emptyText}>
+                  {t({
+                    tr: "AI program seanslarını tamamladıkça artış, tekrar, hafifletme ve deload kararları burada görünür.",
+                    en: "As you complete AI program sessions, increases, repeats, reductions and deload recommendations appear here.",
+                  })}
+                </Text>
+              )}
+            </GlassCard>
 
             <View style={styles.grid}>
               <InsightCard
@@ -490,6 +514,32 @@ function RecentSetLogsCard({ logs }: { logs: WorkoutLog[] }) {
   );
 }
 
+function ProgressionDecisionRow({ decision }: { decision: AppliedProgressionDecision }) {
+  const exerciseName = repairText(getExerciseById(decision.exerciseId)?.displayName ?? decision.exerciseId);
+  const icon = decision.decision.type === 'increase_load'
+    ? 'trending-up'
+    : decision.decision.type === 'recommend_deload'
+      ? 'leaf-outline'
+      : decision.decision.type === 'reduce_load'
+        ? 'arrow-down-circle-outline'
+        : 'reload-outline';
+  const nextLoad = decision.nextState.targetLoadKg;
+  const detail = nextLoad !== undefined && nextLoad > 0
+    ? `${decision.decision.explanation} · Sonraki hedef ${formatWeightValue(nextLoad)} ${weightUnitLabel()}`
+    : decision.decision.explanation;
+  return (
+    <View style={styles.progressionRow}>
+      <View style={styles.progressionIcon}>
+        <Ionicons name={icon} size={17} color={colors.primary} />
+      </View>
+      <View style={styles.progressionCopy}>
+        <Text style={styles.progressionTitle}>{exerciseName}</Text>
+        <Text style={styles.progressionBody}>{repairText(detail)}</Text>
+      </View>
+    </View>
+  );
+}
+
 function findBestSet(logs: WorkoutLog[]): BestSetResult {
   let best: BestSetResult = null;
 
@@ -583,6 +633,23 @@ const styles = createDynamicStyles(() => ({
   cardMeta: { ...typography.labelMd, color: colors.onSurfaceVariant },
   bestSetValue: { ...typography.headlineLgMobile, color: colors.secondary },
   bestSetHint: { ...typography.bodySm, color: colors.onSurface },
+  progressionRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  progressionIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surfaceContainerLow,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  progressionCopy: { flex: 1, gap: 2 },
+  progressionTitle: { ...typography.labelMd, color: colors.onSurface },
+  progressionBody: { ...typography.bodySm, color: colors.onSurfaceVariant, lineHeight: 18 },
   chartRow: {
     minHeight: 142,
     flexDirection: "row",

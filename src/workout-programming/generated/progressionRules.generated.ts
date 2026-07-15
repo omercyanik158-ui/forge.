@@ -18,7 +18,8 @@ export const FORGE_PROGRESSION_RULES = [
     "nameTr": "Çift ilerleme",
     "appliesTo": [
       "hypertrophy",
-      "general_fitness"
+      "general_fitness",
+      "powerbuilding"
     ],
     "loadOrRepLogic": "Aynı yükle tüm setlerde tekrar aralığının üst sınırına ve hedef RIR'a ulaşıldığında %2-5 yük artır.",
     "failureLogic": "Alt tekrar sınırı korunamıyorsa yükü %5-10 azalt veya bir set eksilt.",
@@ -63,6 +64,9 @@ export const FORGE_PROGRESSION_RULES = [
     "progressionRuleId": "bodyweight_rep_leverage",
     "nameTr": "Vücut ağırlığı tekrar/kaldıraç ilerlemesi",
     "appliesTo": [
+      "strength",
+      "hypertrophy",
+      "powerbuilding",
       "general_fitness",
       "home"
     ],
@@ -70,5 +74,58 @@ export const FORGE_PROGRESSION_RULES = [
     "failureLogic": "Form bozuluyorsa daha kolay varyasyona dön.",
     "deloadLogic": "Gerekirse toplam setleri bir hafta %30 azalt.",
     "accessoryLogic": "Hareket kalitesi ve tam eklem açıklığı önceliklidir."
+  },
+  {
+    "progressionRuleId": "rep_range_accessory",
+    "nameTr": "Aksesuar tekrar aralığı",
+    "appliesTo": [
+      "strength",
+      "hypertrophy",
+      "powerbuilding",
+      "general_fitness"
+    ],
+    "loadOrRepLogic": "Önce hedef tekrar aralığında kaliteyi tamamla; üst banda ulaşınca küçük yük artışı veya aynı yükte tekrar kalitesi korunur.",
+    "failureLogic": "Alt banda düşerse aynı hedef tekrar edilir; tekrarlı düşüşte yük veya set sayısı küçük azaltılır.",
+    "deloadLogic": "Ana lift veya toplam performans düşüşüyle birlikte görülürse aksesuar hacmi geçici azaltılır.",
+    "accessoryLogic": "Aksesuar ve izolasyonlar için ana kaldırıştan daha konservatif ilerleme."
+  },
+  {
+    "progressionRuleId": "fixed_load_technique",
+    "nameTr": "Sabit yük teknik",
+    "appliesTo": [
+      "strength",
+      "hypertrophy",
+      "powerbuilding",
+      "general_fitness",
+      "home"
+    ],
+    "loadOrRepLogic": "Yük artırımı otomatik yapılmaz; teknik, pozisyon ve tempo kalitesi korunur.",
+    "failureLogic": "Form veya tekrar hedefi bozulursa aynı hedef tekrar edilir.",
+    "deloadLogic": "Gerekirse set sayısı geçici azaltılır; egzersiz seçimi değişmez.",
+    "accessoryLogic": "Core, mobilite ve teknik destek hareketlerinde güvenli sabit hedef."
+  },
+  {
+    "progressionRuleId": "time_based_conditioning",
+    "nameTr": "Süre tabanlı kondisyon",
+    "appliesTo": [
+      "general_fitness",
+      "home"
+    ],
+    "loadOrRepLogic": "Tamamlanan süre hedefin üst bandına geldiğinde süre küçük artırılır; kilogram hedefi kullanılmaz.",
+    "failureLogic": "Süre tamamlanamazsa aynı süre hedefi tekrar edilir.",
+    "deloadLogic": "Yorgunluk sinyali varsa süre veya interval sayısı geçici azaltılır.",
+    "accessoryLogic": "Kondisyon hareketlerinde yük değil süre takibi önceliklidir."
+  },
+  {
+    "progressionRuleId": "distance_based_conditioning",
+    "nameTr": "Mesafe tabanlı kondisyon",
+    "appliesTo": [
+      "general_fitness",
+      "home"
+    ],
+    "loadOrRepLogic": "Tamamlanan mesafe hedefin üst bandına geldiğinde mesafe küçük artırılır; kilogram hedefi kullanılmaz.",
+    "failureLogic": "Mesafe tamamlanamazsa aynı hedef tekrar edilir.",
+    "deloadLogic": "Yorgunluk sinyali varsa mesafe veya tur sayısı geçici azaltılır.",
+    "accessoryLogic": "Carry ve yürüyüş benzeri hareketlerde mesafe/süre takibi önceliklidir."
   }
 ] as const satisfies readonly ForgeProgressionRule[];

@@ -4,6 +4,7 @@ import {
   createProgramRequestFromAnswers,
   fingerprintProgramRequest,
   matchTemplates,
+  matchTemplatesWithRelaxation,
   type ProgramRequest,
 } from '@/services/templateProgramEngine';
 import type { AIProgramAnswers, AIProgramEquipmentKey, AIProgramExperience, AIProgramGoal } from '@/types/aiProgram';
@@ -169,8 +170,19 @@ describe('Phase 3 deterministic selection scenario matrix', () => {
     const request = createProgramRequestFromAnswers({ answers: answers({ goal: 'strength', level: 'beginner', days: 2 }) });
     const report = getTemplateSelectionDebugReport(request);
     expect(report.fingerprint).toMatch(/^forge-program-request:v1:/);
-    expect(report.compatibleTemplates).toHaveLength(0);
+    expect(report.matchMode).toBe('relaxed_match');
+    expect(report.compatibleTemplates.length).toBeGreaterThan(0);
+    expect(report.relaxationsApplied.join(' ')).toContain('2 gün');
     expect(report.rejectedTemplates.length).toBeGreaterThan(0);
+    expect(report.strictRejectedTemplates.length).toBeGreaterThan(0);
+  });
+
+  it('keeps strict matching available while relaxed matching recovers safe nearby plans', () => {
+    const request = createProgramRequestFromAnswers({ answers: answers({ goal: 'build_muscle', level: 'intermediate', days: 2 }) });
+    expect(matchTemplates(request).compatible).toHaveLength(0);
+    const relaxed = matchTemplatesWithRelaxation(request);
+    expect(relaxed.matchMode).toBe('relaxed_match');
+    expect(relaxed.compatible[0]?.templateId).toBe('forge_hypertrophy_fullbody_intermediate_3d_v1');
   });
 
   it('uses existing-program reuse unless forceNewVariation is explicitly requested', () => {

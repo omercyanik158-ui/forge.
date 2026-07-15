@@ -62,6 +62,10 @@ import {
 import { normalizeProgramText, repairText } from "@/services/textUtils";
 import { loadWorkoutLogs, saveWorkoutLog } from "@/services/workoutStore";
 import {
+  getExerciseProgressionPreview,
+  processAIProgramWorkoutProgression,
+} from "@/workout-programming";
+import {
   clearWorkoutSessionDraft,
   loadWorkoutSessionDraft,
   saveWorkoutSessionDraft,
@@ -88,6 +92,10 @@ import type {
 } from "@/types/aiProgram";
 import type { SessionFeedback } from "@/types/aiProgramFeedback";
 import type { CoachAdjustment } from "@/types/coachAdjustment";
+import type {
+  AppliedProgressionDecision,
+  ExerciseProgressionPreview,
+} from "@/types/aiProgramProgression";
 
 type SessionParams = {
   programId?: string;
@@ -106,6 +114,7 @@ type SessionExercise = {
   rir: number;
   weightKg?: number;
   alternatives?: string[];
+  progressionPreview?: ExerciseProgressionPreview;
 };
 
 type SessionPlan = {
@@ -128,6 +137,7 @@ type SessionPlan = {
 type PersistSessionResult = {
   newAchievementCount: number;
   log: WorkoutLog;
+  progressionDecisions: AppliedProgressionDecision[];
 };
 
 function mapCoachEquipmentToAIEquipment(
@@ -363,6 +373,20 @@ export default function ProgramSessionScreen() {
           .flatMap((week) => week.days)
           .find((item) => item.id === params.aiDayId);
         if (aiProgram && aiDay) {
+          const previews = await Promise.all(
+            aiDay.exercises.map((entry) =>
+              getExerciseProgressionPreview({
+                plan: aiProgram,
+                day: aiDay,
+                exerciseId: entry.exerciseId,
+              }),
+            ),
+          );
+          const previewByExerciseId = new Map(
+            previews
+              .filter((preview): preview is ExerciseProgressionPreview => !!preview)
+              .map((preview) => [preview.exerciseId, preview]),
+          );
           nextPlan = {
             title: normalizeProgramText(aiProgram.title),
             subtitle: normalizeProgramText(aiDay.title),
@@ -378,9 +402,15 @@ export default function ProgramSessionScreen() {
               const exercise = getExerciseById(entry.exerciseId);
               if (!exercise) return [];
               const adjusted = applyCycleIntensity(entry, intensity);
+              const progressionPreview = previewByExerciseId.get(entry.exerciseId);
               return [
                 applyCoachAdjustmentToExercise(
-                  { exercise, ...adjusted },
+                  {
+                    exercise,
+                    ...adjusted,
+                    weightKg: progressionPreview?.targetLoadKg,
+                    progressionPreview,
+                  },
                   coachAdjustment,
                   intensity,
                 ),
@@ -724,6 +754,7 @@ export default function ProgramSessionScreen() {
         setEntries: [...warmupEntries, ...setEntries],
       };
       await saveWorkoutLog(log);
+      let progressionDecisions: AppliedProgressionDecision[] = [];
       if (
         !partial &&
         plan.source === "program" &&
@@ -743,6 +774,21 @@ export default function ProgramSessionScreen() {
         plan.aiProgramDayId
       ) {
         await completeAIProgramDay(plan.aiProgramId, plan.aiProgramDayId);
+        try {
+          const aiProgram = await loadAIProgramInstanceById(plan.aiProgramId);
+          const aiDay = aiProgram?.weeks
+            .flatMap((week) => week.days)
+            .find((day) => day.id === plan.aiProgramDayId);
+          if (aiProgram && aiDay) {
+            progressionDecisions = await processAIProgramWorkoutProgression({
+              plan: aiProgram,
+              day: aiDay,
+              workoutLog: log,
+            });
+          }
+        } catch {
+          // Workout history remains the source of truth; progression can be retried from the saved log.
+        }
       }
       let newAchievementCount = 0;
       if (currentProfile) {
@@ -762,7 +808,7 @@ export default function ProgramSessionScreen() {
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success,
         );
-      return { newAchievementCount, log };
+      return { newAchievementCount, log, progressionDecisions };
     } catch {
       Alert.alert(
         t("session.save_failed_title"),
@@ -830,9 +876,10 @@ export default function ProgramSessionScreen() {
             en: "This session now contributes to Body Progress, strength trends, and focus muscle tracking.",
           })}`
         : "";
+    const progressionMessage = formatProgressionDecisionSummary(result.progressionDecisions, t);
     Alert.alert(
       t("session.completed_title"),
-      `${completedSets} ${t("session.completed_body")}${achievementMessage}${contributionMessage}`,
+      `${completedSets} ${t("session.completed_body")}${achievementMessage}${progressionMessage}${contributionMessage}`,
       [{ text: t("session.great"), onPress: leaveSession }],
     );
   };
@@ -1317,6 +1364,16 @@ export default function ProgramSessionScreen() {
                       {repairText(activeExercise.exercise.muscleGroup)} ·{" "}
                       {activeExercise.repLabel} · {activeExercise.rir} RIR
                     </Text>
+                    {activeExercise.progressionPreview ? (
+                      <Text
+                        style={[
+                          styles.activeMeta,
+                          { color: themeColors.primary, marginTop: 4 },
+                        ]}
+                      >
+                        {formatProgressionPreview(activeExercise.progressionPreview, weightUnitLabel())}
+                      </Text>
+                    ) : null}
                   </View>
                   <TouchableOpacity
                     accessibilityRole="button"
@@ -2351,6 +2408,49 @@ function buildDraftSets(
       };
     });
   });
+}
+
+function formatProgressionPreview(preview: ExerciseProgressionPreview, unit: string): string {
+  const load = preview.targetLoadKg !== undefined && preview.targetLoadKg > 0
+    ? `${formatNumber(preview.targetLoadKg)} ${unit} · `
+    : "";
+  return `Sonraki hedef: ${load}${preview.targetSets} × ${preview.targetRepMin}-${preview.targetRepMax}`;
+}
+
+function formatProgressionDecisionSummary(
+  decisions: AppliedProgressionDecision[],
+  t: (key: string | { tr: string; en: string }) => string,
+): string {
+  const meaningful = decisions
+    .filter((item) => item.validation.valid)
+    .filter((item) => ['increase_load', 'hold', 'repeat', 'reduce_load', 'recommend_deload', 'mark_stalled'].includes(item.decision.type))
+    .slice(0, 3);
+  if (meaningful.length === 0) return "";
+  const lines = meaningful.map((item) => {
+    const name = getExerciseById(item.exerciseId)?.displayName ?? item.exerciseId;
+    const nextLoad = item.nextState.targetLoadKg;
+    switch (item.decision.type) {
+      case 'increase_load':
+        return nextLoad !== undefined
+          ? `${repairText(name)}: ${formatNumber(nextLoad)} ${weightUnitLabel()} hedefe çıktı.`
+          : `${repairText(name)}: tekrar hedefi ilerledi.`;
+      case 'hold':
+        return `${repairText(name)}: aynı hedef korunuyor.`;
+      case 'repeat':
+        return `${repairText(name)}: sonraki seansta aynı hedef tekrar.`;
+      case 'reduce_load':
+        return nextLoad !== undefined
+          ? `${repairText(name)}: hedef ${formatNumber(nextLoad)} ${weightUnitLabel()} ile yeniden kuruluyor.`
+          : `${repairText(name)}: hedef hafifletildi.`;
+      case 'recommend_deload':
+        return `${repairText(name)}: daha hafif bir hafta önerildi.`;
+      case 'mark_stalled':
+        return `${repairText(name)}: hedef takipte, acele artış yapılmadı.`;
+      default:
+        return item.decision.explanation;
+    }
+  });
+  return `\n\n${t({ tr: "Sonraki hedefler", en: "Next targets" })}\n${lines.join("\n")}`;
 }
 
 function sanitizeNumber(value: string, allowDecimal: boolean): string {

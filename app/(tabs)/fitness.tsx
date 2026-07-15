@@ -11,6 +11,7 @@ import {
   deleteAIProgramInstance,
   loadAIProgramInstances,
 } from '@/services/aiProgramInstanceStore';
+import { loadActiveAIProgram, setActiveAIProgramId } from '@/services/activeAIProgramStore';
 import {
   deleteCustomWorkout,
   loadCustomWorkouts,
@@ -51,6 +52,7 @@ export default function FitnessScreen() {
   const { colors } = useAppTheme();
   const [customWorkouts, setCustomWorkouts] = useState<CustomWorkout[]>([]);
   const [aiPrograms, setAIProgramInstances] = useState<AIProgramPlan[]>([]);
+  const [activeAIProgram, setActiveAIProgram] = useState<AIProgramPlan | null>(null);
   const [progressMap, setProgressMap] = useState<ProgramProgressMap>({});
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [favoriteProgramIds, setFavoriteProgramIds] = useState<string[]>([]);
@@ -64,11 +66,12 @@ export default function FitnessScreen() {
   const [progressReferenceTimeMs, setProgressReferenceTimeMs] = useState(0);
 
   const refreshData = useCallback(async () => {
-    const [loadedProfile, savedWorkouts, cycleTracking, aiProgramsData, favoriteIds, progress, bodyProgressData] = await Promise.all([
+    const [loadedProfile, savedWorkouts, cycleTracking, aiProgramsData, activeProgramData, favoriteIds, progress, bodyProgressData] = await Promise.all([
       loadProfile(),
       loadCustomWorkouts(),
       loadCycleTracking(),
       loadAIProgramInstances(),
+      loadActiveAIProgram(),
       loadFavoriteProgramIds(),
       loadAllProgramProgress(),
       loadBodyProgress(),
@@ -76,6 +79,7 @@ export default function FitnessScreen() {
     setProfile(loadedProfile);
     setCustomWorkouts(savedWorkouts);
     setAIProgramInstances(aiProgramsData);
+    setActiveAIProgram(activeProgramData);
     setFavoriteProgramIds(favoriteIds);
     setProgressMap(progress);
     setBodyProgress(bodyProgressData);
@@ -106,10 +110,6 @@ export default function FitnessScreen() {
   const programRailPrograms = useMemo(
     () => favoriteLibraryPrograms.length > 0 ? favoriteLibraryPrograms : FREE_PROGRAMS.slice(0, 4),
     [favoriteLibraryPrograms],
-  );
-  const activeAIProgram = useMemo(
-    () => [...aiPrograms].sort((left, right) => right.generatedAt.localeCompare(left.generatedAt))[0] ?? null,
-    [aiPrograms],
   );
   const activeProgramProgress = activeAIProgram ? progressMap[`ai:${activeAIProgram.id}`] ?? [] : [];
   const activeProgramNextDayId = activeAIProgram ? getNextAIProgramDayId(activeAIProgram, activeProgramProgress) : "";
@@ -147,6 +147,9 @@ export default function FitnessScreen() {
     try {
       if (managementItem.kind === 'ai') {
         await deleteAIProgramInstance(managementItem.plan.id);
+        if (activeAIProgram?.id === managementItem.plan.id) {
+          await setActiveAIProgramId(null);
+        }
       } else {
         await deleteCustomWorkout(managementItem.workout.id);
       }
@@ -157,7 +160,7 @@ export default function FitnessScreen() {
     } finally {
       setManagementBusy(false);
     }
-  }, [managementBusy, managementItem, refreshData]);
+  }, [activeAIProgram?.id, managementBusy, managementItem, refreshData]);
 
   const handleRenameManagedWorkout = useCallback(async () => {
     if (!managementItem || managementItem.kind !== 'custom' || managementBusy) return;

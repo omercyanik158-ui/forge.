@@ -1,0 +1,8 @@
+﻿modality,template_count,levels,days_per_week,equipment_profiles,splits
+strength,45,"advanced,beginner,intermediate","2,3,4,5",full_gym,"full_body,upper_lower"
+hypertrophy,90,"advanced,beginner,intermediate","2,3,4,5,6","dumbbell_only,full_gym","body_part,full_body,push_pull_legs,upper_lower"
+powerbuilding,40,"advanced,intermediate","3,4,5",full_gym,"full_body,powerbuilding"
+general_fitness,45,"beginner,intermediate","2,3,4","dumbbell_only,full_gym","full_body,upper_lower"
+home,30,"beginner,intermediate","2,3,4","bodyweight_home,resistance_band_bodyweight",full_body
+yoga,25,"advanced,beginner,intermediate","2,3,4,5",bodyweight_home,custom
+pilates,25,"advanced,beginner,intermediate","2,3,4,5",bodyweight_home,custom

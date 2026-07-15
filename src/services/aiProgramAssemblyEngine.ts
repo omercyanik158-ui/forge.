@@ -1264,6 +1264,9 @@ function goalRepBias(goal: AIProgramGoal): 'low' | 'mid' | 'high' {
     case 'lose_fat':
     case 'general_fitness':
     case 'return_to_training':
+    case 'home_workout':
+    case 'yoga':
+    case 'pilates':
       return 'high';
     case 'athletic_performance':
       return 'low';

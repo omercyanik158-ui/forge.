@@ -45,3 +45,4 @@ Expo-Go-*.tar.app/
 .env.production
 *.apk
 programs_detailed_boostcamp_kaggle.csv
+program_summary.csv

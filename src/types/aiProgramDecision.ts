@@ -165,4 +165,7 @@ export const GOAL_LABELS: Record<AIProgramGoal, string> = {
   athletic_performance: 'Athletic performance',
   general_fitness: 'General fitness',
   return_to_training: 'Return to training',
+  home_workout: 'Home workout',
+  yoga: 'Yoga',
+  pilates: 'Pilates',
 };

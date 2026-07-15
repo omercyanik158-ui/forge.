@@ -1,5 +1,5 @@
 import {
-  matchTemplates,
+  matchTemplatesWithRelaxation,
   PROGRAM_TEMPLATES,
   type ProgramRequest,
   type TemplateMatchResult,
@@ -12,12 +12,15 @@ export type TemplateSelectionDebugReport = {
   compatibleTemplates: TemplateMatchResult[];
   rejectedTemplates: TemplateMatchResult[];
   selectedTemplateId?: string;
+  matchMode: 'strict_match' | 'relaxed_match' | 'no_safe_match';
+  relaxationsApplied: string[];
+  strictRejectedTemplates: TemplateMatchResult[];
   existingProgramReuseEligible: boolean;
   newVariationRequested: boolean;
 };
 
 export function getTemplateSelectionDebugReport(request: ProgramRequest): TemplateSelectionDebugReport {
-  const matches = matchTemplates(request);
+  const matches = matchTemplatesWithRelaxation(request);
   return {
     request: {
       ...request,
@@ -31,6 +34,9 @@ export function getTemplateSelectionDebugReport(request: ProgramRequest): Templa
     compatibleTemplates: matches.compatible,
     rejectedTemplates: matches.rejected,
     selectedTemplateId: matches.compatible[0]?.templateId,
+    matchMode: matches.matchMode,
+    relaxationsApplied: matches.relaxationsApplied,
+    strictRejectedTemplates: matches.strictRejected,
     existingProgramReuseEligible: !request.forceNewVariation && PROGRAM_TEMPLATES.some((template) => template.id === matches.compatible[0]?.templateId),
     newVariationRequested: !!request.forceNewVariation,
   };

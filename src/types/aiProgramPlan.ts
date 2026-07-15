@@ -55,6 +55,11 @@ export type AIDayPrescription = {
     sets: number;
     reps: number;
     repLabel: string;
+    prescriptionType?: 'reps' | 'duration' | 'breaths' | 'rounds';
+    durationSecondsMin?: number;
+    durationSecondsMax?: number;
+    breathsMin?: number;
+    breathsMax?: number;
     restSeconds: number;
     rir: number;
     alternatives: string[];
@@ -112,7 +117,10 @@ export type AIProgramPlan = {
   requestFingerprint?: string;
   selectedTemplateId?: string;
   selectedTemplateVersion?: number;
+  templateMatchMode?: 'strict_match' | 'relaxed_match' | 'no_safe_match';
+  templateRelaxationsApplied?: string[];
   adaptationVersion?: number;
+  adaptationFingerprint?: string;
   requestSnapshot?: ProgramRequest;
   appliedAdaptations?: AppliedAdaptation[];
 };

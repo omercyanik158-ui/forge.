@@ -21,6 +21,8 @@ export const ANALYTICS_EVENTS = {
   aiHubModeChanged: 'ai_hub_mode_changed',
   aiProgramGenerationStarted: 'ai_program_generation_started',
   aiProgramSaved: 'ai_program_saved',
+  programActivated: 'program_activated',
+  programReplacementCancelled: 'program_replacement_cancelled',
   rewardedAdPromptShown: 'rewarded_ad_prompt_shown',
   rewardedAdStarted: 'rewarded_ad_started',
   rewardedAdCompleted: 'rewarded_ad_completed',

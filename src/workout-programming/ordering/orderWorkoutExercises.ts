@@ -1,4 +1,5 @@
 import type { ForgeGeneratedExercise, ForgeGeneratedTemplate, ForgeGeneratedWorkoutDay } from '@/workout-programming/types/csvWorkoutBrain';
+import { normalizeFocusMuscleValue, type CanonicalFocusMuscle } from '../adaptation/physiqueFocusRules';
 
 type OrderedExercise = ForgeGeneratedExercise & {
   order: number;
@@ -64,28 +65,37 @@ function isStrengthPriorityLift(exercise: ForgeGeneratedExercise): boolean {
   return exercise.required || exercise.role === 'main_lift' || PRIORITY_STRENGTH_LIFTS.has(exercise.canonicalExerciseId);
 }
 
-function orderAccessoryBlock<TExercise extends ForgeGeneratedExercise>(exercises: TExercise[]): TExercise[] {
+function exerciseMatchesFocus(exercise: ForgeGeneratedExercise, focusMuscles: readonly CanonicalFocusMuscle[]): boolean {
+  return exercise.primaryMuscles.some((muscle) => {
+    const normalized = normalizeFocusMuscleValue(muscle);
+    return normalized ? focusMuscles.includes(normalized) : false;
+  });
+}
+
+function orderAccessoryBlock<TExercise extends ForgeGeneratedExercise>(exercises: TExercise[], focusMuscles: readonly CanonicalFocusMuscle[] = []): TExercise[] {
   return [...exercises].sort((left, right) => {
     const blockDifference = blockRank(left) - blockRank(right);
     if (blockDifference !== 0) return blockDifference;
+    const focusDifference = Number(exerciseMatchesFocus(right, focusMuscles)) - Number(exerciseMatchesFocus(left, focusMuscles));
+    if (focusDifference !== 0) return focusDifference;
     const roleDifference = roleRank(left) - roleRank(right);
     if (roleDifference !== 0) return roleDifference;
     return left.order - right.order;
   });
 }
 
-function orderStrengthExercises<TExercise extends ForgeGeneratedExercise>(exercises: TExercise[]): TExercise[] {
+function orderStrengthExercises<TExercise extends ForgeGeneratedExercise>(exercises: TExercise[], focusMuscles: readonly CanonicalFocusMuscle[] = []): TExercise[] {
   const ordered: TExercise[] = [];
   let accessoryRun: TExercise[] = [];
   for (const exercise of exercises) {
     if (isStrengthPriorityLift(exercise)) {
-      ordered.push(...orderAccessoryBlock(accessoryRun), exercise);
+      ordered.push(...orderAccessoryBlock(accessoryRun, focusMuscles), exercise);
       accessoryRun = [];
       continue;
     }
     accessoryRun.push(exercise);
   }
-  ordered.push(...orderAccessoryBlock(accessoryRun));
+  ordered.push(...orderAccessoryBlock(accessoryRun, focusMuscles));
   return ordered;
 }
 
@@ -97,14 +107,21 @@ function withSequentialOrder<TExercise extends ForgeGeneratedExercise>(exercises
 }
 
 export function orderWorkoutExercises<TExercise extends ForgeGeneratedExercise>(
-  template: Pick<ForgeGeneratedTemplate, 'goal'>,
+  template: Pick<ForgeGeneratedTemplate, 'goal' | 'modality'>,
   workout: OrderableWorkoutDay<TExercise>,
+  focusMuscles: readonly CanonicalFocusMuscle[] = [],
 ): OrderableWorkoutDay<TExercise & OrderedExercise> {
   const original = [...workout.exercises].sort((left, right) => left.order - right.order);
+  if (template.modality === 'yoga' || template.modality === 'pilates') {
+    return {
+      ...workout,
+      exercises: withSequentialOrder(original),
+    };
+  }
   if (template.goal === 'strength') {
     return {
       ...workout,
-      exercises: withSequentialOrder(orderStrengthExercises(original)),
+      exercises: withSequentialOrder(orderStrengthExercises(original, focusMuscles)),
     };
   }
 
@@ -115,7 +132,7 @@ export function orderWorkoutExercises<TExercise extends ForgeGeneratedExercise>(
         ...workout,
         exercises: withSequentialOrder([
           firstExercise,
-          ...orderAccessoryBlock(original.slice(1)),
+          ...orderAccessoryBlock(original.slice(1), focusMuscles),
         ]),
       };
     }
@@ -123,13 +140,14 @@ export function orderWorkoutExercises<TExercise extends ForgeGeneratedExercise>(
 
   return {
     ...workout,
-    exercises: withSequentialOrder(orderAccessoryBlock(original)),
+    exercises: withSequentialOrder(orderAccessoryBlock(original, focusMuscles)),
   };
 }
 
 export function orderProgramWorkouts<TExercise extends ForgeGeneratedExercise>(
-  template: Pick<ForgeGeneratedTemplate, 'goal'>,
+  template: Pick<ForgeGeneratedTemplate, 'goal' | 'modality'>,
   workouts: OrderableWorkoutDay<TExercise>[],
+  focusMuscles: readonly CanonicalFocusMuscle[] = [],
 ): OrderableWorkoutDay<TExercise & OrderedExercise>[] {
-  return workouts.map((workout) => orderWorkoutExercises(template, workout));
+  return workouts.map((workout) => orderWorkoutExercises(template, workout, focusMuscles));
 }

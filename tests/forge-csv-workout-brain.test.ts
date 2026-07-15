@@ -32,7 +32,7 @@ describe('FORGE CSV workout brain generated data', () => {
   it('matches the curated manifest counts', () => {
     expect(PROGRAM_TEMPLATES).toHaveLength(26);
     expect(FORGE_CANONICAL_EXERCISES).toHaveLength(67);
-    expect(FORGE_PROGRESSION_RULES).toHaveLength(6);
+    expect(FORGE_PROGRESSION_RULES).toHaveLength(10);
     expect(FORGE_ADAPTATION_RULES).toHaveLength(52);
     expect(FORGE_EXERCISE_SUBSTITUTIONS).toHaveLength(27);
   });

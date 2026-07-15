@@ -10,6 +10,12 @@ import type { AppPreferences } from './appPreferencesStore';
 import type { AIHubAccessState } from './aiHubAccess';
 import type { AIProgramPhysiqueSeed } from '@/types/aiProgram';
 import type { UserProgram } from './userProgramsStore';
+import { loadAIProgramInstances } from './aiProgramInstanceStore';
+import { loadActiveAIProgramRecord } from './activeAIProgramStore';
+import { loadWorkoutLogs } from './workoutStore';
+import { loadProgressionDecisions, loadProgressionStates } from '@/workout-programming/progression/progressionDecisionRepository';
+import { hasExercise } from './exerciseCatalog';
+import { PROGRAM_TEMPLATES } from './templateProgramEngine';
 
 export type DataHealthItem = {
   key: StorageRegistryKey;
@@ -20,6 +26,20 @@ export type DataHealthItem = {
   isHealthy: boolean;
   lastSavedAt?: string;
   lastRecoveredAt?: string;
+};
+
+export type HealthIssue = {
+  code: string;
+  message: string;
+  severity: 'error' | 'warning';
+  repairable: boolean;
+};
+
+export type WorkoutSystemHealthReport = {
+  healthy: boolean;
+  errors: HealthIssue[];
+  warnings: HealthIssue[];
+  repairableIssues: HealthIssue[];
 };
 
 function isProfile(value: unknown): value is UserProfile {
@@ -197,6 +217,18 @@ function isUserProgramArray(value: unknown): value is UserProgram[] {
   return Array.isArray(value) && value.every(isUserProgram);
 }
 
+function isProgressionDecisionSnapshot(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as { decisions?: unknown; states?: unknown };
+  return Array.isArray(candidate.decisions) && Array.isArray(candidate.states);
+}
+
+function isActiveAIProgramRecord(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as { activeProgramId?: unknown; updatedAt?: unknown };
+  return (candidate.activeProgramId === null || typeof candidate.activeProgramId === 'string') && typeof candidate.updatedAt === 'string';
+}
+
 const STORAGE_VALIDATORS: Record<StorageRegistryKey, (value: unknown) => boolean> = {
   profile: (value) => value === null || isProfile(value),
   meals: isMealArray,
@@ -219,9 +251,11 @@ const STORAGE_VALIDATORS: Record<StorageRegistryKey, (value: unknown) => boolean
   coachPreferences: isCoachPreferencesRecord,
   aiProgramPhysiqueSeed: (value) => value === null || isAIProgramPhysiqueSeedRecord(value),
   aiProgramInstances: isAIProgramInstanceArray,
+  activeAIProgram: isActiveAIProgramRecord,
   aiProgramFeedback: isSessionFeedbackArray,
   coachAdjustments: isCoachAdjustmentArray,
   userPrograms: isUserProgramArray,
+  progressionDecisions: isProgressionDecisionSnapshot,
 };
 
 export async function loadDataHealth(): Promise<{
@@ -255,5 +289,84 @@ export async function loadDataHealth(): Promise<{
     items: inspections,
     healthyCount: inspections.filter((item) => item.isHealthy).length,
     recoveredCount: inspections.filter((item) => !!item.lastRecoveredAt).length,
+  };
+}
+
+function issue(severity: 'error' | 'warning', code: string, message: string, repairable = false): HealthIssue {
+  return { severity, code, message, repairable };
+}
+
+export async function runWorkoutSystemHealthCheck(): Promise<WorkoutSystemHealthReport> {
+  const [programs, activeRecord, logs, decisions, states] = await Promise.all([
+    loadAIProgramInstances(),
+    loadActiveAIProgramRecord(),
+    loadWorkoutLogs(),
+    loadProgressionDecisions(),
+    loadProgressionStates(),
+  ]);
+  const errors: HealthIssue[] = [];
+  const warnings: HealthIssue[] = [];
+  const programIds = new Set(programs.map((program) => program.id));
+  const logIds = new Set<string>();
+  const fingerprints = new Set<string>();
+  const templateIds = new Set(PROGRAM_TEMPLATES.map((template) => template.id));
+
+  if (activeRecord.activeProgramId && !programIds.has(activeRecord.activeProgramId)) {
+    warnings.push(issue('warning', 'ACTIVE_PROGRAM_MISSING', 'Active AI program points to a missing saved program.', true));
+  }
+
+  for (const program of programs) {
+    if (program.selectedTemplateId && !templateIds.has(program.selectedTemplateId)) {
+      warnings.push(issue('warning', 'PROGRAM_TEMPLATE_MISSING', `Saved program ${program.id} references an unknown template.`, false));
+    }
+    for (const day of program.weeks.flatMap((week) => week.days)) {
+      for (const exercise of day.exercises) {
+        if (!hasExercise(exercise.exerciseId)) {
+          errors.push(issue('error', 'PROGRAM_EXERCISE_MISSING', `Program ${program.id} references missing exercise ${exercise.exerciseId}.`));
+        }
+        if (exercise.sets < 1 || exercise.reps < 1) {
+          errors.push(issue('error', 'PROGRAM_NEGATIVE_TARGET', `Program ${program.id} has impossible set/reps target.`));
+        }
+      }
+    }
+  }
+
+  for (const log of logs) {
+    if (logIds.has(log.id)) errors.push(issue('error', 'DUPLICATE_WORKOUT_ID', `Duplicate workout log id ${log.id}.`));
+    logIds.add(log.id);
+    for (const set of log.setEntries ?? []) {
+      if (set.kg < 0 || set.reps < 0) {
+        errors.push(issue('error', 'NEGATIVE_WORKOUT_SET', `Workout ${log.id} contains negative load or reps.`));
+      }
+    }
+  }
+
+  for (const decision of decisions) {
+    if (fingerprints.has(decision.progressionFingerprint)) {
+      errors.push(issue('error', 'DUPLICATE_DECISION_FINGERPRINT', `Duplicate progression fingerprint ${decision.progressionFingerprint}.`));
+    }
+    fingerprints.add(decision.progressionFingerprint);
+    if (!programIds.has(decision.programId)) {
+      warnings.push(issue('warning', 'DECISION_PROGRAM_MISSING', `Progression decision references missing program ${decision.programId}.`));
+    }
+    if (!logIds.has(decision.sessionId)) {
+      warnings.push(issue('warning', 'DECISION_SESSION_MISSING', `Progression decision references missing workout log ${decision.sessionId}.`));
+    }
+  }
+
+  for (const state of states) {
+    if (!programIds.has(state.programId)) {
+      warnings.push(issue('warning', 'STATE_PROGRAM_MISSING', `Progression state references missing program ${state.programId}.`));
+    }
+    if ((state.targetLoadKg ?? 0) < 0 || state.targetSets < 1 || state.targetReps < 0) {
+      errors.push(issue('error', 'INVALID_PROGRESSION_STATE', `Progression state for ${state.exerciseId} has impossible targets.`));
+    }
+  }
+
+  return {
+    healthy: errors.length === 0,
+    errors,
+    warnings,
+    repairableIssues: [...errors, ...warnings].filter((item) => item.repairable),
   };
 }

@@ -1,0 +1,28 @@
+﻿source_exercise_id,alternative_exercise_id,movement_pattern,alternative_equipment,reason,constraint,preserve_role,deterministic_rank
+back_squat,front_squat,squat,"barbell,rack",quad emphasis,Kısıt yoksa,true,1
+back_squat,hack_squat,squat,machine,lower skill / less axial load,Tam spor salonu,true,2
+back_squat,leg_press,squat,machine,lower back friendly,Ana lift zorunlu değilse,true,3
+back_squat,goblet_squat,squat,dumbbell,beginner/home fallback,Yük kapasitesi sınırlı,true,4
+conventional_deadlift,trap_bar_deadlift,hinge,trap_bar,more quad / often simpler,Trap bar varsa,true,1
+conventional_deadlift,romanian_deadlift,hinge,barbell,less floor-pull specificity,Strength ana lift zorunlu değilse,true,2
+romanian_deadlift,dumbbell_rdl,hinge,dumbbell,equipment fallback,Dambıl varsa,true,1
+bench_press,dumbbell_bench_press,horizontal_push,"dumbbell,bench",more freedom,Ana lift zorunlu değilse,true,1
+bench_press,machine_chest_press,horizontal_push,machine,stability / beginner,Ana lift zorunlu değilse,true,2
+incline_barbell_press,incline_dumbbell_press,incline_push,"dumbbell,incline_bench",equipment/comfort,,true,1
+overhead_press,dumbbell_shoulder_press,vertical_push,"dumbbell,bench",equipment/comfort,Ana lift zorunlu değilse,true,1
+overhead_press,machine_shoulder_press,vertical_push,machine,stability,Ana lift zorunlu değilse,true,2
+barbell_row,chest_supported_row,horizontal_pull,machine_or_dumbbell,reduce lower-back fatigue,,true,1
+barbell_row,seated_cable_row,horizontal_pull,cable,stable alternative,,true,2
+pull_up,assisted_pull_up,vertical_pull,assisted_machine,strength regression,,true,1
+pull_up,lat_pulldown,vertical_pull,cable,load control,,true,2
+lat_pulldown,band_pulldown,vertical_pull,resistance_band,home fallback,,true,1
+seated_cable_row,band_row,horizontal_pull,resistance_band,home fallback,,true,1
+bulgarian_split_squat,reverse_lunge,lunge,dumbbell,balance/comfort,,true,1
+leg_curl,nordic_curl,knee_flexion,bodyweight,home/high difficulty,Regresyon gerekebilir,true,1
+lateral_raise,cable_lateral_raise,shoulder_abduction,cable,constant tension,,true,1
+reverse_pec_deck,face_pull,horizontal_abduction,cable,equipment fallback,,true,1
+barbell_curl,cable_curl,elbow_flexion,cable,joint comfort,,true,1
+incline_dumbbell_curl,hammer_curl,elbow_flexion,dumbbell,neutral grip,,true,1
+triceps_pushdown,overhead_triceps_extension,elbow_extension,cable_or_dumbbell,long-head bias,Dirsek toleransı,true,1
+plank,dead_bug,anti_extension,bodyweight,beginner regression,,true,1
+ab_wheel,plank,anti_extension,bodyweight,regression,,true,1

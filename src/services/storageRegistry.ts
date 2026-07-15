@@ -19,10 +19,12 @@ export const STORAGE_KEYS = {
   coachPreferences: '@forge/coach-preferences',
   aiProgramPhysiqueSeed: '@forge/ai-program-physique-seed',
   aiProgramInstances: '@forge/ai-program-instances',
+  activeAIProgram: '@forge/active-ai-program',
   aiProgramFeedback: '@forge/ai-program-feedback',
   coachAdjustments: '@forge/coach-adjustments',
   userPrograms: '@forge/user-programs',
   programFavorites: '@forge/program-favorites',
+  progressionDecisions: '@forge/progression-decisions',
 } as const;
 
 export type StorageRegistryKey = keyof typeof STORAGE_KEYS;
@@ -48,8 +50,10 @@ export const STORAGE_LABELS: Record<StorageRegistryKey, string> = {
   coachPreferences: 'Kişisel koç tercihleri',
   aiProgramPhysiqueSeed: 'AI program fizik aktarımı',
   aiProgramInstances: 'Kayıtlı AI programları',
+  activeAIProgram: 'Aktif AI programı',
   aiProgramFeedback: 'AI seans geri bildirimleri',
   coachAdjustments: 'Koç kararları',
   userPrograms: 'Kullanıcı programları',
   programFavorites: 'Favori programlar',
+  progressionDecisions: 'Progression kararları',
 };

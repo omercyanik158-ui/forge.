@@ -71,6 +71,57 @@ describe('template recommendation engine', () => {
     expect(() => buildTemplateProgram({ request })).toThrow('No compatible FORGE CSV template found');
   });
 
+  it('falls back to the closest safe plan when home hypertrophy has no exact curated template', () => {
+    const request = createProgramRequestFromAnswers({
+      answers: {
+        ...baseAnswers,
+        mainGoal: 'build_muscle',
+        trainingDays: 3,
+        location: 'home',
+        equipment: ['bodyweight_only', 'dumbbells'],
+        experience: 'intermediate',
+      },
+    });
+    const result = buildTemplateProgram({ request });
+
+    expect(result.matchMode).toBe('relaxed_match');
+    expect(result.validation.valid).toBe(true);
+    expect(result.selectedTemplateId).toMatch(/general_fitness|home|dumbbell/);
+    expect(result.relaxationsApplied.join(' ')).toContain('Tam eşleşme yoktu');
+    expect(result.plan.explanation.whyThisPlan[0]).toContain('Tam eşleşme yoktu');
+  });
+
+  it('falls back from unsupported 2-day gym hypertrophy to a nearby safe frequency', () => {
+    const request = createProgramRequestFromAnswers({
+      answers: { ...baseAnswers, trainingDays: 2, experience: 'intermediate' },
+    });
+    const first = buildTemplateProgram({ request });
+    const second = buildTemplateProgram({ request });
+
+    expect(first.matchMode).toBe('relaxed_match');
+    expect(first.selectedTemplateId).toBe(second.selectedTemplateId);
+    expect(first.relaxationsApplied).toEqual(second.relaxationsApplied);
+    expect(first.plan.daysPerWeek).toBe(3);
+  });
+
+  it('relaxes explicit split preference when no safe exact split match exists', () => {
+    const request = createProgramRequestFromAnswers({
+      answers: {
+        ...baseAnswers,
+        mainGoal: 'strength',
+        trainingDays: 4,
+        experience: 'intermediate',
+        preferredProgramStyle: 'push_pull_legs',
+        priorityMuscles: [],
+      },
+    });
+    const result = buildTemplateProgram({ request });
+
+    expect(result.matchMode).toBe('relaxed_match');
+    expect(result.selectedTemplateId).toBe('forge_strength_upper_lower_intermediate_4d_v1');
+    expect(result.relaxationsApplied).toContain('Split tercihini otomatik kabul ettik.');
+  });
+
   it('different day count selects a compatible template frequency', () => {
     const threeDay = buildRecommendedAIProgram({
       draftId: 'three-day-template',
