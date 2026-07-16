@@ -69,6 +69,26 @@ describe('client config boundaries', () => {
     }
   });
 
+  it('avoids root-level Expo font and vector icon barrel imports in app runtime code', () => {
+    const files = [
+      'app/_layout.tsx',
+      'app/ai-program-builder.tsx',
+      'app/program-session.tsx',
+      'src/components/Button.tsx',
+      'src/screens/AIHubScreen.tsx',
+    ];
+
+    for (const relativePath of files) {
+      const source = readFileSync(path.join(root, relativePath), 'utf8');
+      expect(source, relativePath).not.toContain("@expo-google-fonts/inter'");
+      expect(source, relativePath).not.toContain('@expo-google-fonts/inter"');
+      expect(source, relativePath).not.toContain("@expo-google-fonts/montserrat'");
+      expect(source, relativePath).not.toContain('@expo-google-fonts/montserrat"');
+      expect(source, relativePath).not.toContain("@expo/vector-icons'");
+      expect(source, relativePath).not.toContain('@expo/vector-icons"');
+    }
+  });
+
   it('exposes explicit client config issues for unknown app environments', () => {
     expect(clientConfig.appEnv === 'unknown' || clientConfig.isKnownAppEnv).toBe(true);
     if (clientConfig.appEnv === 'unknown') {

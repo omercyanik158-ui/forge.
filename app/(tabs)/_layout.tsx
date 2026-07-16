@@ -7,7 +7,7 @@ import {
   useAppTheme,
 } from "@/theme";
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text, View } from "react-native";
 import { useAppLocalization } from "@/providers/localization-context";
 

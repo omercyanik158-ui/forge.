@@ -1,5 +1,5 @@
 import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAppTheme, spacing, radius, typography, shadowStyle, animations } from '@/theme';
 
 type IonIconNames = React.ComponentProps<typeof Ionicons>['name'];

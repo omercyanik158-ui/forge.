@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { buildAiLimitModalModel } from '@/services/aiLimitModalModel';
 import type { AIQuotaDecision } from '@/services/aiQuotaGate';

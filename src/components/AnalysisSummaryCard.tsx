@@ -6,7 +6,7 @@ import {
   useAppTheme,
 } from "@/theme";
 import { Text, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { GlassCard } from "@/components/GlassCard";
 import { REGION_STATUS_META } from "@/components/analysisMeta";
 import type {

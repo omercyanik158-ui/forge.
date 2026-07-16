@@ -2,20 +2,24 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { startTransition, useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import {
-  useFonts,
-  Montserrat_400Regular,
   Montserrat_500Medium,
+} from '@expo-google-fonts/montserrat/500Medium';
+import {
   Montserrat_600SemiBold,
+} from '@expo-google-fonts/montserrat/600SemiBold';
+import {
   Montserrat_700Bold,
-} from '@expo-google-fonts/montserrat';
+} from '@expo-google-fonts/montserrat/700Bold';
 import {
   Inter_400Regular as InterReg,
+} from '@expo-google-fonts/inter/400Regular';
+import {
   Inter_600SemiBold as InterSemi,
-  Inter_700Bold as InterBold,
-} from '@expo-google-fonts/inter';
+} from '@expo-google-fonts/inter/600SemiBold';
 import { AppThemeProvider, useAppTheme } from '@/theme';
 import { LocalizationProvider } from '@/providers/localization-context';
 import { AuthProvider, useAuth } from '@/providers/auth-context';
@@ -248,13 +252,11 @@ export function ErrorBoundary({ retry }: { retry: () => void }) {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Montserrat_400Regular,
     Montserrat_500Medium,
     Montserrat_600SemiBold,
     Montserrat_700Bold,
     Inter_400Regular: InterReg,
     Inter_600SemiBold: InterSemi,
-    Inter_700Bold: InterBold,
   });
 
   const [status, setStatus] = useState<GateStatus>('loading');

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GlassCard } from "@/components/GlassCard";

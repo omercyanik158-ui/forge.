@@ -6,7 +6,7 @@ import {
   type BarcodeScanningResult,
 } from "expo-camera";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { useAppLocalization } from "@/providers/localization-context";
 import { safeGoBack } from "@/services/navigation";

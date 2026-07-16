@@ -6,7 +6,7 @@ import {
   typography,
 } from "@/theme";
 import { Text, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAppLocalization } from "@/providers/localization-context";
 import { formatWeightValue, weightUnitLabel } from "@/services/localization";
 import type { WorkoutSetLogEntry } from "@/types";

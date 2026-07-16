@@ -1,6 +1,6 @@
 import { createDynamicStyles, useAppTheme , colors, spacing, typography } from '@/theme';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { GlassCard } from '@/components/GlassCard';
 import { useAppLocalization } from '@/providers/localization-context';

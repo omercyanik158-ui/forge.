@@ -1,6 +1,6 @@
 import { createDynamicStyles, radius, shadowStyle, spacing, typography, useAppTheme } from '@/theme';
 import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter, useScrollToTop } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';

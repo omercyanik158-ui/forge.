@@ -11,7 +11,7 @@ import {
 import { useFocusEffect, useLocalSearchParams, useRouter, useScrollToTop } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { AIActionButton } from "@/components/ai-hub/ai-action-button";
 import { AICaptureGuidance } from "@/components/ai-hub/ai-capture-guidance";
 import { AIHistoryCard } from "@/components/ai-hub/ai-history-card";

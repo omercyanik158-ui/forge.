@@ -1,6 +1,6 @@
 import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { repairText } from "@/services/textUtils";
 import { createDynamicStyles, radius, spacing, typography, useAppTheme } from "@/theme";
 

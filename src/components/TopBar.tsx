@@ -9,7 +9,7 @@ import {
 } from "@/theme";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useAppLocalization } from "@/providers/localization-context";
 import { repairText } from "@/services/textUtils";

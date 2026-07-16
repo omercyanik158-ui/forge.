@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, Text, View } from 'react-native';
 import { formatDate } from '@/services/localization';
 import { createDynamicStyles, typography, useAppTheme } from '@/theme';
