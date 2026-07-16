@@ -76,13 +76,91 @@ function decision(type: ProgressionDecision['type'], outcome: ProgressionDecisio
   return { type, outcome, reasonCode, explanation, evidence };
 }
 
+type WorkingLoadResolution =
+  | { kind: 'not_applicable' }
+  | { kind: 'missing' }
+  | { kind: 'mixed'; loads: number[] }
+  | { kind: 'resolved'; source: 'completed_sets' | 'previous_state'; loadKg: number };
+
 function successEvidence(log: NormalizedCompletedExerciseLog, requiredSets: number): string[] {
   const working = log.sets.filter((set) => !set.skipped).slice(0, requiredSets);
-  return working.map((set) => `Set ${set.setIndex}: ${set.reps ?? 0} reps @ ${set.loadKg ?? 0} kg`);
+  return working.map((set) => {
+    const load = Number.isFinite(set.loadKg) ? `${set.loadKg} kg` : 'load missing';
+    return `Set ${set.setIndex}: ${set.reps ?? 0} reps @ ${load}`;
+  });
 }
 
 function requiredWorkingSets(log: NormalizedCompletedExerciseLog, requiredSets: number) {
   return log.sets.filter((set) => !set.skipped).slice(0, requiredSets);
+}
+
+function isLoadTrackedState(state: ExerciseProgressionState, rule: ExerciseProgressionRule): boolean {
+  if (state.equipmentKind === 'bodyweight' || state.equipmentKind === 'time' || state.equipmentKind === 'distance') {
+    return false;
+  }
+  return (
+    rule.ruleType === 'double_progression' ||
+    rule.ruleType === 'linear_load' ||
+    rule.ruleType === 'top_set_backoff' ||
+    rule.ruleType === 'percentage_based' ||
+    rule.ruleType === 'rir_based'
+  );
+}
+
+function isValidCompletedLoad(loadKg: number | undefined, equipmentKind: ExerciseProgressionState['equipmentKind']): loadKg is number {
+  if (typeof loadKg !== 'number' || !Number.isFinite(loadKg)) return false;
+  if (equipmentKind === 'bodyweight') return loadKg >= 0;
+  return loadKg > 0;
+}
+
+function resolveWorkingLoadBaseline(
+  log: NormalizedCompletedExerciseLog,
+  previousState: ExerciseProgressionState,
+  rule: ExerciseProgressionRule,
+): WorkingLoadResolution {
+  if (!isLoadTrackedState(previousState, rule)) {
+    return { kind: 'not_applicable' };
+  }
+
+  const workingLoads = requiredWorkingSets(log, previousState.targetSets)
+    .map((set) => set.loadKg)
+    .filter((loadKg): loadKg is number => isValidCompletedLoad(loadKg, previousState.equipmentKind));
+
+  if (workingLoads.length === 0) {
+    if (Number.isFinite(previousState.targetLoadKg) && (previousState.targetLoadKg ?? 0) > 0) {
+      return {
+        kind: 'resolved',
+        source: 'previous_state',
+        loadKg: previousState.targetLoadKg!,
+      };
+    }
+    return { kind: 'missing' };
+  }
+
+  const firstLoad = workingLoads[0]!;
+  const hasMixedLoads = workingLoads.some((loadKg) => Math.abs(loadKg - firstLoad) > 0.001);
+  if (hasMixedLoads) {
+    return { kind: 'mixed', loads: workingLoads };
+  }
+
+  return {
+    kind: 'resolved',
+    source: 'completed_sets',
+    loadKg: firstLoad,
+  };
+}
+
+function rebaseStateToWorkingLoad(
+  state: ExerciseProgressionState,
+  resolution: WorkingLoadResolution,
+): ExerciseProgressionState {
+  if (resolution.kind !== 'resolved' || resolution.source !== 'completed_sets') {
+    return state;
+  }
+  return {
+    ...state,
+    targetLoadKg: resolution.loadKg,
+  };
 }
 
 function classifyRepOutcome(log: NormalizedCompletedExerciseLog, state: ExerciseProgressionState, rule: ExerciseProgressionRule) {
@@ -102,7 +180,10 @@ function classifyRepOutcome(log: NormalizedCompletedExerciseLog, state: Exercise
 
 function increaseLoad(state: ExerciseProgressionState, rule: ExerciseProgressionRule): ExerciseProgressionState {
   if (state.equipmentKind === 'bodyweight') return { ...state, targetReps: state.targetRepMin, failureCount: 0, plateauCount: 0 };
-  const current = state.targetLoadKg ?? 0;
+  if (!Number.isFinite(state.targetLoadKg) || (state.targetLoadKg ?? 0) <= 0) {
+    return { ...state, failureCount: 0, plateauCount: 0 };
+  }
+  const current = state.targetLoadKg!;
   const rawIncrease = rule.loadIncrementKg ?? (current * ((rule.loadIncrementPercent ?? 2.5) / 100));
   const nextLoad = roundLoadForEquipment(current + rawIncrease, state.equipmentKind);
   return {
@@ -118,7 +199,10 @@ function reduceLoad(state: ExerciseProgressionState, rule: ExerciseProgressionRu
   if (state.equipmentKind === 'bodyweight') {
     return { ...state, targetReps: state.targetRepMin, failureCount: 0, plateauCount: state.plateauCount + 1 };
   }
-  const current = state.targetLoadKg ?? 0;
+  if (!Number.isFinite(state.targetLoadKg) || (state.targetLoadKg ?? 0) <= 0) {
+    return { ...state, targetLoadKg: undefined, targetReps: state.targetRepMin, failureCount: 0, plateauCount: state.plateauCount + 1 };
+  }
+  const current = state.targetLoadKg!;
   const multiplier = 1 - ((rule.reductionPercent ?? 5) / 100);
   return {
     ...state,
@@ -151,25 +235,41 @@ function evaluateValid(input: {
   rule: ExerciseProgressionRule;
 }): { decision: ProgressionDecision; nextState: ExerciseProgressionState } {
   const { log, previousState, rule } = input;
-  const outcome = classifyRepOutcome(log, previousState, rule);
+  const loadResolution = resolveWorkingLoadBaseline(log, previousState, rule);
+  const baselineState = rebaseStateToWorkingLoad(previousState, loadResolution);
+  const outcome = classifyRepOutcome(log, baselineState, rule);
   const evidence = successEvidence(log, previousState.targetSets);
   if (outcome === 'skipped') {
     return {
       decision: decision('preserve', 'skipped', 'ALL_SETS_SKIPPED', 'Bu hareket için tamamlanmış çalışma seti yok. Hedefler korunur.', evidence),
-      nextState: cloneState(previousState),
+      nextState: cloneState(baselineState),
     };
   }
 
   if (rule.ruleType === 'fixed_load') {
     return {
       decision: decision('hold', outcome, 'FIXED_LOAD_RULE', 'Bu hareket sabit hedefle takip edilir. Hedef aynı kalır.', evidence),
-      nextState: { ...previousState, failureCount: outcome === 'failure' ? previousState.failureCount + 1 : 0 },
+      nextState: { ...baselineState, failureCount: outcome === 'failure' ? baselineState.failureCount + 1 : 0 },
+    };
+  }
+
+  if (loadResolution.kind === 'mixed') {
+    return {
+      decision: decision('hold', outcome, 'MIXED_WORKING_LOADS_UNSUPPORTED', 'Aynı egzersizde birden fazla çalışma yükü görüldü. Bu model top-set/back-off ayrımı taşımadığı için otomatik artış yapılmadı.', evidence),
+      nextState: cloneState(previousState),
+    };
+  }
+
+  if (loadResolution.kind === 'missing' && isLoadTrackedState(previousState, rule)) {
+    return {
+      decision: decision('hold', outcome, 'MISSING_WORKING_LOAD_BASELINE', 'Geçerli bir çalışma yükü bulunamadı. Yük hedefi veri olmadan artırılmadı.', evidence),
+      nextState: cloneState(previousState),
     };
   }
 
   if (outcome === 'failure') {
-    const failureCount = previousState.failureCount + 1;
-    const failedState = { ...previousState, failureCount };
+    const failureCount = baselineState.failureCount + 1;
+    const failedState = { ...baselineState, failureCount };
     if (failureCount >= rule.deloadThreshold) {
       return {
         decision: decision('recommend_deload', 'deload', 'DELOAD_THRESHOLD_REACHED', 'Birden fazla geçerli seansta hedef korunamadı. Egzersiz seçimi değişmeden daha hafif bir hafta önerilir.', evidence),
@@ -195,38 +295,46 @@ function evaluateValid(input: {
   }
 
   if (rule.ruleType === 'linear_reps' || rule.ruleType === 'rep_range' || rule.ruleType === 'time_based' || rule.ruleType === 'distance_based') {
-    const repCap = Math.min(previousState.targetRepMax, rule.maxReps);
-    const nextTarget = Math.min(repCap, previousState.targetReps + 1);
-    if (nextTarget > previousState.targetReps) {
+    const repCap = Math.min(baselineState.targetRepMax, rule.maxReps);
+    const nextTarget = Math.min(repCap, baselineState.targetReps + 1);
+    if (nextTarget > baselineState.targetReps) {
       return {
         decision: decision('increase_reps', outcome, 'REP_TARGET_INCREASED', 'Hedef tekrarlar tamamlandı. Sonraki seans aynı yükle tekrar hedefi küçük artırıldı.', evidence),
-        nextState: { ...previousState, targetReps: nextTarget, failureCount: 0, plateauCount: 0 },
+        nextState: { ...baselineState, targetReps: nextTarget, failureCount: 0, plateauCount: 0 },
       };
     }
     return {
       decision: decision('hold', outcome, 'REP_UPPER_BOUND_HELD', 'Tekrar aralığının üst sınırındasın. Daha sert bir progresyon gözden geçirilene kadar hedef korunur.', evidence),
-      nextState: { ...previousState, failureCount: 0 },
+      nextState: { ...baselineState, failureCount: 0 },
     };
   }
 
   if (outcome === 'partial_success') {
     return {
       decision: decision('hold', 'partial_success', 'MINIMUM_TARGET_MET', 'Minimum hedef tamamlandı. Aynı yükle üst tekrar bandına yaklaş.', evidence),
-      nextState: { ...previousState, failureCount: 0 },
+      nextState: { ...baselineState, failureCount: 0 },
     };
   }
 
   if (rule.ruleType === 'double_progression' || rule.ruleType === 'linear_load' || rule.ruleType === 'top_set_backoff' || rule.ruleType === 'percentage_based' || rule.ruleType === 'rir_based') {
-    const nextState = increaseLoad(previousState, rule);
+    const nextState = increaseLoad(baselineState, rule);
     return {
-      decision: decision('increase_load', 'success', 'LOAD_INCREASED', `Tüm setler üst hedefe ulaştı. Sonraki seansta ${nextState.targetLoadKg ?? 0} kg hedefle.`, evidence),
+      decision: decision(
+        nextState.targetLoadKg === undefined ? 'hold' : 'increase_load',
+        'success',
+        nextState.targetLoadKg === undefined ? 'MISSING_WORKING_LOAD_BASELINE' : 'LOAD_INCREASED',
+        nextState.targetLoadKg === undefined
+          ? 'Geçerli yük verisi olmadan artış yapılmadı. Mevcut hedef korunur.'
+          : `Tüm setler üst hedefe ulaştı. Sonraki seansta ${nextState.targetLoadKg} kg hedefle.`,
+        evidence,
+      ),
       nextState,
     };
   }
 
   return {
     decision: decision('hold', outcome, 'SUPPORTED_RULE_HELD', 'Hedefler tamamlandı; bu kural için hedef korunur.', evidence),
-    nextState: { ...previousState, failureCount: 0 },
+    nextState: { ...baselineState, failureCount: 0 },
   };
 }
 

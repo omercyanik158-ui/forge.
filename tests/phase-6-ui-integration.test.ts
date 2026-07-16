@@ -63,7 +63,7 @@ function workoutLogForDay(plan: AIProgramPlan): WorkoutLog {
       kind: 'working' as const,
       exerciseId: exercise.exerciseId,
       kg: 40,
-      reps: 12,
+      reps: exercise.reps,
       completedAt: '2026-07-15T12:00:00.000Z',
     })),
   );
@@ -162,5 +162,15 @@ describe('Phase 6 canonical program flow integration', () => {
     const second = await processAIProgramWorkoutProgression({ plan, day, workoutLog: workoutLogForDay(plan) });
     expect(first[0]?.progressionFingerprint).toBe(second[0]?.progressionFingerprint);
     expect(second[0]?.reusedExisting).toBe(true);
+    const progressedDecision = first.find((item) =>
+      item.decision.type === 'increase_load' &&
+      item.previousState.targetLoadKg === undefined &&
+      item.nextState.targetLoadKg !== undefined &&
+      item.nextState.targetLoadKg > 0,
+    );
+    expect(progressedDecision).toBeTruthy();
+    const nextPreview = await getExerciseProgressionPreview({ plan, day, exerciseId: progressedDecision!.exerciseId });
+    expect(progressedDecision?.previousState.targetLoadKg).toBeUndefined();
+    expect(nextPreview?.targetLoadKg).toBe(progressedDecision?.nextState.targetLoadKg);
   });
 });

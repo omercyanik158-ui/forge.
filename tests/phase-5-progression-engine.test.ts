@@ -146,6 +146,51 @@ describe('Phase 5 progression validation and fingerprints', () => {
 });
 
 describe('Phase 5 progression decisions', () => {
+  it('first successful load-based session uses completed working load as the baseline', () => {
+    const previous = state({ targetLoadKg: undefined });
+    const result = evaluateProgressionDecision({
+      log: log(sets([12, 12, 12], 40)),
+      previousState: previous,
+      rule: rule(),
+    });
+    expect(result.applied.decision.type).toBe('increase_load');
+    expect(result.applied.decision.reasonCode).toBe('LOAD_INCREASED');
+    expect(result.applied.nextState.targetLoadKg).toBe(42.5);
+  });
+
+  it('uses the completed load instead of the planned target when the user works lighter', () => {
+    const previous = state({ targetLoadKg: 40, targetReps: 12 });
+    const result = evaluateProgressionDecision({
+      log: log(sets([12, 12, 12], 35)),
+      previousState: previous,
+      rule: rule(),
+    });
+    expect(result.applied.decision.type).toBe('increase_load');
+    expect(result.applied.nextState.targetLoadKg).toBe(37.5);
+  });
+
+  it('does not invent a load increase when no valid external load baseline exists', () => {
+    const previous = state({ targetLoadKg: undefined });
+    const result = evaluateProgressionDecision({
+      log: log([{ setIndex: 1, reps: 12 }, { setIndex: 2, reps: 12 }, { setIndex: 3, reps: 12 }]),
+      previousState: previous,
+      rule: rule(),
+    });
+    expect(result.applied.decision.type).toBe('hold');
+    expect(result.applied.decision.reasonCode).toBe('MISSING_WORKING_LOAD_BASELINE');
+    expect(result.applied.nextState.targetLoadKg).toBeUndefined();
+  });
+
+  it('keeps hold behavior for partial success without increasing load', () => {
+    const result = evaluateProgressionDecision({
+      log: log(sets([12, 11, 10])),
+      previousState: state({ targetReps: 12 }),
+      rule: rule(),
+    });
+    expect(result.applied.decision.type).toBe('hold');
+    expect(result.applied.nextState.targetLoadKg).toBe(40);
+  });
+
   it('double progression below minimum repeats target', () => {
     const result = evaluateProgressionDecision({ log: log(sets([8, 7, 8])), previousState: state(), rule: rule() });
     expect(result.applied.decision.type).toBe('repeat');
@@ -215,6 +260,22 @@ describe('Phase 5 equipment, persistence and debug behavior', () => {
       rule: rule({ loadIncrementKg: undefined }),
     });
     expect(body.applied.nextState.targetLoadKg).toBeUndefined();
+  });
+
+  it('holds conservatively when working sets use mixed loads without a supported top-set model', () => {
+    const previous = state({ targetLoadKg: undefined, targetReps: 12 });
+    const result = evaluateProgressionDecision({
+      log: log([
+        { setIndex: 1, reps: 12, loadKg: 40 },
+        { setIndex: 2, reps: 12, loadKg: 37.5 },
+        { setIndex: 3, reps: 12, loadKg: 37.5 },
+      ]),
+      previousState: previous,
+      rule: rule(),
+    });
+    expect(result.applied.decision.type).toBe('hold');
+    expect(result.applied.decision.reasonCode).toBe('MIXED_WORKING_LOADS_UNSUPPORTED');
+    expect(result.applied.nextState.targetLoadKg).toBeUndefined();
   });
 
   it('persists one decision for duplicate session processing', async () => {

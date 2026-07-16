@@ -175,7 +175,9 @@ export async function getExerciseProgressionPreview(input: {
     targetSets: state.targetSets,
     progressionRuleName: resolved.rule.displayName,
     explanation: state.targetLoadKg === undefined
-      ? 'Bu hareket tekrar hedefiyle takip edilir.'
+      ? (state.equipmentKind === 'bodyweight' || state.equipmentKind === 'time' || state.equipmentKind === 'distance'
+        ? 'Bu hareket tekrar hedefiyle takip edilir.'
+        : 'İlk geçerli çalışma yükü tamamlandıktan sonra sonraki seans hedefi burada gösterilir.')
       : `${state.targetSets} set · ${state.targetRepMin}-${state.targetRepMax} tekrar · ${state.targetLoadKg} kg hedef.`,
   };
 }
