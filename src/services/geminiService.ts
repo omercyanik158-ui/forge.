@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import { fetch } from 'expo/fetch';
+import { clientConfig } from '@/config/clientConfig';
 import { parseFoodAnalysisResult, parsePhysiqueAnalysisResult } from './aiHubValidation';
 import type { AIHubLanguage, FoodAnalysisResult, PhysiqueAnalysisResult } from '@/types/aiHub';
 
@@ -76,7 +77,7 @@ export class AIHubApiError extends Error {
 }
 
 function endpoint(): string {
-  const baseUrl = process.env.EXPO_PUBLIC_AI_API_URL?.replace(/\/$/, '');
+  const baseUrl = clientConfig.ai.apiBaseUrl;
   if (baseUrl) return `${baseUrl}/api/ai-analyze`;
   if (process.env.EXPO_OS === 'web') return '/api/ai-analyze';
 

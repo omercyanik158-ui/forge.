@@ -1,5 +1,7 @@
+import { clientConfig } from '@/config/clientConfig';
+
 export async function searchFoodImage(query: string): Promise<string | undefined> {
-  const endpoint = process.env.EXPO_PUBLIC_IMAGE_SEARCH_API_URL;
+  const endpoint = clientConfig.ai.imageSearchApiUrl;
   if (!endpoint) return undefined;
 
   const controller = new AbortController();

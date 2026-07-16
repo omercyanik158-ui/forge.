@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import { getCurrentAppUserId, toRevenueCatAppUserId } from './accountIdentity';
 import { formatMessage } from './localization';
 import { setSubscriptionTier } from './subscription';
+import { clientConfig } from '@/config/clientConfig';
 import { PREMIUM_ENTITLEMENT_ID, PREMIUM_OFFERING_ID, premiumPackagePriority } from '@/config/premium';
 import type { SubscriptionSummary } from '@/types/auth';
 
@@ -76,8 +77,8 @@ let configurePromise: Promise<boolean> | null = null;
 let configuredAppUserId: string | null = null;
 
 function configuredApiKey(): string | null {
-  if (Platform.OS === 'ios') return process.env.EXPO_PUBLIC_RC_IOS_API_KEY ?? null;
-  if (Platform.OS === 'android') return process.env.EXPO_PUBLIC_RC_ANDROID_API_KEY ?? null;
+  if (Platform.OS === 'ios') return clientConfig.purchases.iosApiKey;
+  if (Platform.OS === 'android') return clientConfig.purchases.androidApiKey;
   return null;
 }
 
@@ -112,7 +113,7 @@ async function loadPurchasesModule(): Promise<RevenueCatModule | null> {
 }
 
 export function isStorePurchaseConfigured(): boolean {
-  return process.env.EXPO_PUBLIC_PURCHASES_ENABLED === 'true' && !!configuredApiKey();
+  return clientConfig.purchases.enabled && !!configuredApiKey();
 }
 
 function hasActivePremiumEntitlement(customerInfo: RevenueCatCustomerInfo | null | undefined): boolean {

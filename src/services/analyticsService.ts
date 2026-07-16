@@ -1,4 +1,5 @@
 import { ANALYTICS_EVENTS, type AnalyticsEventName } from '@/config/analyticsEvents';
+import { clientConfig } from '@/config/clientConfig';
 import { addBreadcrumb, captureError } from './errorReporting';
 import type { ResolvedLocalization } from './localization';
 
@@ -23,9 +24,9 @@ let adapterPromise: Promise<AnalyticsAdapter | null> | null = null;
 let currentUser: AnalyticsUser | null = null;
 let runtimeContext: AnalyticsProperties = {};
 
-const POSTHOG_KEY = process.env.EXPO_PUBLIC_POSTHOG_KEY;
-const POSTHOG_HOST = process.env.EXPO_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com';
-const ANALYTICS_ENABLED = process.env.EXPO_PUBLIC_ANALYTICS_ENABLED === 'true';
+const POSTHOG_KEY = clientConfig.analytics.posthogKey;
+const POSTHOG_HOST = clientConfig.analytics.posthogHost;
+const ANALYTICS_ENABLED = clientConfig.analytics.enabled;
 
 async function loadAdapter(): Promise<AnalyticsAdapter | null> {
   if (!ANALYTICS_ENABLED || !POSTHOG_KEY) return null;

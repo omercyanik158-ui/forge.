@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
+import { clientConfig } from '@/config/clientConfig';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = clientConfig.supabase.url;
+const supabaseAnonKey = clientConfig.supabase.anonKey;
 
 export function isSupabaseConfigured(): boolean {
   return typeof supabaseUrl === 'string'

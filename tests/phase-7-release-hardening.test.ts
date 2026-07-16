@@ -1,10 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  getProgressionWritesFeatureState,
-  getTemplateProgramEngineFeatureState,
-} from '@/services/workoutEngineFeatureFlags';
-import {
   clearActiveAIProgram,
   loadActiveAIProgram,
   setActiveAIProgramId,
@@ -15,7 +11,6 @@ import {
 } from '@/services/aiProgramInstanceStore';
 import { saveWorkoutLog, clearWorkoutLogs } from '@/services/workoutStore';
 import { runWorkoutSystemHealthCheck } from '@/services/dataHealth';
-import { createProgramRequestFromAnswers, buildTemplateProgram } from '@/services/templateProgramEngine';
 import { clearProgressionDecisions, persistProgressionDecision } from '@/workout-programming';
 import { evaluateProgressionDecision } from '@/workout-programming/progression/evaluateProgressionDecision';
 import { createInitialProgressionState, defaultProgressionRule } from '@/workout-programming/progression/progressionUtils';
@@ -55,8 +50,17 @@ const answers: AIProgramAnswers = {
   useLatestPhysiqueAnalysis: false,
 };
 
+async function loadFeatureFlags() {
+  return import('@/services/workoutEngineFeatureFlags');
+}
+
+async function loadTemplateEngine() {
+  return import('@/services/templateProgramEngine');
+}
+
 beforeEach(async () => {
   storage.clear();
+  process.env.EXPO_PUBLIC_APP_ENV = 'test';
   delete process.env.EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE;
   delete process.env.EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE_DEV_OVERRIDE;
   delete process.env.EXPO_PUBLIC_PROGRESSION_WRITES;
@@ -65,20 +69,27 @@ beforeEach(async () => {
   await clearActiveAIProgram();
   await clearWorkoutLogs();
   await clearProgressionDecisions();
+  vi.resetModules();
 });
 
 describe('Phase 7 feature flags and release hardening', () => {
-  it('template engine flag is fail-safe opt-in', () => {
+  it('template engine flag is fail-safe opt-in', async () => {
+    const { getTemplateProgramEngineFeatureState } = await loadFeatureFlags();
     expect(getTemplateProgramEngineFeatureState()).toMatchObject({ enabled: false, source: 'disabled_default' });
     process.env.EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE = 'false';
-    expect(getTemplateProgramEngineFeatureState().enabled).toBe(false);
+    vi.resetModules();
+    expect((await loadFeatureFlags()).getTemplateProgramEngineFeatureState().enabled).toBe(false);
     process.env.EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE = 'invalid';
-    expect(getTemplateProgramEngineFeatureState().enabled).toBe(false);
+    vi.resetModules();
+    expect((await loadFeatureFlags()).getTemplateProgramEngineFeatureState().enabled).toBe(false);
     process.env.EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE = 'true';
-    expect(getTemplateProgramEngineFeatureState()).toMatchObject({ enabled: true, source: 'environment' });
+    vi.resetModules();
+    expect((await loadFeatureFlags()).getTemplateProgramEngineFeatureState()).toMatchObject({ enabled: true, source: 'environment' });
   });
 
   it('disabled progression writes preserve existing data and create no new decisions', async () => {
+    const { getProgressionWritesFeatureState } = await loadFeatureFlags();
+    const { createProgramRequestFromAnswers, buildTemplateProgram } = await loadTemplateEngine();
     expect(getProgressionWritesFeatureState().enabled).toBe(false);
     const request = createProgramRequestFromAnswers({ answers, userId: 'u1' });
     const plan = buildTemplateProgram({ request }).plan;
@@ -88,6 +99,7 @@ describe('Phase 7 feature flags and release hardening', () => {
   });
 
   it('explicit active program survives restart and missing active reference fails safely', async () => {
+    const { createProgramRequestFromAnswers, buildTemplateProgram } = await loadTemplateEngine();
     const request = createProgramRequestFromAnswers({ answers, userId: 'u1' });
     const plan = buildTemplateProgram({ request }).plan;
     await saveAIProgramInstance(plan);
@@ -98,6 +110,7 @@ describe('Phase 7 feature flags and release hardening', () => {
   });
 
   it('workout system health detects duplicate logs, negative set values and duplicate decisions', async () => {
+    const { createProgramRequestFromAnswers, buildTemplateProgram } = await loadTemplateEngine();
     const request = createProgramRequestFromAnswers({ answers, userId: 'u1' });
     const plan = buildTemplateProgram({ request }).plan;
     await saveAIProgramInstance(plan);
@@ -120,6 +133,7 @@ describe('Phase 7 feature flags and release hardening', () => {
       setEntries: [],
     });
     process.env.EXPO_PUBLIC_PROGRESSION_WRITES = 'true';
+    vi.resetModules();
     const rule = defaultProgressionRule({
       ruleId: 'double_progression',
       goal: 'hypertrophy',
@@ -157,12 +171,20 @@ describe('Phase 7 feature flags and release hardening', () => {
   });
 
   it('release config checker warns in development and blocks production when rollout flags are missing', () => {
-    const dev = execFileSync('node', ['scripts/check-release-config.mjs'], { encoding: 'utf-8' });
+    const dev = execFileSync('node', ['scripts/check-release-config.mjs'], {
+      encoding: 'utf-8',
+      env: { ...process.env, FORGE_RELEASE_PROFILE: 'development', EXPO_PUBLIC_APP_ENV: 'development' },
+    });
     expect(JSON.parse(dev).status).not.toBe('blocker');
     expect(() =>
       execFileSync('node', ['scripts/check-release-config.mjs'], {
         encoding: 'utf-8',
-        env: { ...process.env, FORGE_RELEASE_PROFILE: 'production', EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE: 'false' },
+        env: {
+          ...process.env,
+          FORGE_RELEASE_PROFILE: 'production',
+          EXPO_PUBLIC_APP_ENV: 'production',
+          EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE: 'false',
+        },
       }),
     ).toThrow();
   });

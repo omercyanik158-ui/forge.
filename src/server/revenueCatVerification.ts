@@ -1,4 +1,5 @@
 import { PREMIUM_ENTITLEMENT_ID } from '@/config/premium';
+import { serverConfig } from './serverConfig';
 
 type RevenueCatSubscriberResponse = {
   subscriber?: {
@@ -15,7 +16,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map<string, CachedEntitlement>();
 
 export async function verifyPremiumEntitlement(appUserId: string | undefined): Promise<boolean> {
-  const secret = process.env.REVENUECAT_SECRET_API_KEY;
+  const secret = serverConfig.revenueCatSecretApiKey;
   if (!secret || !appUserId || appUserId.length > 128) return false;
 
   const cached = cache.get(appUserId);

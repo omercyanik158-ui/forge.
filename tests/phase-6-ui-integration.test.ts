@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AIProgramAnswers } from '@/types/aiProgram';
 import type { AIProgramPlan } from '@/types/aiProgramPlan';
-import { createProgramRequestFromAnswers, buildTemplateProgram } from '@/services/templateProgramEngine';
 import { getProgramSelectionExplanation } from '@/services/programRecommendationEngine';
 import {
   clearActiveAIProgram,
@@ -12,11 +11,6 @@ import {
   clearAIProgramInstances,
   saveAIProgramInstance,
 } from '@/services/aiProgramInstanceStore';
-import {
-  clearProgressionDecisions,
-  getExerciseProgressionPreview,
-  processAIProgramWorkoutProgression,
-} from '@/workout-programming';
 import type { WorkoutLog } from '@/types';
 
 const storage = new Map<string, string>();
@@ -53,9 +47,12 @@ const baseAnswers: AIProgramAnswers = {
   useLatestPhysiqueAnalysis: false,
 };
 
-function planFromAnswers(answers: AIProgramAnswers, userId = 'user'): AIProgramPlan {
-  const request = createProgramRequestFromAnswers({ answers, userId });
-  return buildTemplateProgram({ request }).plan;
+async function loadTemplateEngine() {
+  return import('@/services/templateProgramEngine');
+}
+
+async function loadWorkoutProgramming() {
+  return import('@/workout-programming');
 }
 
 function workoutLogForDay(plan: AIProgramPlan): WorkoutLog {
@@ -91,11 +88,13 @@ beforeEach(async () => {
   storage.clear();
   await clearAIProgramInstances();
   await clearActiveAIProgram();
-  await clearProgressionDecisions();
+  vi.resetModules();
+  await (await loadWorkoutProgramming()).clearProgressionDecisions();
 });
 
 describe('Phase 6 canonical program flow integration', () => {
-  it('maps builder answers to canonical request without display labels', () => {
+  it('maps builder answers to canonical request without display labels', async () => {
+    const { createProgramRequestFromAnswers } = await loadTemplateEngine();
     const request = createProgramRequestFromAnswers({ answers: baseAnswers, userId: 'u1' });
     expect(request.goal).toBe('hypertrophy');
     expect(request.level).toBe('intermediate');
@@ -106,14 +105,16 @@ describe('Phase 6 canonical program flow integration', () => {
     expect(request.availableEquipment).not.toContain('pullup_bar');
   });
 
-  it('caps focus areas at two through normalized request/adaptation path', () => {
+  it('caps focus areas at two through normalized request/adaptation path', async () => {
+    const { createProgramRequestFromAnswers, buildTemplateProgram } = await loadTemplateEngine();
     const request = createProgramRequestFromAnswers({ answers: baseAnswers, userId: 'u1' });
     const result = buildTemplateProgram({ request });
     const focusMuscles = new Set(result.adaptations.map((item) => item.focusMuscle).filter(Boolean));
     expect(focusMuscles.size).toBeLessThanOrEqual(2);
   });
 
-  it('creates user-facing selection explanations without raw score IDs', () => {
+  it('creates user-facing selection explanations without raw score IDs', async () => {
+    const { createProgramRequestFromAnswers, buildTemplateProgram } = await loadTemplateEngine();
     const request = createProgramRequestFromAnswers({ answers: baseAnswers, userId: 'u1' });
     const result = buildTemplateProgram({ request });
     const explanation = getProgramSelectionExplanation(result);
@@ -122,6 +123,9 @@ describe('Phase 6 canonical program flow integration', () => {
   });
 
   it('save-only does not silently replace the active program', async () => {
+    const { createProgramRequestFromAnswers, buildTemplateProgram } = await loadTemplateEngine();
+    const planFromAnswers = (answers: AIProgramAnswers, userId = 'user') =>
+      buildTemplateProgram({ request: createProgramRequestFromAnswers({ answers, userId }) }).plan;
     const first = planFromAnswers({ ...baseAnswers, trainingDays: 4 }, 'u1');
     const second = planFromAnswers({ ...baseAnswers, trainingDays: 5 }, 'u1');
     await saveAIProgramInstance(first);
@@ -131,6 +135,9 @@ describe('Phase 6 canonical program flow integration', () => {
   });
 
   it('explicit replacement changes active program only after confirmation action', async () => {
+    const { createProgramRequestFromAnswers, buildTemplateProgram } = await loadTemplateEngine();
+    const planFromAnswers = (answers: AIProgramAnswers, userId = 'user') =>
+      buildTemplateProgram({ request: createProgramRequestFromAnswers({ answers, userId }) }).plan;
     const first = planFromAnswers({ ...baseAnswers, trainingDays: 4 }, 'u1');
     const second = planFromAnswers({ ...baseAnswers, trainingDays: 5 }, 'u1');
     await saveAIProgramInstance(first);
@@ -141,7 +148,11 @@ describe('Phase 6 canonical program flow integration', () => {
   });
 
   it('session preview reads persisted next target and completion runs progression once', async () => {
-    const plan = planFromAnswers({ ...baseAnswers, priorityMuscles: [] }, 'u1');
+    const { createProgramRequestFromAnswers, buildTemplateProgram } = await loadTemplateEngine();
+    const { getExerciseProgressionPreview, processAIProgramWorkoutProgression } = await loadWorkoutProgramming();
+    const plan = buildTemplateProgram({
+      request: createProgramRequestFromAnswers({ answers: { ...baseAnswers, priorityMuscles: [] }, userId: 'u1' }),
+    }).plan;
     await saveAIProgramInstance(plan);
     await setActiveAIProgramId(plan.id);
     const day = plan.weeks[0]!.days[0]!;

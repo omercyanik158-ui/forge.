@@ -1,4 +1,5 @@
 import { logServerError } from './serverLogger';
+import { serverConfig } from './serverConfig';
 
 type BucketEntry = {
   timestamps: number[];
@@ -39,8 +40,8 @@ export type RateLimitResult = {
   retryAfterSeconds: number;
 };
 
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const UPSTASH_URL = serverConfig.upstashRedisRestUrl;
+const UPSTASH_TOKEN = serverConfig.upstashRedisRestToken;
 
 function isUpstashConfigured(): boolean {
   return Boolean(UPSTASH_URL && UPSTASH_TOKEN);

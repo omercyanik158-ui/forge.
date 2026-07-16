@@ -20,6 +20,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { GlassCard } from "@/components/GlassCard";
 import { ScreenHeader } from "@/components/ScreenHeader";
+import { clientConfig } from "@/config/clientConfig";
 import { loadDataHealth, type DataHealthItem } from "@/services/dataHealth";
 import { useAppLocalization } from "@/providers/localization-context";
 import { formatDate as formatLocalizedDate } from "@/services/localization";
@@ -27,7 +28,7 @@ import { resetAnalytics } from "@/services/analyticsService";
 import { clearAllAppData } from "@/services/appReset";
 import { setReportingUser } from "@/services/errorReporting";
 
-const SUPPORT_EMAIL = process.env.EXPO_PUBLIC_SUPPORT_EMAIL;
+const SUPPORT_EMAIL = clientConfig.support.email;
 const HAS_SUPPORT_EMAIL =
   typeof SUPPORT_EMAIL === "string" && SUPPORT_EMAIL.trim().length > 0;
 

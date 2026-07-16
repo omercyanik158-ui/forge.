@@ -13,6 +13,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GlassCard } from "@/components/GlassCard";
 import { PremiumOfferSummary } from "@/components/PremiumOfferSummary";
+import { clientConfig } from "@/config/clientConfig";
 import { getPremiumMarketSnapshot } from "@/services/market";
 import { safeGoBack } from "@/services/navigation";
 import { loadProfile } from "@/services/profileStore";
@@ -44,8 +45,8 @@ import {
 } from "@/theme";
 import type { UserProfile } from "@/types";
 
-const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL;
-const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL;
+const TERMS_URL = clientConfig.legal.termsUrl;
+const PRIVACY_URL = clientConfig.legal.privacyUrl;
 
 async function openLegalUrl(url: string): Promise<void> {
   const supported = await Linking.canOpenURL(url);

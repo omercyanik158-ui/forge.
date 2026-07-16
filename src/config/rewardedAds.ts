@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { clientConfig } from './clientConfig';
 
 export const REWARDED_AD_DAILY_CAP = 3;
 
@@ -24,11 +25,11 @@ function isDevelopmentRuntime(): boolean {
 }
 
 export function isAdMobEnabled(): boolean {
-  return process.env.EXPO_PUBLIC_ADMOB_ENABLED === 'true';
+  return clientConfig.ads.enabled;
 }
 
 export function isAdMobTestMode(): boolean {
-  return process.env.EXPO_PUBLIC_ADMOB_TEST_MODE === 'true';
+  return clientConfig.ads.testMode;
 }
 
 export function shouldEnableNativeRewardedAds(): boolean {
@@ -40,8 +41,8 @@ export function isDevelopmentMockAdsEnabled(): boolean {
 }
 
 export function currentAdMobAppId(): string | null {
-  if (Platform.OS === 'ios') return process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID || null;
-  if (Platform.OS === 'android') return process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID || null;
+  if (Platform.OS === 'ios') return clientConfig.ads.iosAppId;
+  if (Platform.OS === 'android') return clientConfig.ads.androidAppId;
   return null;
 }
 
@@ -54,13 +55,13 @@ export function getRewardedAdUnitId(type: RewardedCreditType): string | null {
 
   if (type === REWARDED_AD_TYPES.mealAnalysis) {
     return Platform.OS === 'ios'
-      ? process.env.EXPO_PUBLIC_ADMOB_IOS_REWARDED_MEAL_AD_UNIT_ID || null
-      : process.env.EXPO_PUBLIC_ADMOB_ANDROID_REWARDED_MEAL_AD_UNIT_ID || null;
+      ? clientConfig.ads.rewardedMeal.ios
+      : clientConfig.ads.rewardedMeal.android;
   }
 
   return Platform.OS === 'ios'
-    ? process.env.EXPO_PUBLIC_ADMOB_IOS_REWARDED_PHYSIQUE_AD_UNIT_ID || null
-    : process.env.EXPO_PUBLIC_ADMOB_ANDROID_REWARDED_PHYSIQUE_AD_UNIT_ID || null;
+    ? clientConfig.ads.rewardedPhysique.ios
+    : clientConfig.ads.rewardedPhysique.android;
 }
 
 export function getTestAdMobAppId(): string | null {

@@ -95,6 +95,7 @@ beforeEach(async () => {
   process.env.EXPO_PUBLIC_PROGRESSION_WRITES = 'true';
   storage.clear();
   await clearProgressionDecisions();
+  vi.resetModules();
 });
 
 describe('Phase 5 progression validation and fingerprints', () => {

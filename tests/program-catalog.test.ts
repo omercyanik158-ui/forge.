@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CSV_EXERCISES, CSV_PROGRAMS, TRAINING_CATALOG_IMPORT_META } from '@/data/trainingCatalog.generated';
-import { hasExercise, searchExercises } from '@/services/exerciseCatalog';
+import { getSearchableExercises, hasExercise, searchExercises } from '@/services/exerciseCatalog';
 import { FORGE_REVIEWED_EXERCISES } from '@/workout-programming/data/exerciseIdMap';
-import { FORGE_REVIEWED_EXERCISES_300 } from '@/workout-programming/data/exerciseIdMap300';
 import {
   ALL_PROGRAMS,
   CSV_RECOMMENDED_PROGRAMS,
@@ -45,9 +44,8 @@ describe('CSV-only program catalog', () => {
     const results = searchExercises('bench');
     expect(results.length).toBeGreaterThan(0);
     expect(results.every((exercise) => exercise.id.startsWith('csv-') || exercise.id.startsWith('forge-'))).toBe(true);
-    expect(searchExercises('').length).toBe(
-      CSV_EXERCISES.length + FORGE_REVIEWED_EXERCISES.length + FORGE_REVIEWED_EXERCISES_300.length,
-    );
+    expect(searchExercises('').length).toBe(CSV_EXERCISES.length + FORGE_REVIEWED_EXERCISES.length);
+    expect(new Set(getSearchableExercises().map((entry) => entry.exercise.id)).size).toBe(searchExercises('').length);
   });
 
   it('filters generated programs by discoverable metadata', () => {

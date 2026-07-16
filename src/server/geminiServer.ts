@@ -1,5 +1,6 @@
 import { buildPrompt, getPromptSchema } from '@/services/ai/promptRegistry';
 import { parseFoodAnalysisResult, parsePhysiqueAnalysisResult } from '@/services/aiHubValidation';
+import { serverConfig } from './serverConfig';
 import type { AIHubLanguage, FoodAnalysisResult, PhysiqueAnalysisResult } from '@/types/aiHub';
 
 type InlineImage = {
@@ -67,10 +68,10 @@ async function requestGemini(
   responseJsonSchema: Record<string, unknown>,
   options?: { safetySettings?: GeminiSafetySetting[]; imageLabels?: string[] },
 ): Promise<unknown> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = serverConfig.geminiApiKey;
   if (!apiKey) throw new Error('GEMINI_API_KEY_MISSING');
 
-  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const model = serverConfig.geminiModel;
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
     {

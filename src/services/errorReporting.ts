@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { clientConfig } from '@/config/clientConfig';
 
 export type ErrorReportingUser = {
   id?: string;
@@ -19,9 +20,7 @@ type Breadcrumb = {
   createdAt: string;
 };
 
-const RUNTIME_ENVIRONMENT =
-  process.env.EXPO_PUBLIC_APP_ENVIRONMENT ||
-  (__DEV__ ? 'development' : 'production');
+const RUNTIME_ENVIRONMENT = clientConfig.appEnvMarker;
 
 const MAX_BREADCRUMBS = 50;
 

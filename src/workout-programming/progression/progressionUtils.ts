@@ -6,14 +6,10 @@ import type {
   ProgressionEquipmentKind,
   ProgressionRuleType,
 } from '@/types/aiProgramProgression';
-import { getWorkoutLibraryVersionState } from '@/services/workoutEngineFeatureFlags';
 import { FORGE_PROGRESSION_RULES as FORGE_PROGRESSION_RULES_STABLE } from '../generated/progressionRules.generated';
-import { FORGE_PROGRESSION_RULES_300 } from '../generated/progressionRules300.generated';
 
 export const PROGRESSION_ENGINE_VERSION = 'forge-progression-engine:v1';
-const FORGE_PROGRESSION_RULES = getWorkoutLibraryVersionState().version === '300'
-  ? FORGE_PROGRESSION_RULES_300
-  : FORGE_PROGRESSION_RULES_STABLE;
+const FORGE_PROGRESSION_RULES = FORGE_PROGRESSION_RULES_STABLE;
 
 export type NormalizedCompletedExerciseLog = CompletedExerciseLog & {
   sets: CompletedSetLog[];

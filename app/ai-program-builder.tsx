@@ -33,7 +33,6 @@ import { getExerciseById, searchExercises } from "@/services/exerciseCatalog";
 import { buildOrReuseRecommendedAIProgram } from "@/services/programRecommendationEngine";
 import {
   USE_TEMPLATE_PROGRAM_ENGINE,
-  WORKOUT_LIBRARY_VERSION,
 } from "@/services/templateProgramEngine";
 import {
   GYM_EQUIPMENT,
@@ -143,17 +142,7 @@ const BASE_GOAL_OPTIONS: AIProgramGoal[] = [
   "general_fitness",
   "return_to_training",
 ];
-
-const LIBRARY_300_GOAL_OPTIONS: AIProgramGoal[] = [
-  "home_workout",
-  "yoga",
-  "pilates",
-];
-
-const GOAL_OPTIONS: AIProgramGoal[] =
-  WORKOUT_LIBRARY_VERSION === "300"
-    ? [...BASE_GOAL_OPTIONS, ...LIBRARY_300_GOAL_OPTIONS]
-    : BASE_GOAL_OPTIONS;
+const GOAL_OPTIONS: AIProgramGoal[] = BASE_GOAL_OPTIONS;
 const EXPERIENCE_OPTIONS: AIProgramExperience[] = [
   "beginner",
   "returning",
@@ -464,7 +453,23 @@ export default function AIProgramBuilderScreen() {
         cycle,
       });
       if (!USE_TEMPLATE_PROGRAM_ENGINE) {
-        throw new Error("Template program engine must be enabled for program recommendations.");
+        Alert.alert(
+          t({ tr: "Program kurulumu şu anda kullanılamıyor", en: "Program setup is unavailable right now" }),
+          t({
+            tr: "Forge program motoru bu build için aktif değil. Lütfen daha sonra tekrar dene veya destek ekibiyle iletişime geç.",
+            en: "The FORGE program engine is not active in this build. Please try again later or contact support.",
+          }),
+        );
+        setProcessingIndex(-1);
+        setDraft((current) =>
+          current
+            ? mergeAIProgramDraft(current, {
+                generationStatus: "idle",
+                currentStep: "summary",
+              })
+            : current,
+        );
+        return;
       }
       const recommendedPlan = (
         await buildOrReuseRecommendedAIProgram({

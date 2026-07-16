@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import { fetch } from 'expo/fetch';
+import { clientConfig } from '@/config/clientConfig';
 import type { RewardedCreditType } from '@/config/rewardedAds';
 
 type RewardedCreditApiResponse = {
@@ -44,7 +45,7 @@ function developmentOrigin(): string | null {
 }
 
 function rewardedCreditEndpoint(): string {
-  const baseUrl = process.env.EXPO_PUBLIC_AI_API_URL?.replace(/\/$/, '');
+  const baseUrl = clientConfig.ai.apiBaseUrl;
   if (baseUrl) return `${baseUrl}/api/ai-rewarded-credit`;
   if (process.env.EXPO_OS === 'web') return '/api/ai-rewarded-credit';
 

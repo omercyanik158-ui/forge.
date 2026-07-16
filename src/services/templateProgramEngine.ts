@@ -1,13 +1,8 @@
 import { FORGE_ADAPTATION_RULES as FORGE_ADAPTATION_RULES_STABLE } from '@/workout-programming/generated/adaptationRules.generated';
-import { FORGE_ADAPTATION_RULES_300 } from '@/workout-programming/generated/adaptationRules300.generated';
 import { FORGE_PROGRAM_TEMPLATES as FORGE_PROGRAM_TEMPLATES_STABLE } from '@/workout-programming/generated/templates.generated';
-import { FORGE_PROGRAM_TEMPLATES_300 } from '@/workout-programming/generated/templates300.generated';
 import { FORGE_EXERCISE_SUBSTITUTIONS as FORGE_EXERCISE_SUBSTITUTIONS_STABLE } from '@/workout-programming/generated/substitutions.generated';
-import { FORGE_EXERCISE_SUBSTITUTIONS_300 } from '@/workout-programming/generated/substitutions300.generated';
 import { FORGE_PROGRESSION_RULES as FORGE_PROGRESSION_RULES_STABLE } from '@/workout-programming/generated/progressionRules.generated';
-import { FORGE_PROGRESSION_RULES_300 } from '@/workout-programming/generated/progressionRules300.generated';
 import { FORGE_CANONICAL_EXERCISES as FORGE_CANONICAL_EXERCISES_STABLE } from '@/workout-programming/generated/exerciseCatalog.generated';
-import { FORGE_CANONICAL_EXERCISES_300 } from '@/workout-programming/generated/exerciseCatalog300.generated';
 import {
   focusAreaAllowsVolume,
   normalizeFocusMuscleValue,
@@ -36,7 +31,7 @@ import type { AIProgramAnswers, AIProgramPhysiqueSummary } from '@/types/aiProgr
 import type { AIProgramAlternativeDecision, AIProgramDecisionBlueprint, AIProgramSplitKey } from '@/types/aiProgramDecision';
 import type { AIDayPrescription, AIGeneratedWeek, AIProgramPlan } from '@/types/aiProgramPlan';
 import { hasExercise } from './exerciseCatalog';
-import { getTemplateProgramEngineFeatureState, getWorkoutLibraryVersionState } from './workoutEngineFeatureFlags';
+import { getTemplateProgramEngineFeatureState } from './workoutEngineFeatureFlags';
 
 export const USE_TEMPLATE_PROGRAM_ENGINE =
   getTemplateProgramEngineFeatureState().enabled;
@@ -44,7 +39,7 @@ export const USE_TEMPLATE_PROGRAM_ENGINE =
 const ADAPTATION_VERSION = 2;
 
 export type TemplateGoal = 'strength' | 'hypertrophy' | 'powerbuilding' | 'general_fitness';
-export type TemplateModality = 'strength' | 'hypertrophy' | 'powerbuilding' | 'general_fitness' | 'home' | 'yoga' | 'pilates';
+export type TemplateModality = 'strength' | 'hypertrophy' | 'powerbuilding' | 'general_fitness' | 'home';
 export type TemplateLevel = 'beginner' | 'intermediate' | 'advanced';
 export type TemplateSplit = 'full_body' | 'upper_lower' | 'push_pull_legs' | 'body_part' | 'powerbuilding' | 'custom';
 export type TemplateEquipmentProfile = 'full_gym' | 'dumbbell_only' | 'bodyweight_home' | 'resistance_band_bodyweight' | 'custom';
@@ -185,12 +180,12 @@ type LimitationReplacement = {
   reason: string;
 };
 
-export const WORKOUT_LIBRARY_VERSION = getWorkoutLibraryVersionState().version;
-const ACTIVE_PROGRAM_TEMPLATES = WORKOUT_LIBRARY_VERSION === '300' ? FORGE_PROGRAM_TEMPLATES_300 : FORGE_PROGRAM_TEMPLATES_STABLE;
-const ACTIVE_ADAPTATION_RULES = WORKOUT_LIBRARY_VERSION === '300' ? FORGE_ADAPTATION_RULES_300 : FORGE_ADAPTATION_RULES_STABLE;
-const ACTIVE_EXERCISE_SUBSTITUTIONS = WORKOUT_LIBRARY_VERSION === '300' ? FORGE_EXERCISE_SUBSTITUTIONS_300 : FORGE_EXERCISE_SUBSTITUTIONS_STABLE;
-export const FORGE_PROGRESSION_RULES = WORKOUT_LIBRARY_VERSION === '300' ? FORGE_PROGRESSION_RULES_300 : FORGE_PROGRESSION_RULES_STABLE;
-const ACTIVE_CANONICAL_EXERCISES = WORKOUT_LIBRARY_VERSION === '300' ? FORGE_CANONICAL_EXERCISES_300 : FORGE_CANONICAL_EXERCISES_STABLE;
+export const WORKOUT_LIBRARY_VERSION = 'stable' as const;
+const ACTIVE_PROGRAM_TEMPLATES = FORGE_PROGRAM_TEMPLATES_STABLE;
+const ACTIVE_ADAPTATION_RULES = FORGE_ADAPTATION_RULES_STABLE;
+const ACTIVE_EXERCISE_SUBSTITUTIONS = FORGE_EXERCISE_SUBSTITUTIONS_STABLE;
+export const FORGE_PROGRESSION_RULES = FORGE_PROGRESSION_RULES_STABLE;
+const ACTIVE_CANONICAL_EXERCISES = FORGE_CANONICAL_EXERCISES_STABLE;
 
 export const LEGACY_PROGRAM_TEMPLATES: ProgramTemplate[] = FORGE_PROGRAM_TEMPLATES_STABLE.map((template) => ({
   ...template,
@@ -210,6 +205,19 @@ export const READ_COMPAT_PROGRAM_TEMPLATES: ProgramTemplate[] = [
   ...PROGRAM_TEMPLATES,
   ...LEGACY_PROGRAM_TEMPLATES.filter((legacy) => !PROGRAM_TEMPLATES.some((active) => active.id === legacy.id)),
 ];
+
+export type SavedTemplateResolution =
+  | { status: 'missing' }
+  | { status: 'supported'; template: ProgramTemplate }
+  | { status: 'unsupported'; templateId: string };
+
+export function resolveSavedTemplate(templateId: string | null | undefined): SavedTemplateResolution {
+  const normalized = templateId?.trim();
+  if (!normalized) return { status: 'missing' };
+  const template = READ_COMPAT_PROGRAM_TEMPLATES.find((item) => item.id === normalized || item.templateId === normalized);
+  if (!template) return { status: 'unsupported', templateId: normalized };
+  return { status: 'supported', template };
+}
 
 export function getSupportedProgramOptions(input: SupportedProgramOptionsInput = {}): SupportedProgramOptions {
   const templates = PROGRAM_TEMPLATES.filter((template) =>
@@ -459,8 +467,6 @@ function goalFromAnswers(answers: AIProgramAnswers): TemplateGoal {
 
 function modalityFromAnswers(answers: AIProgramAnswers): TemplateModality {
   if (answers.mainGoal === 'home_workout') return 'home';
-  if (answers.mainGoal === 'yoga') return 'yoga';
-  if (answers.mainGoal === 'pilates') return 'pilates';
   if (answers.mainGoal === 'strength') return 'strength';
   if (answers.mainGoal === 'build_muscle') return 'hypertrophy';
   if (answers.mainGoal === 'recomposition') return 'powerbuilding';
@@ -576,7 +582,7 @@ export function fingerprintProgramRequest(request: ProgramRequest, templateVersi
 function templateRejections(template: ProgramTemplate, request: ProgramRequest): TemplateRejectionReason[] {
   const rejections: TemplateRejectionReason[] = [];
   if (template.goal !== request.goal) rejections.push({ code: 'GOAL_MISMATCH', message: `Template goal ${template.goal} does not match request goal ${request.goal}.`, field: 'goal' });
-  if (WORKOUT_LIBRARY_VERSION === '300' && request.modality && (template.modality ?? template.goal) !== request.modality) {
+  if (request.modality && (template.modality ?? template.goal) !== request.modality) {
     rejections.push({ code: 'MODALITY_MISMATCH', message: `Template modality ${template.modality ?? template.goal} does not match request modality ${request.modality}.`, field: 'modality' });
   }
   if (template.daysPerWeek !== request.daysPerWeek) rejections.push({ code: 'DAY_COUNT_MISMATCH', message: `Template has ${template.daysPerWeek} days, request needs ${request.daysPerWeek}.`, field: 'daysPerWeek' });
@@ -681,6 +687,12 @@ export function matchTemplates(request: ProgramRequest): { compatible: TemplateM
   return { compatible, rejected: scored.filter((item) => item.rejectionReasons?.length) };
 }
 
+function fallbackModalityForRequest(request: ProgramRequest): TemplateModality {
+  return request.equipmentProfile === 'full_gym' || request.equipmentProfile === 'dumbbell_only'
+    ? 'general_fitness'
+    : 'home';
+}
+
 type RelaxedRequestCandidate = {
   request: ProgramRequest;
   relaxationsApplied: string[];
@@ -739,7 +751,7 @@ function createRelaxedRequestCandidates(request: ProgramRequest): RelaxedRequest
     const reason = request.equipmentProfile === 'full_gym'
       ? `${request.goal} hedefinde tam eşleşme yoktu; güvenli general fitness template alternatif olarak değerlendirildi.`
       : `Seçili ekipmanla ${request.goal} curated template yoktu; güvenli general fitness template alternatif olarak değerlendirildi.`;
-    add({ goal: 'general_fitness' }, reason);
+    add({ goal: 'general_fitness', modality: fallbackModalityForRequest(request) }, reason);
   }
 
   const safeBase: Partial<ProgramRequest> = {
@@ -762,6 +774,7 @@ function createRelaxedRequestCandidates(request: ProgramRequest): RelaxedRequest
       {
         ...safeBase,
         goal: 'general_fitness',
+        modality: fallbackModalityForRequest(request),
         daysPerWeek: fallbackDays,
         level: request.level === 'advanced' ? 'intermediate' : request.level,
       },
@@ -776,6 +789,7 @@ function createRelaxedRequestCandidates(request: ProgramRequest): RelaxedRequest
         {
           ...safeBase,
           goal: 'general_fitness',
+          modality: fallbackModalityForRequest(request),
           daysPerWeek: 3,
           level: 'beginner',
         },
@@ -812,15 +826,6 @@ export function matchTemplatesWithRelaxation(request: ProgramRequest): {
   strictRejected: TemplateMatchResult[];
 } {
   const strict = matchTemplates(request);
-  if (WORKOUT_LIBRARY_VERSION === '300') {
-    return {
-      ...strict,
-      effectiveRequest: request,
-      matchMode: strict.compatible.length > 0 ? 'strict_match' : 'no_safe_match',
-      relaxationsApplied: [],
-      strictRejected: strict.rejected,
-    };
-  }
   if (strict.compatible.length > 0) {
     return {
       ...strict,
@@ -949,22 +954,6 @@ function substituteForLimitation(exercise: MutableExercise, request: ProgramRequ
 }
 
 function eligibleFocus(request: ProgramRequest, template: ProgramTemplate): { selected: PhysiqueFocusArea[]; ignored: IgnoredPhysiqueFocusArea[] } {
-  if (template.modality === 'yoga' || template.modality === 'pilates') {
-    const normalized = normalizePhysiqueFocusAreas({
-      manualFocusMuscles: request.focusMuscles,
-      physiqueFocus: request.physiqueFocus,
-    });
-    return {
-      selected: [],
-      ignored: [
-        ...normalized.ignored,
-        ...normalized.focusAreas.map((area) => ({
-          rawMuscle: area.muscle,
-          reason: 'TEMPLATE_INCOMPATIBLE' as const,
-        })),
-      ],
-    };
-  }
   const normalized = normalizePhysiqueFocusAreas({
     manualFocusMuscles: request.focusMuscles,
     physiqueFocus: request.physiqueFocus,

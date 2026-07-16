@@ -1,5 +1,5 @@
 {
-  "name": "yenispor",
+  "name": "forge",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
@@ -17,6 +17,8 @@
     "check:expo": "npx expo-doctor",
     "check:release": "node scripts/release-check.mjs",
     "check:release-config": "node scripts/check-release-config.mjs",
+    "check:release-server": "node scripts/check-server-config.mjs",
+    "check:config-inline": "node scripts/check-config-inline.mjs",
     "check:repo-hygiene": "node scripts/check-repository-hygiene.mjs",
     "lint": "eslint app src scripts --max-warnings=0",
     "test": "vitest run",

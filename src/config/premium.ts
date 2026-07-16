@@ -1,15 +1,17 @@
-export const PREMIUM_ENTITLEMENT_ID = process.env.EXPO_PUBLIC_RC_ENTITLEMENT_ID || 'premium';
+import { clientConfig } from './clientConfig';
 
-export const PREMIUM_OFFERING_ID = process.env.EXPO_PUBLIC_RC_OFFERING_ID || 'default';
+export const PREMIUM_ENTITLEMENT_ID = clientConfig.purchases.entitlementId;
+
+export const PREMIUM_OFFERING_ID = clientConfig.purchases.offeringId;
 
 export const PREMIUM_PACKAGE_IDS = {
-  monthly: process.env.EXPO_PUBLIC_RC_MONTHLY_PACKAGE_ID || '$rc_monthly',
-  annual: process.env.EXPO_PUBLIC_RC_ANNUAL_PACKAGE_ID || '$rc_annual',
+  monthly: clientConfig.purchases.packageIds.monthly,
+  annual: clientConfig.purchases.packageIds.annual,
 } as const;
 
 export const PREMIUM_PRODUCT_IDS = {
-  monthly: process.env.EXPO_PUBLIC_RC_MONTHLY_PRODUCT_ID || 'forge_monthly',
-  annual: process.env.EXPO_PUBLIC_RC_ANNUAL_PRODUCT_ID || 'forge_yearly',
+  monthly: clientConfig.purchases.productIds.monthly,
+  annual: clientConfig.purchases.productIds.annual,
 } as const;
 
 export const PREMIUM_FEATURE_KEYS = {

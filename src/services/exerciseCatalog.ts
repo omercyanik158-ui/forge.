@@ -1,6 +1,5 @@
 import { CSV_EXERCISES } from '@/data/trainingCatalog.generated';
 import { FORGE_REVIEWED_EXERCISES } from '@/workout-programming/data/exerciseIdMap';
-import { FORGE_REVIEWED_EXERCISES_300 } from '@/workout-programming/data/exerciseIdMap300';
 import type { ExerciseLibraryItem } from '@/types';
 import { normalizedText } from './textUtils';
 
@@ -15,11 +14,28 @@ export type SearchableExercise = {
 let exerciseById: Map<string, ExerciseLibraryItem> | null = null;
 let searchableExercises: SearchableExercise[] | null = null;
 
-const ALL_EXERCISES: ExerciseLibraryItem[] = [
-  ...CSV_EXERCISES,
-  ...FORGE_REVIEWED_EXERCISES,
-  ...FORGE_REVIEWED_EXERCISES_300,
-];
+function buildExerciseCatalog(): ExerciseLibraryItem[] {
+  const allExercises = [
+    ...CSV_EXERCISES,
+    ...FORGE_REVIEWED_EXERCISES,
+  ];
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+  for (const exercise of allExercises) {
+    if (seen.has(exercise.id)) duplicates.add(exercise.id);
+    seen.add(exercise.id);
+  }
+  if (duplicates.size > 0) {
+    throw new Error(`Duplicate production exercise IDs: ${[...duplicates].sort((left, right) => left.localeCompare(right)).join(', ')}`);
+  }
+  return allExercises;
+}
+
+const ALL_EXERCISES: ExerciseLibraryItem[] = buildExerciseCatalog();
+
+export function getAllExercises(): ExerciseLibraryItem[] {
+  return ALL_EXERCISES;
+}
 
 function getExerciseByIdIndex(): Map<string, ExerciseLibraryItem> {
   if (!exerciseById) {
