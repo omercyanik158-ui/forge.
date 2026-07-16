@@ -789,6 +789,7 @@ export function fingerprintProgramRequest(request: ProgramRequest, templateVersi
     preferredSplit: request.preferredSplit,
     forceNewVariation: !!request.forceNewVariation,
     previousTemplateId: request.previousTemplateId,
+    selectedTemplateId: request.selectedTemplateId,
     templateVersionSeed,
     adaptationVersion: ADAPTATION_VERSION,
   }));

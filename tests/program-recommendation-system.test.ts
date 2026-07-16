@@ -2,10 +2,13 @@ import { describe, it, expect } from 'vitest';
 import {
   createProgramRequestFromAnswers,
   recommendPrograms,
+  buildTemplateProgram,
+  fingerprintProgramRequest,
   type ProgramRequest,
   type ProgramRecommendations,
   type NoMatchExplanation,
 } from '@/services/templateProgramEngine';
+import type { AIProgramAnswers } from '@/types/aiProgram';
 
 describe('Program Recommendation System', () => {
   describe('Unspecified Equipment (Case A)', () => {
@@ -492,3 +495,175 @@ describe('Program Recommendation System', () => {
     });
   });
 });
+
+describe('Explicit Template Selection', () => {
+  // Unspecified equipment + general_fitness/3d/beginner yields multiple compatible
+  // templates in the stable library, so alternatives exist to select between.
+  const multiTemplateAnswers: AIProgramAnswers = {
+    mainGoal: 'lose_fat',
+    trainingDays: 3,
+    experience: 'beginner',
+    equipment: [],
+    priorityMuscles: [],
+    painLimitations: ['none'],
+    useLatestPhysiqueAnalysis: false,
+  };
+
+  function buildRequestWithSelection(selectedTemplateId?: string): ProgramRequest {
+    return createProgramRequestFromAnswers({
+      answers: multiTemplateAnswers,
+      selectedTemplateId,
+    });
+  }
+
+  function requireMultipleCandidates() {
+    const recs = recommendPrograms(buildRequestWithSelection());
+    expect('bestMatch' in recs).toBe(true);
+    if (!('bestMatch' in recs)) return null;
+    const candidates = [recs.bestMatch, ...recs.alternatives];
+    expect(candidates.length).toBeGreaterThan(1);
+    return candidates;
+  }
+
+  it('fingerprint changes when selectedTemplateId differs', () => {
+    const baseline = fingerprintProgramRequest(buildRequestWithSelection());
+
+    const candidates = requireMultipleCandidates();
+    if (!candidates) return;
+
+    const first = fingerprintProgramRequest(buildRequestWithSelection(candidates[0]!.templateId));
+    const second = fingerprintProgramRequest(buildRequestWithSelection(candidates[1]!.templateId));
+    const auto = fingerprintProgramRequest(buildRequestWithSelection());
+
+    expect(first).not.toBe(second);
+    expect(first).not.toBe(baseline);
+    expect(auto).toBe(baseline);
+  });
+
+  it('activates the exact selected template, not the best match', () => {
+    const candidates = requireMultipleCandidates();
+    if (!candidates) return;
+
+    const best = candidates[0]!;
+    const alternative = candidates[1]!;
+
+    // Selecting the alternative must instantiate the alternative, not the best match.
+    const result = buildTemplateProgram({ request: buildRequestWithSelection(alternative.templateId) });
+
+    expect(result.selectedTemplateId).toBe(alternative.templateId);
+    expect(result.selectedTemplateId).not.toBe(best.templateId);
+    expect(result.plan.selectedTemplateId).toBe(alternative.templateId);
+  });
+
+  it('selecting two different templates yields two different instantiated plans', () => {
+    const candidates = requireMultipleCandidates();
+    if (!candidates) return;
+
+    const planA = buildTemplateProgram({ request: buildRequestWithSelection(candidates[0]!.templateId) });
+    const planB = buildTemplateProgram({ request: buildRequestWithSelection(candidates[1]!.templateId) });
+
+    expect(planA.selectedTemplateId).not.toBe(planB.selectedTemplateId);
+    expect(planA.plan.id).not.toBe(planB.plan.id);
+  });
+});
+
+describe('Determinism', () => {
+  it('produces identical recommendation order across 100 repetitions', () => {
+    const request = createProgramRequestFromAnswers({
+      answers: {
+        mainGoal: 'lose_fat',
+        trainingDays: 3,
+        experience: 'beginner',
+        equipment: [],
+        priorityMuscles: [],
+        painLimitations: ['none'],
+        useLatestPhysiqueAnalysis: false,
+      },
+    });
+
+    const baseline = recommendPrograms(request);
+    expect('bestMatch' in baseline).toBe(true);
+    if (!('bestMatch' in baseline)) return;
+
+    const baselineIds = [baseline.bestMatch, ...baseline.alternatives].map((r) => r.templateId);
+    const baselineScores = [baseline.bestMatch, ...baseline.alternatives].map((r) => r.matchScore);
+
+    for (let i = 0; i < 100; i += 1) {
+      const repeat = recommendPrograms(request);
+      if (!('bestMatch' in repeat)) {
+        // Should never flip to a no-match on identical input.
+        expect(false).toBe(true);
+        return;
+      }
+      const repeatIds = [repeat.bestMatch, ...repeat.alternatives].map((r) => r.templateId);
+      const repeatScores = [repeat.bestMatch, ...repeat.alternatives].map((r) => r.matchScore);
+      expect(repeatIds).toEqual(baselineIds);
+      expect(repeatScores).toEqual(baselineScores);
+      // Scores must be non-increasing (ranked by descending score).
+      for (let s = 1; s < repeatScores.length; s += 1) {
+        expect(repeatScores[s - 1]).toBeGreaterThanOrEqual(repeatScores[s]);
+      }
+    }
+  });
+});
+
+describe('forceNewVariation', () => {
+  it('does not force an invalid template when no strong alternative exists', () => {
+    // strength + 3 days + beginner + gym + barbells resolves to a single
+    // compatible template in the stable library, so forceNewVariation must
+    // keep the valid template rather than forcing a rejected/unsafe one.
+    const answers: AIProgramAnswers = {
+      mainGoal: 'strength',
+      trainingDays: 3,
+      location: 'gym',
+      equipment: ['barbells'],
+      experience: 'beginner',
+      priorityMuscles: [],
+      painLimitations: ['none'],
+      useLatestPhysiqueAnalysis: false,
+    };
+    const baseRequest = createProgramRequestFromAnswers({ answers });
+    const first = buildTemplateProgram({ request: baseRequest });
+
+    const variation = buildTemplateProgram({
+      request: { ...baseRequest, forceNewVariation: true, previousTemplateId: first.selectedTemplateId },
+    });
+
+    expect(variation.validation.valid).toBe(true);
+    expect(variation.selectedTemplateId).toMatch(/^forge_/);
+  });
+});
+
+describe('Zero-Result Safety', () => {
+  it('never suggests removing safety constraints (limitations)', () => {
+    // An impossible hard-constraint combination must yield an actionable
+    // explanation whose suggestions never propose dropping an injury/limitation.
+    const request = createProgramRequestFromAnswers({
+      answers: {
+        mainGoal: 'strength',
+        trainingDays: 6,
+        location: 'home',
+        equipment: ['bodyweight_only'],
+        experience: 'advanced',
+        priorityMuscles: ['chest', 'shoulders', 'arms', 'lats'],
+        painLimitations: ['shoulder', 'knee', 'lower_back'],
+        useLatestPhysiqueAnalysis: false,
+      },
+    });
+
+    const result = recommendPrograms(request);
+    expect('blockingConstraints' in result).toBe(true);
+    if (!('blockingConstraints' in result)) return;
+
+    // Guard against suggestions that advise dropping safety constraints.
+    // An informational note ("limitations may restrict programs") is allowed;
+    // an imperative to remove/drop/ignore a limitation is not.
+    const removalAdvice = /(remove|drop|ignore|disable|clear)\s+(your\s+)?(limitation|injury|pain|restriction)/i;
+    for (const suggestion of result.suggestedChanges) {
+      expect(removalAdvice.test(suggestion)).toBe(false);
+    }
+    // Must still provide at least one actionable, non-safety-weakening suggestion.
+    expect(result.suggestedChanges.length).toBeGreaterThan(0);
+  });
+});
+
