@@ -10,6 +10,7 @@ export type NormalizeProgramRequestInput = {
   physiqueSummary?: AIProgramPhysiqueSummary;
   forceNewVariation?: boolean;
   previousTemplateId?: string;
+  selectedTemplateId?: string;
 };
 
 export function normalizeProgramRequest(input: NormalizeProgramRequestInput): ProgramRequest {

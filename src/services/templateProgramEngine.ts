@@ -82,6 +82,7 @@ export type ProgramRequest = {
   preferredSessionMinutes: number;
   equipmentProfile: TemplateEquipmentProfile;
   availableEquipment: string[];
+  equipmentSpecified: boolean; // Distinguishes unspecified equipment from explicit empty selection
   focusMuscles: string[];
   physiqueFocus: ForgePhysiqueFocus[];
   restrictedExerciseIds: string[];
@@ -89,6 +90,7 @@ export type ProgramRequest = {
   preferredSplit?: TemplateSplit;
   forceNewVariation?: boolean;
   previousTemplateId?: string;
+  selectedTemplateId?: string; // Force this specific template to be used (for recommendation selection)
 };
 
 export type TemplateMatchResult = {
@@ -170,6 +172,51 @@ export type SupportedProgramOptions = {
   compatibleTemplateCount: number;
 };
 
+export type ExactMatches = {
+  goal: boolean;
+  modality: boolean;
+  daysPerWeek: boolean;
+  level: boolean;
+  equipment: boolean;
+  duration: boolean;
+  split: boolean;
+  focusMuscles: boolean;
+};
+
+export type RecommendationMatch = {
+  templateId: string;
+  title: string;
+  matchScore: number; // 0-100
+  exactMatches: ExactMatches;
+  approximateMatches: string[];
+  matchingReasons: string[];
+  compromises: string[];
+  assumptions: string[];
+  requiredEquipment: string[];
+  estimatedSessionMinutes: number;
+  daysPerWeek: number;
+  goal: TemplateGoal;
+  modality: TemplateModality;
+  level: TemplateLevel;
+  equipmentProfile: TemplateEquipmentProfile;
+  split: TemplateSplit;
+  durationWeeks: number;
+};
+
+export type ProgramRecommendations = {
+  bestMatch: RecommendationMatch;
+  alternatives: RecommendationMatch[];
+  totalCompatible: number;
+  totalRejected: number;
+};
+
+export type NoMatchExplanation = {
+  blockingConstraints: string[];
+  rejectionCounts: Record<string, number>;
+  suggestedChanges: string[];
+  hasAnyTemplates: boolean;
+};
+
 type MutableExercise = ForgeGeneratedExercise & {
   adaptedFromExerciseId?: string;
 };
@@ -228,6 +275,164 @@ export function getSupportedProgramOptions(input: SupportedProgramOptionsInput =
       ['full_gym', 'dumbbell_only', 'bodyweight_home', 'resistance_band_bodyweight', 'custom'].includes(profile),
     ))].sort((left, right) => left.localeCompare(right)),
     compatibleTemplateCount: templates.length,
+  };
+}
+
+export function recommendPrograms(request: ProgramRequest): ProgramRecommendations | NoMatchExplanation {
+  // Score all templates
+  const allScores = PROGRAM_TEMPLATES.map((template) => scoreTemplate(template, request));
+
+  // Separate compatible and rejected
+  const compatible = allScores.filter((result) => !result.rejectionReasons?.length);
+  const rejected = allScores.filter((result) => result.rejectionReasons?.length);
+
+  // Handle zero-result case
+  if (compatible.length === 0) {
+    const rejectionCounts: Record<string, number> = {};
+    rejected.forEach((result) => {
+      result.rejectionReasons?.forEach((code) => {
+        rejectionCounts[code] = (rejectionCounts[code] || 0) + 1;
+      });
+    });
+
+    const blockingConstraints = Object.keys(rejectionCounts);
+    const suggestedChanges: string[] = [];
+
+    // Generate suggested changes based on rejection reasons
+    if (rejectionCounts['DAY_COUNT_MISMATCH']) {
+      const availableDays = [...new Set(PROGRAM_TEMPLATES.map((t) => t.daysPerWeek))].sort((a, b) => a - b);
+      suggestedChanges.push(`Try training days: ${availableDays.slice(0, 3).join(', ')}`);
+    }
+    if (rejectionCounts['LEVEL_MISMATCH']) {
+      suggestedChanges.push('Consider adjusting your experience level');
+    }
+    if (rejectionCounts['EQUIPMENT_MISMATCH'] || rejectionCounts['NO_VALID_SUBSTITUTION']) {
+      suggestedChanges.push('Review your equipment selections or try "bodyweight only"');
+    }
+    if (rejectionCounts['MODALITY_MISMATCH']) {
+      suggestedChanges.push('Try a different training style or modality');
+    }
+    if (rejectionCounts['LIMITATION_CONFLICT']) {
+      suggestedChanges.push('Some limitations may restrict available programs');
+    }
+
+    return {
+      blockingConstraints,
+      rejectionCounts,
+      suggestedChanges,
+      hasAnyTemplates: PROGRAM_TEMPLATES.length > 0,
+    };
+  }
+
+  // Sort compatible templates by score (descending)
+  const sorted = compatible.sort((a, b) => {
+    // Primary: total score
+    if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+
+    // Secondary: fewer assumptions (better for unspecified fields)
+    const aAssumptions = a.breakdown.adaptationCostPenalty ?? 0;
+    const bAssumptions = b.breakdown.adaptationCostPenalty ?? 0;
+    if (aAssumptions !== bAssumptions) return bAssumptions - aAssumptions; // Higher (less negative) is better
+
+    // Tertiary: template ID for deterministic ordering
+    return a.templateId.localeCompare(b.templateId);
+  });
+
+  // Take top 3
+  const top3 = sorted.slice(0, 3);
+
+  // Convert to RecommendationMatch format
+  const recommendations = top3.map((match): RecommendationMatch => {
+    const template = PROGRAM_TEMPLATES.find((t) => t.id === match.templateId)!;
+    const exactMatches: ExactMatches = {
+      goal: template.goal === request.goal,
+      modality: WORKOUT_LIBRARY_VERSION === '300' && request.modality
+        ? (template.modality ?? template.goal) === request.modality
+        : template.goal === request.goal,
+      daysPerWeek: template.daysPerWeek === request.daysPerWeek,
+      level: template.level === request.level,
+      equipment: request.equipmentSpecified
+        ? template.equipmentProfile === request.equipmentProfile
+        : true, // When unspecified, all are "compatible"
+      duration: Math.abs(request.preferredSessionMinutes - template.sessionMinutes.target) <= 15,
+      split: request.preferredSplit === template.split,
+      focusMuscles: request.focusMuscles.length > 0 &&
+        request.focusMuscles.some((m) => template.compatibleFocusMuscles.includes(m)),
+    };
+
+    const matchingReasons: string[] = [];
+    const compromises: string[] = [];
+    const assumptions: string[] = [];
+    const approximateMatches: string[] = [];
+
+    // Build matching reasons and compromises
+    if (exactMatches.goal) matchingReasons.push(`Goal: ${template.goal}`);
+    else if (template.goal !== request.goal) approximateMatches.push(`Goal: ${request.goal} → ${template.goal}`);
+
+    if (exactMatches.modality && WORKOUT_LIBRARY_VERSION === '300') {
+      matchingReasons.push(`Modality: ${template.modality ?? template.goal}`);
+    } else if (WORKOUT_LIBRARY_VERSION === '300' && request.modality && (template.modality ?? template.goal) !== request.modality) {
+      compromises.push(`Modality: ${request.modality} → ${template.modality ?? template.goal}`);
+    }
+
+    if (exactMatches.daysPerWeek) matchingReasons.push(`${template.daysPerWeek} days/week`);
+    else compromises.push(`${request.daysPerWeek} → ${template.daysPerWeek} days/week`);
+
+    if (exactMatches.level) matchingReasons.push(`Level: ${template.level}`);
+    else compromises.push(`Level: ${request.level} → ${template.level}`);
+
+    if (request.equipmentSpecified) {
+      if (exactMatches.equipment) matchingReasons.push(`Equipment: ${template.equipmentProfile}`);
+      else compromises.push(`Equipment: ${request.equipmentProfile} (may require substitutions)`);
+    } else {
+      assumptions.push(`Equipment unspecified: ${template.equipmentProfile} program shown as option`);
+    }
+
+    if (exactMatches.duration) matchingReasons.push(`Duration: ~${template.sessionMinutes.target} min`);
+    else approximateMatches.push(`Duration: ${template.sessionMinutes.target} min (preferred: ${request.preferredSessionMinutes} min)`);
+
+    if (exactMatches.split) matchingReasons.push(`Split: ${template.split}`);
+    else if (request.preferredSplit) approximateMatches.push(`Split: ${template.split} (preferred: ${request.preferredSplit})`);
+
+    if (exactMatches.focusMuscles) matchingReasons.push(`Focus muscles match`);
+    else if (request.focusMuscles.length > 0) {
+      assumptions.push(`Focus muscles may be adapted`);
+    }
+
+    // Determine required equipment from template exercises
+    const requiredEquipment = new Set<string>();
+    template.workouts.forEach((workout) => {
+      workout.exercises.forEach((exercise) => {
+        exercise.equipment.forEach((eq) => requiredEquipment.add(eq));
+      });
+    });
+
+    return {
+      templateId: template.id,
+      title: template.name,
+      matchScore: match.totalScore,
+      exactMatches,
+      approximateMatches,
+      matchingReasons,
+      compromises,
+      assumptions,
+      requiredEquipment: Array.from(requiredEquipment),
+      estimatedSessionMinutes: template.sessionMinutes.target,
+      daysPerWeek: template.daysPerWeek,
+      goal: template.goal,
+      modality: (template.modality ?? template.goal) as TemplateModality,
+      level: template.level,
+      equipmentProfile: template.equipmentProfile as TemplateEquipmentProfile,
+      split: template.split as TemplateSplit,
+      durationWeeks: template.durationWeeks,
+    };
+  });
+
+  return {
+    bestMatch: recommendations[0],
+    alternatives: recommendations.slice(1),
+    totalCompatible: compatible.length,
+    totalRejected: rejected.length,
   };
 }
 
@@ -356,6 +561,12 @@ function exerciseEquipmentFits(equipment: string[], request: ProgramRequest): bo
 }
 
 function equipmentProfileFits(template: ProgramTemplate, request: ProgramRequest): boolean {
+  // When equipment is not specified, don't reject templates based on equipment
+  // Equipment accessibility becomes a ranking factor instead
+  if (!request.equipmentSpecified) {
+    return true;
+  }
+
   const available = requestEquipmentSet(request);
   if (template.equipmentProfile === 'resistance_band_bodyweight') return available.has('bodyweight') && available.has('resistance_band');
   if (template.equipmentProfile === 'bodyweight_home') return available.has('bodyweight') && (request.equipmentProfile === 'bodyweight_home' || available.has('resistance_band'));
@@ -373,6 +584,12 @@ function equipmentProfileScore(template: ProgramTemplate, request: ProgramReques
 }
 
 function requiredExerciseFitsOrCanSubstitute(exercise: ForgeGeneratedExercise, request: ProgramRequest): boolean {
+  // When equipment is not specified, allow all exercises
+  // They can be substituted during adaptation if needed
+  if (!request.equipmentSpecified) {
+    return true;
+  }
+
   if (
     request.goal === 'strength'
     && exercise.required
@@ -493,6 +710,7 @@ export function createProgramRequestFromAnswers(input: {
   physiqueSummary?: AIProgramPhysiqueSummary;
   forceNewVariation?: boolean;
   previousTemplateId?: string;
+  selectedTemplateId?: string;
 }): ProgramRequest {
   const { answers, physiqueSummary } = input;
   const physiqueFocus = answers.useLatestPhysiqueAnalysis ? physiqueFocusFromSummary(physiqueSummary) : [];
@@ -500,6 +718,8 @@ export function createProgramRequestFromAnswers(input: {
     ...answers.equipment.map(normalizeEquipmentKey),
     answers.location === 'home' ? 'bodyweight' : '',
   ]);
+  // Equipment is considered "specified" when user explicitly selected equipment OR location
+  const equipmentSpecified = answers.equipment.length > 0 || answers.location !== undefined;
   return {
     userId: input.userId ?? 'local_user',
     goal: goalFromAnswers(answers),
@@ -509,6 +729,7 @@ export function createProgramRequestFromAnswers(input: {
     preferredSessionMinutes: Math.min(120, Math.max(20, answers.sessionDurationMin ?? 60)),
     equipmentProfile: equipmentProfileFromAnswers(answers, availableEquipment),
     availableEquipment,
+    equipmentSpecified,
     focusMuscles: normalizeList(answers.priorityMuscles.map((item) => normalizeFocusMuscleValue(item) ?? item)),
     physiqueFocus,
     restrictedExerciseIds: normalizeList([...(answers.avoidedExerciseIds ?? [])]),
@@ -516,6 +737,7 @@ export function createProgramRequestFromAnswers(input: {
     preferredSplit: splitFromAnswers(answers),
     forceNewVariation: !!input.forceNewVariation,
     previousTemplateId: input.previousTemplateId?.trim() || undefined,
+    selectedTemplateId: input.selectedTemplateId?.trim() || undefined,
   };
 }
 
@@ -620,24 +842,88 @@ function scoreTemplate(template: ProgramTemplate, request: ProgramRequest): Temp
   const rejections = templateRejections(template, request);
   const focusHits = request.focusMuscles.filter((muscle) => template.compatibleFocusMuscles.includes(muscle)).length;
   const durationDistance = Math.abs(request.preferredSessionMinutes - template.sessionMinutes.target);
-  const adaptationCostPenalty = template.workouts.flatMap((workout) => workout.exercises).reduce((penalty, exercise) => {
-    const equipmentPenalty = exercise.required && !exerciseEquipmentFits(exercise.equipment, request) ? -5 : 0;
-    const limitationPenalty = exercise.required && getExerciseLimitationConflicts(exercise, request.limitations).length > 0 ? -6 : 0;
+
+  // Goal/Modality scoring (30 points max)
+  let goalScore = 0;
+  if (template.goal === request.goal) {
+    goalScore = 30;
+    // Bonus for modality match in 300-library
+    if (WORKOUT_LIBRARY_VERSION === '300' && request.modality && (template.modality ?? template.goal) === request.modality) {
+      goalScore = 30; // Already max for exact goal match
+    }
+  } else {
+    // Partial score for goal proximity
+    const goalHierarchy: Record<TemplateGoal, number> = { strength: 3, powerbuilding: 2, hypertrophy: 2, general_fitness: 1 };
+    const requestLevel = goalHierarchy[request.goal] ?? 1;
+    const templateLevel = goalHierarchy[template.goal] ?? 1;
+    goalScore = Math.max(0, 15 - Math.abs(requestLevel - templateLevel) * 5);
+  }
+
+  // Days per week scoring (25 points max)
+  const daysScore = template.daysPerWeek === request.daysPerWeek ? 25 : Math.max(0, 25 - Math.abs(template.daysPerWeek - request.daysPerWeek) * 8);
+
+  // Equipment compatibility/accessibility scoring (20 points max)
+  let equipmentScore = 0;
+  if (request.equipmentSpecified) {
+    // When equipment is specified, exact match gets max score
+    equipmentScore = equipmentProfileScore(template, request);
+    // Scale up to 20 points max
+    if (equipmentScore === 10) equipmentScore = 20;
+    else if (equipmentScore === 6) equipmentScore = 12;
+    else equipmentScore = 0;
+  } else {
+    // When equipment is unspecified, score based on accessibility
+    // Fewer equipment requirements = more accessible = higher score
+    const equipmentComplexity: Record<TemplateEquipmentProfile, number> = {
+      bodyweight_home: 20,
+      resistance_band_bodyweight: 18,
+      dumbbell_only: 15,
+      full_gym: 10,
+      custom: 5,
+    };
+    equipmentScore = equipmentComplexity[template.equipmentProfile as TemplateEquipmentProfile] ?? 5;
+  }
+
+  // Level proximity scoring (10 points max)
+  const levelHierarchy: Record<TemplateLevel, number> = { beginner: 1, intermediate: 2, advanced: 3 };
+  const requestLevel = levelHierarchy[request.level] ?? 1;
+  const templateLevel = levelHierarchy[template.level] ?? 1;
+  const levelDistance = Math.abs(requestLevel - templateLevel);
+  const levelScore = levelDistance === 0 ? 10 : levelDistance === 1 ? 6 : 2;
+
+  // Duration proximity scoring (10 points max)
+  let durationScore = 0;
+  if (durationDistance === 0) durationScore = 10;
+  else if (durationDistance <= 10) durationScore = 8;
+  else if (durationDistance <= 20) durationScore = 5;
+  else if (durationDistance <= 30) durationScore = 3;
+  else durationScore = 1;
+
+  // Split and focus muscle preference scoring (5 points max)
+  const splitScore = request.preferredSplit && request.preferredSplit === template.split ? 3 : 0;
+  const focusScore = Math.min(2, focusHits); // Max 2 points for focus muscles
+
+  // Adaptation cost penalty (only when equipment is specified)
+  const adaptationCostPenalty = request.equipmentSpecified ? template.workouts.flatMap((workout) => workout.exercises).reduce((penalty, exercise) => {
+    const equipmentPenalty = exercise.required && !exerciseEquipmentFits(exercise.equipment, request) ? -3 : 0;
+    const limitationPenalty = exercise.required && getExerciseLimitationConflicts(exercise, request.limitations).length > 0 ? -4 : 0;
     return penalty + equipmentPenalty + limitationPenalty;
-  }, 0);
+  }, 0) : 0;
+
   const breakdown = {
-    goal: template.goal === request.goal ? 35 : 0,
-    days: template.daysPerWeek === request.daysPerWeek ? 25 : 0,
-    level: template.level === request.level ? 15 : 0,
-    equipment: equipmentProfileScore(template, request),
-    duration: durationDistance <= 10 ? 5 : durationDistance <= 20 ? 3 : 1,
-    focus: Math.min(5, focusHits * 2),
-    split: request.preferredSplit && request.preferredSplit === template.split ? 5 : 0,
+    goal: goalScore,
+    days: daysScore,
+    level: levelScore,
+    equipment: equipmentScore,
+    duration: durationScore,
+    focus: focusScore,
+    split: splitScore,
     adaptationCostPenalty,
   };
+
   return {
     templateId: template.id,
-    totalScore: Object.values(breakdown).reduce((sum, item) => sum + item, 0),
+    totalScore: Object.values(breakdown).reduce((sum, item) => sum + (typeof item === 'number' ? item : 0), 0),
     matchMode: 'strict_match',
     relaxationsApplied: [],
     breakdown,
@@ -694,6 +980,7 @@ function cloneRequest(request: ProgramRequest): ProgramRequest {
     physiqueFocus: request.physiqueFocus.map((item) => ({ ...item })),
     restrictedExerciseIds: [...request.restrictedExerciseIds],
     limitations: [...request.limitations],
+    equipmentSpecified: request.equipmentSpecified,
   };
 }
 
@@ -869,6 +1156,29 @@ function selectTemplateWithRelaxation(request: ProgramRequest): {
   matchMode: 'strict_match' | 'relaxed_match' | 'no_safe_match';
   relaxationsApplied: string[];
 } {
+  // If a specific template is selected, use it directly
+  if (request.selectedTemplateId) {
+    const template = PROGRAM_TEMPLATES.find((item) => item.id === request.selectedTemplateId);
+    if (!template) throw new Error(`Selected template ${request.selectedTemplateId} is missing.`);
+
+    // Score the selected template for consistent match result
+    const match = scoreTemplate(template, request);
+    if (match.rejectionReasons?.length) {
+      throw new Error(`Selected template ${request.selectedTemplateId} is incompatible: ${match.rejectionReasons.join(', ')}`);
+    }
+
+    const allMatches = matchTemplatesWithRelaxation(request);
+    return {
+      template,
+      match,
+      rejected: allMatches.matchMode === 'relaxed_match' ? allMatches.strictRejected : allMatches.rejected,
+      compatible: allMatches.compatible,
+      effectiveRequest: allMatches.effectiveRequest,
+      matchMode: 'strict_match',
+      relaxationsApplied: [],
+    };
+  }
+
   const matches = matchTemplatesWithRelaxation(request);
   let pool = matches.compatible;
   if (matches.effectiveRequest.forceNewVariation && matches.effectiveRequest.previousTemplateId && matches.compatible.length > 1) {
@@ -878,10 +1188,10 @@ function selectTemplateWithRelaxation(request: ProgramRequest): {
   }
   const match = pool[0];
   if (!match) throw new Error(`No compatible FORGE CSV template found: ${matches.rejected.map((item) => `${item.templateId}:${item.rejectionReasons?.join('/')}`).join(', ')}`);
-  const template = PROGRAM_TEMPLATES.find((item) => item.id === match.templateId);
-  if (!template) throw new Error(`Selected template ${match.templateId} is missing.`);
+  const selectedTemplate = PROGRAM_TEMPLATES.find((item) => item.id === match.templateId);
+  if (!selectedTemplate) throw new Error(`Selected template ${match.templateId} is missing.`);
   return {
-    template,
+    template: selectedTemplate,
     match,
     rejected: matches.matchMode === 'relaxed_match' ? matches.strictRejected : matches.rejected,
     compatible: matches.compatible,

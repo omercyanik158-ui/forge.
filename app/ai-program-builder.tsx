@@ -30,10 +30,16 @@ import {
   trackScreen,
 } from "@/services/analyticsService";
 import { getExerciseById, searchExercises } from "@/services/exerciseCatalog";
-import { buildOrReuseRecommendedAIProgram } from "@/services/programRecommendationEngine";
+import {
+  buildOrReuseRecommendedAIProgram,
+  getTopProgramRecommendations,
+} from "@/services/programRecommendationEngine";
 import {
   USE_TEMPLATE_PROGRAM_ENGINE,
   WORKOUT_LIBRARY_VERSION,
+  type ProgramRecommendations,
+  type NoMatchExplanation,
+  type RecommendationMatch,
 } from "@/services/templateProgramEngine";
 import {
   GYM_EQUIPMENT,
@@ -306,6 +312,9 @@ export default function AIProgramBuilderScreen() {
   >(null);
   const [exercisePickerQuery, setExercisePickerQuery] = useState("");
   const [exitSheetVisible, setExitSheetVisible] = useState(false);
+  const [recommendations, setRecommendations] = useState<ProgramRecommendations | null>(null);
+  const [noMatchExplanation, setNoMatchExplanation] = useState<NoMatchExplanation | null>(null);
+  const [selectedRecommendation, setSelectedRecommendation] = useState<RecommendationMatch | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -466,24 +475,35 @@ export default function AIProgramBuilderScreen() {
       if (!USE_TEMPLATE_PROGRAM_ENGINE) {
         throw new Error("Template program engine must be enabled for program recommendations.");
       }
-      const recommendedPlan = (
-        await buildOrReuseRecommendedAIProgram({
-            draftId: nextDraft.id,
-            userId: profile?.name ?? "local_user",
-            answers: nextDraft.answers,
-            physiqueSummary: nextDraft.answers.useLatestPhysiqueAnalysis
-              ? nextDraft.latestPhysiqueSummary
-              : undefined,
-            forceNewVariation,
-            previousTemplateId,
-          })
-      ).plan;
+
+      // Get top program recommendations
+      const recommendationResult = getTopProgramRecommendations({
+        userId: profile?.name ?? "local_user",
+        answers: nextDraft.answers,
+        physiqueSummary: nextDraft.answers.useLatestPhysiqueAnalysis
+          ? nextDraft.latestPhysiqueSummary
+          : undefined,
+        forceNewVariation,
+        previousTemplateId,
+      });
+
+      // Check if we have recommendations or no-match
+      if ('bestMatch' in recommendationResult) {
+        // We have recommendations - store them for user selection
+        setRecommendations(recommendationResult);
+        setSelectedRecommendation(null); // Clear any previous selection
+        setNoMatchExplanation(null);
+      } else {
+        // No compatible programs found
+        setNoMatchExplanation(recommendationResult);
+        setRecommendations(null);
+        setSelectedRecommendation(null);
+      }
+
       const readyDraft = mergeAIProgramDraft(nextDraft, {
         decisionContext,
-        decisionBlueprint: recommendedPlan.sourceBlueprint,
         currentStep: "summary",
       });
-      setGeneratedPlan(recommendedPlan);
       setForceNewVariation(false);
       setPreviousTemplateId(undefined);
       setDraft(readyDraft);
@@ -741,6 +761,77 @@ export default function AIProgramBuilderScreen() {
       params: { id: generatedPlan.id },
     });
   }, [activeProgram, generatedPlan, router]);
+
+  const handleSelectRecommendation = useCallback(async (recommendation: RecommendationMatch) => {
+    setSelectedRecommendation(recommendation);
+    setSavingPlan(true);
+    try {
+      // Build the actual program for the selected template
+      const profile = await loadProfile();
+      const result = await buildOrReuseRecommendedAIProgram({
+        draftId: draft?.id,
+        userId: profile?.name ?? "local_user",
+        answers: draft?.answers ?? {
+          equipment: [],
+          priorityMuscles: [],
+          painLimitations: [],
+          useLatestPhysiqueAnalysis: false,
+        },
+        physiqueSummary: draft?.answers.useLatestPhysiqueAnalysis
+          ? draft?.latestPhysiqueSummary
+          : undefined,
+        forceNewVariation,
+        previousTemplateId,
+        selectedTemplateId: recommendation.templateId, // Force the specific template the user selected
+      });
+
+      const generatedPlan = result.plan;
+      setGeneratedPlan(generatedPlan);
+      setPlanSaved(false);
+
+      // Show activation confirmation
+      setActivationSheetVisible(true);
+
+      void trackEvent(ANALYTICS_EVENTS.aiProgramSaved, {
+        planId: generatedPlan.id,
+        daysPerWeek: generatedPlan.daysPerWeek,
+        weekCount: generatedPlan.weekCount,
+        premium: false,
+      });
+    } catch {
+      Alert.alert(
+        t("ai_program.save_error_title"),
+        t("ai_program.save_error_body"),
+      );
+    } finally {
+      setSavingPlan(false);
+    }
+  }, [draft, forceNewVariation, previousTemplateId, t]);
+
+  const handleEditFromNoMatch = useCallback((stepToEdit: string) => {
+    // Navigate back to the specific step that needs editing
+    if (!draft) return;
+
+    // Determine which step group contains the step we want to edit
+    const groupIndex = STEP_GROUPS.findIndex((group) =>
+      group.steps.includes(stepToEdit as any)
+    );
+
+    if (groupIndex >= 0) {
+      // Go back to that step
+      const nextDraft = mergeAIProgramDraft(draft, {
+        currentStep: stepToEdit as any,
+        generationStatus: "idle",
+        validationCodes: [],
+        cautionCodes: [],
+      });
+      setDraft(nextDraft);
+      setNoMatchExplanation(null);
+      setRecommendations(null);
+      setSelectedRecommendation(null);
+      setProcessingIndex(-1);
+    }
+  }, [draft]);
 
   const openExercisePicker = useCallback((mode: "preferred" | "avoided") => {
     setExercisePickerMode(mode);
@@ -1013,7 +1104,25 @@ export default function AIProgramBuilderScreen() {
             </View>
           </GlassCard>
         ) : isReady ? (
-          generatedPlan ? (
+          noMatchExplanation ? (
+            <NoMatchResultCard
+              explanation={noMatchExplanation}
+              t={t}
+              colors={colors}
+              onEditStep={handleEditFromNoMatch}
+              onReset={handleResetBuilder}
+            />
+          ) : recommendations ? (
+            <RecommendationSelectionCard
+              recommendations={recommendations}
+              selectedRecommendation={selectedRecommendation}
+              t={t}
+              colors={colors}
+              onSelect={handleSelectRecommendation}
+              onReset={handleResetBuilder}
+              equipmentSpecified={draft?.answers ? draft.answers.equipment.length > 0 || draft.answers.location !== undefined : false}
+            />
+          ) : generatedPlan ? (
             <ProgramReadyCard
               plan={generatedPlan}
               t={t}
@@ -2214,6 +2323,266 @@ function SummaryBlock({
   );
 }
 
+function RecommendationSelectionCard({
+  recommendations,
+  selectedRecommendation,
+  t,
+  colors,
+  onSelect,
+  onReset,
+  equipmentSpecified,
+}: {
+  recommendations: ProgramRecommendations;
+  selectedRecommendation: RecommendationMatch | null;
+  t: (key: string | { tr: string; en: string }) => string;
+  colors: ReturnType<typeof useAppTheme>["colors"];
+  onSelect: (recommendation: RecommendationMatch) => void;
+  onReset: () => void;
+  equipmentSpecified: boolean;
+}) {
+  const allRecommendations = [recommendations.bestMatch, ...recommendations.alternatives];
+
+  return (
+    <ScrollView style={styles.recommendationContainer}>
+      {!equipmentSpecified && (
+        <View style={[styles.equipmentNote, { backgroundColor: `${colors.tertiary}12`, borderColor: colors.tertiary }]}>
+          <Ionicons name="information-circle-outline" size={18} color={colors.tertiary} />
+          <Text style={[styles.equipmentNoteText, { color: colors.onSurface }]}>
+            {t({
+              tr: "Ekipman seçmediğin için programlar, ihtiyaç duydukları ekipman ve diğer tercihlerine yakınlıklarına göre sıralandı.",
+              en: "Since you didn't specify equipment, programs are ranked by their equipment requirements and proximity to your other preferences.",
+            })}
+          </Text>
+        </View>
+      )}
+
+      <Text style={[styles.recommendationTitle, { color: colors.onSurface }]}>
+        {t({ tr: "Sana en uygun program", en: "Best Match for You" })}
+      </Text>
+
+      {allRecommendations.map((recommendation, index) => {
+        const isBestMatch = index === 0;
+        const isSelected = selectedRecommendation?.templateId === recommendation.templateId;
+
+        return (
+          <TouchableOpacity
+            key={recommendation.templateId}
+            onPress={() => onSelect(recommendation)}
+            style={[
+              styles.recommendationCard,
+              {
+                backgroundColor: colors.surface,
+                borderColor: isSelected ? colors.primary : colors.outlineVariant,
+              },
+            ]}
+          >
+            {isBestMatch && (
+              <View style={[styles.bestMatchBadge, { backgroundColor: colors.primary }]}>
+                <Text style={[styles.bestMatchBadgeText, { color: colors.onPrimary }]}>
+                  {t({ tr: "En uygun", en: "Best Match" })}
+                </Text>
+              </View>
+            )}
+
+            <Text style={[styles.recommendationCardTitle, { color: colors.onSurface }]}>
+              {recommendation.title}
+            </Text>
+
+            <View style={styles.recommendationMeta}>
+              <Text style={[styles.recommendationScore, { color: colors.primary }]}>
+                %{Math.round(recommendation.matchScore)}
+              </Text>
+              <Text style={[styles.recommendationMetaText, { color: colors.onSurfaceVariant }]}>
+                {recommendation.daysPerWeek} {t({ tr: "gün", en: "days"})} • {recommendation.estimatedSessionMinutes} {t({ tr: "dk", en: "min" })}
+              </Text>
+              <Text style={[styles.recommendationMetaText, { color: colors.onSurfaceVariant }]}>
+                {recommendation.level} • {recommendation.split}
+              </Text>
+            </View>
+
+            <View style={styles.recommendationDetails}>
+              <Text style={[styles.recommendationDetailLabel, { color: colors.onSurfaceVariant }]}>
+                {t({ tr: "Ekipman", en: "Equipment" })}:
+              </Text>
+              <Text style={[styles.recommendationDetailValue, { color: colors.onSurface }]}>
+                {recommendation.requiredEquipment.length > 0
+                  ? recommendation.requiredEquipment.join(", ")
+                  : t({ tr: "Vücut ağırlığı", en: "Bodyweight" })}
+              </Text>
+            </View>
+
+            {recommendation.matchingReasons.length > 0 && (
+              <View style={styles.recommendationReasons}>
+                <Text style={[styles.recommendationDetailLabel, { color: colors.onSurfaceVariant }]}>
+                  {t({ tr: "Eşleşen", en: "Matches" })}:
+                </Text>
+                {recommendation.matchingReasons.slice(0, 3).map((reason, i) => (
+                  <Text key={i} style={[styles.recommendationReasonText, { color: colors.onSurface }]}>
+                    • {reason}
+                  </Text>
+                ))}
+              </View>
+            )}
+
+            {recommendation.compromises.length > 0 && (
+              <View style={styles.recommendationCompromises}>
+                <Text style={[styles.recommendationDetailLabel, { color: colors.tertiary }]}>
+                  {t({ tr: "Yaklaşık", en: "Approximate" })}:
+                </Text>
+                {recommendation.compromises.slice(0, 2).map((compromise, i) => (
+                  <Text key={i} style={[styles.recommendationCompromiseText, { color: colors.onSurface }]}>
+                    • {compromise}
+                  </Text>
+                ))}
+              </View>
+            )}
+
+            {recommendation.assumptions.length > 0 && (
+              <View style={styles.recommendationAssumptions}>
+                <Text style={[styles.recommendationDetailLabel, { color: colors.tertiary }]}>
+                  {t({ tr: "Varsayım", en: "Assumption" })}:
+                </Text>
+                {recommendation.assumptions.map((assumption, i) => (
+                  <Text key={i} style={[styles.recommendationAssumptionText, { color: colors.onSurfaceVariant }]}>
+                    • {assumption}
+                  </Text>
+                ))}
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[styles.recommendationSelectButton, { backgroundColor: colors.primary }]}
+              onPress={() => onSelect(recommendation)}
+            >
+              <Text style={[styles.recommendationSelectButtonText, { color: colors.onPrimary }]}>
+                {isSelected
+                  ? t({ tr: "Seçili", en: "Selected" })
+                  : t({ tr: "Bu programı seç", en: "Select This Program" })}
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        );
+      })}
+
+      <TouchableOpacity
+        style={[styles.recommendationResetButton, { borderColor: colors.outlineVariant }]}
+        onPress={onReset}
+      >
+        <Text style={[styles.recommendationResetButtonText, { color: colors.onSurfaceVariant }]}>
+          {t({ tr: "Yeni program ara", en: "Start Over" })}
+        </Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+function NoMatchResultCard({
+  explanation,
+  t,
+  colors,
+  onEditStep,
+  onReset,
+}: {
+  explanation: NoMatchExplanation;
+  t: (key: string | { tr: string; en: string }) => string;
+  colors: ReturnType<typeof useAppTheme>["colors"];
+  onEditStep: (step: string) => void;
+  onReset: () => void;
+}) {
+  const stepLabels: Record<string, string> = {
+    goal: t({ tr: "Hedef", en: "Goal" }),
+    days: t({ tr: "Gün sayısı", en: "Days" }),
+    duration: t({ tr: "Süre", en: "Duration" }),
+    location: t({ tr: "Konum", en: "Location" }),
+    equipment: t({ tr: "Ekipman", en: "Equipment" }),
+    experience: t({ tr: "Deneyim", en: "Experience" }),
+  };
+
+  return (
+    <ScrollView style={styles.noMatchContainer}>
+      <View style={[styles.noMatchIcon, { backgroundColor: `${colors.error}12` }]}>
+        <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
+      </View>
+
+      <Text style={[styles.noMatchTitle, { color: colors.onSurface }]}>
+        {t({ tr: "Uyumlu program bulunamadı", en: "No Compatible Program Found" })}
+      </Text>
+
+      <Text style={[styles.noMatchSubtitle, { color: colors.onSurfaceVariant }]}>
+        {t({
+          tr: "Seçtiğin hedef, gün sayısı, ekipman veya kısıtlamalarla uyumlu reviewed bir program bulamadık.",
+          en: "We couldn't find a reviewed program compatible with your selections.",
+        })}
+      </Text>
+
+      {explanation.blockingConstraints.length > 0 && (
+        <View style={styles.noMatchSection}>
+          <Text style={[styles.noMatchSectionTitle, { color: colors.onSurface }]}>
+            {t({ tr: "Engelleyen kısıtlamalar", en: "Blocking Constraints" })}
+          </Text>
+          {explanation.blockingConstraints.map((constraint) => (
+            <View key={constraint} style={styles.noMatchConstraint}>
+              <Ionicons name="close-circle" size={16} color={colors.error} />
+              <Text style={[styles.noMatchConstraintText, { color: colors.onSurface }]}>
+                {constraint}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {Object.keys(explanation.rejectionCounts).length > 0 && (
+        <View style={styles.noMatchSection}>
+          <Text style={[styles.noMatchSectionTitle, { color: colors.onSurface }]}>
+            {t({ tr: "Reddedilme nedenleri", en: "Rejection Reasons" })}
+          </Text>
+          {Object.entries(explanation.rejectionCounts).map(([reason, count]) => (
+            <Text key={reason} style={[styles.noMatchRejectionText, { color: colors.onSurfaceVariant }]}>
+              {reason}: {count}
+            </Text>
+          ))}
+        </View>
+      )}
+
+      {explanation.suggestedChanges.length > 0 && (
+        <View style={styles.noMatchSection}>
+          <Text style={[styles.noMatchSectionTitle, { color: colors.onSurface }]}>
+            {t({ tr: "Önerilen değişiklikler", en: "Suggested Changes" })}
+          </Text>
+          {explanation.suggestedChanges.map((suggestion, index) => {
+            // Parse suggestion to extract step name
+            const stepKey = Object.keys(stepLabels).find(key =>
+              suggestion.toLowerCase().includes(stepLabels[key].toLowerCase())
+            );
+
+            return (
+              <TouchableOpacity
+                key={index}
+                style={[styles.noMatchSuggestion, { borderColor: colors.outlineVariant }]}
+                onPress={() => stepKey && onEditStep(stepKey)}
+              >
+                <Text style={[styles.noMatchSuggestionText, { color: colors.onSurface }]}>
+                  {suggestion}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={[styles.noMatchResetButton, { borderColor: colors.outlineVariant }]}
+        onPress={onReset}
+      >
+        <Text style={[styles.noMatchResetButtonText, { color: colors.onSurfaceVariant }]}>
+          {t({ tr: "Baştan başla", en: "Start Over" })}
+        </Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
 function ProgramReadyCard({
   plan,
   t,
@@ -3123,4 +3492,210 @@ const styles = createDynamicStyles(() => ({
     justifyContent: "center",
   },
   exitSheetDestructiveText: { ...typography.labelMd, textAlign: "center" },
+
+  // Recommendation selection styles
+  recommendationContainer: {
+    width: "100%",
+    maxWidth: layout.maxContentWidth,
+    alignSelf: "center",
+    paddingHorizontal: spacing.containerMargin,
+    paddingVertical: spacing.sm,
+    gap: spacing.md,
+  },
+  equipmentNote: {
+    borderRadius: radius.lg,
+    padding: spacing.smPlus,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.sm,
+    borderWidth: 1,
+  },
+  equipmentNoteText: {
+    ...typography.bodySm,
+    flex: 1,
+    lineHeight: 18,
+  },
+  recommendationTitle: {
+    ...typography.headlineLg,
+    marginBottom: spacing.sm,
+  },
+  recommendationCard: {
+    borderRadius: radius.xl,
+    padding: spacing.cardPadding,
+    gap: spacing.sm,
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+  },
+  bestMatchBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full,
+    marginBottom: spacing.sm,
+  },
+  bestMatchBadgeText: {
+    ...typography.labelCaps,
+    fontSize: 10,
+  },
+  recommendationCardTitle: {
+    ...typography.headlineMd,
+    marginBottom: spacing.sm,
+  },
+  recommendationMeta: {
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  recommendationScore: {
+    ...typography.labelMd,
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  recommendationMetaText: {
+    ...typography.bodySm,
+    lineHeight: 16,
+  },
+  recommendationDetails: {
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  recommendationDetailLabel: {
+    ...typography.labelMd,
+  },
+  recommendationDetailValue: {
+    ...typography.bodySm,
+    lineHeight: 18,
+  },
+  recommendationReasons: {
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  recommendationReasonText: {
+    ...typography.bodySm,
+    lineHeight: 17,
+    paddingLeft: spacing.sm,
+  },
+  recommendationCompromises: {
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  recommendationCompromiseText: {
+    ...typography.bodySm,
+    lineHeight: 17,
+    paddingLeft: spacing.sm,
+    fontStyle: "italic",
+  },
+  recommendationAssumptions: {
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  recommendationAssumptionText: {
+    ...typography.bodyXs,
+    lineHeight: 16,
+    paddingLeft: spacing.sm,
+  },
+  recommendationSelectButton: {
+    minHeight: 48,
+    borderRadius: radius.lg,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.xs,
+  },
+  recommendationSelectButtonText: {
+    ...typography.buttonSm,
+  },
+  recommendationResetButton: {
+    minHeight: 44,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.md,
+  },
+  recommendationResetButtonText: {
+    ...typography.labelMd,
+  },
+
+  // No-match result styles
+  noMatchContainer: {
+    width: "100%",
+    maxWidth: layout.maxContentWidth,
+    alignSelf: "center",
+    paddingHorizontal: spacing.containerMargin,
+    paddingVertical: spacing.lg,
+    gap: spacing.md,
+  },
+  noMatchIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: spacing.md,
+  },
+  noMatchTitle: {
+    ...typography.headlineLg,
+    textAlign: "center",
+    marginBottom: spacing.sm,
+  },
+  noMatchSubtitle: {
+    ...typography.bodyMd,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: spacing.lg,
+  },
+  noMatchSection: {
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  noMatchSectionTitle: {
+    ...typography.labelCaps,
+    marginBottom: spacing.xs,
+  },
+  noMatchConstraint: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  noMatchConstraintText: {
+    ...typography.bodySm,
+    lineHeight: 18,
+    flex: 1,
+  },
+  noMatchRejectionText: {
+    ...typography.bodySm,
+    lineHeight: 18,
+    paddingVertical: spacing.xs,
+  },
+  noMatchSuggestion: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    padding: spacing.smPlus,
+    marginBottom: spacing.xs,
+  },
+  noMatchSuggestionText: {
+    ...typography.bodySm,
+    lineHeight: 18,
+    flex: 1,
+    paddingRight: spacing.sm,
+  },
+  noMatchResetButton: {
+    minHeight: 44,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.lg,
+  },
+  noMatchResetButtonText: {
+    ...typography.labelMd,
+  },
 }));

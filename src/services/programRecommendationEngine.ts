@@ -6,9 +6,12 @@ import { normalizeProgramRequest } from '@/workout-programming/selection/normali
 import {
   USE_TEMPLATE_PROGRAM_ENGINE,
   matchTemplatesWithRelaxation,
+  recommendPrograms as getRecommendations,
   type ProgramRequest,
   type TemplateEngineResult,
   type TemplateMatchResult,
+  type ProgramRecommendations,
+  type NoMatchExplanation,
 } from './templateProgramEngine';
 
 export type ProgramRecommendation = {
@@ -32,6 +35,7 @@ type RecommendationInput = {
   physiqueSummary?: AIProgramPhysiqueSummary;
   forceNewVariation?: boolean;
   previousTemplateId?: string;
+  selectedTemplateId?: string;
 };
 
 function buildRequest(input: Omit<RecommendationInput, 'basePlan'>): ProgramRequest {
@@ -41,7 +45,13 @@ function buildRequest(input: Omit<RecommendationInput, 'basePlan'>): ProgramRequ
     physiqueSummary: input.physiqueSummary,
     forceNewVariation: input.forceNewVariation,
     previousTemplateId: input.previousTemplateId,
+    selectedTemplateId: input.selectedTemplateId,
   });
+}
+
+export function getTopProgramRecommendations(input: Omit<RecommendationInput, 'basePlan' | 'draftId'>): ProgramRecommendations | NoMatchExplanation {
+  const request = buildRequest(input);
+  return getRecommendations(request);
 }
 
 export function recommendPrograms(input: Omit<RecommendationInput, 'basePlan' | 'draftId'>): ProgramRecommendation[] {

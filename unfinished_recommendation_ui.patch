@@ -1,0 +1,1296 @@
+diff --git a/app/ai-program-builder.tsx b/app/ai-program-builder.tsx
+index 9b09a46..a196471 100644
+--- a/app/ai-program-builder.tsx
++++ b/app/ai-program-builder.tsx
+@@ -30,10 +30,16 @@ import {
+   trackScreen,
+ } from "@/services/analyticsService";
+ import { getExerciseById, searchExercises } from "@/services/exerciseCatalog";
+-import { buildOrReuseRecommendedAIProgram } from "@/services/programRecommendationEngine";
++import {
++  buildOrReuseRecommendedAIProgram,
++  getTopProgramRecommendations,
++} from "@/services/programRecommendationEngine";
+ import {
+   USE_TEMPLATE_PROGRAM_ENGINE,
+   WORKOUT_LIBRARY_VERSION,
++  type ProgramRecommendations,
++  type NoMatchExplanation,
++  type RecommendationMatch,
+ } from "@/services/templateProgramEngine";
+ import {
+   GYM_EQUIPMENT,
+@@ -306,6 +312,9 @@ export default function AIProgramBuilderScreen() {
+   >(null);
+   const [exercisePickerQuery, setExercisePickerQuery] = useState("");
+   const [exitSheetVisible, setExitSheetVisible] = useState(false);
++  const [recommendations, setRecommendations] = useState<ProgramRecommendations | null>(null);
++  const [noMatchExplanation, setNoMatchExplanation] = useState<NoMatchExplanation | null>(null);
++  const [selectedRecommendation, setSelectedRecommendation] = useState<RecommendationMatch | null>(null);
+ 
+   const refresh = useCallback(async () => {
+     setLoading(true);
+@@ -466,24 +475,35 @@ export default function AIProgramBuilderScreen() {
+       if (!USE_TEMPLATE_PROGRAM_ENGINE) {
+         throw new Error("Template program engine must be enabled for program recommendations.");
+       }
+-      const recommendedPlan = (
+-        await buildOrReuseRecommendedAIProgram({
+-            draftId: nextDraft.id,
+-            userId: profile?.name ?? "local_user",
+-            answers: nextDraft.answers,
+-            physiqueSummary: nextDraft.answers.useLatestPhysiqueAnalysis
+-              ? nextDraft.latestPhysiqueSummary
+-              : undefined,
+-            forceNewVariation,
+-            previousTemplateId,
+-          })
+-      ).plan;
++
++      // Get top program recommendations
++      const recommendationResult = getTopProgramRecommendations({
++        userId: profile?.name ?? "local_user",
++        answers: nextDraft.answers,
++        physiqueSummary: nextDraft.answers.useLatestPhysiqueAnalysis
++          ? nextDraft.latestPhysiqueSummary
++          : undefined,
++        forceNewVariation,
++        previousTemplateId,
++      });
++
++      // Check if we have recommendations or no-match
++      if ('bestMatch' in recommendationResult) {
++        // We have recommendations - store them for user selection
++        setRecommendations(recommendationResult);
++        setSelectedRecommendation(null); // Clear any previous selection
++        setNoMatchExplanation(null);
++      } else {
++        // No compatible programs found
++        setNoMatchExplanation(recommendationResult);
++        setRecommendations(null);
++        setSelectedRecommendation(null);
++      }
++
+       const readyDraft = mergeAIProgramDraft(nextDraft, {
+         decisionContext,
+-        decisionBlueprint: recommendedPlan.sourceBlueprint,
+         currentStep: "summary",
+       });
+-      setGeneratedPlan(recommendedPlan);
+       setForceNewVariation(false);
+       setPreviousTemplateId(undefined);
+       setDraft(readyDraft);
+@@ -742,6 +762,77 @@ export default function AIProgramBuilderScreen() {
+     });
+   }, [activeProgram, generatedPlan, router]);
+ 
++  const handleSelectRecommendation = useCallback(async (recommendation: RecommendationMatch) => {
++    setSelectedRecommendation(recommendation);
++    setSavingPlan(true);
++    try {
++      // Build the actual program for the selected template
++      const profile = await loadProfile();
++      const result = await buildOrReuseRecommendedAIProgram({
++        draftId: draft?.id,
++        userId: profile?.name ?? "local_user",
++        answers: draft?.answers ?? {
++          equipment: [],
++          priorityMuscles: [],
++          painLimitations: [],
++          useLatestPhysiqueAnalysis: false,
++        },
++        physiqueSummary: draft?.answers.useLatestPhysiqueAnalysis
++          ? draft?.latestPhysiqueSummary
++          : undefined,
++        forceNewVariation,
++        previousTemplateId,
++        selectedTemplateId: recommendation.templateId, // Force the specific template the user selected
++      });
++
++      const generatedPlan = result.plan;
++      setGeneratedPlan(generatedPlan);
++      setPlanSaved(false);
++
++      // Show activation confirmation
++      setActivationSheetVisible(true);
++
++      void trackEvent(ANALYTICS_EVENTS.aiProgramSaved, {
++        planId: generatedPlan.id,
++        daysPerWeek: generatedPlan.daysPerWeek,
++        weekCount: generatedPlan.weekCount,
++        premium: false,
++      });
++    } catch {
++      Alert.alert(
++        t("ai_program.save_error_title"),
++        t("ai_program.save_error_body"),
++      );
++    } finally {
++      setSavingPlan(false);
++    }
++  }, [draft, forceNewVariation, previousTemplateId, t]);
++
++  const handleEditFromNoMatch = useCallback((stepToEdit: string) => {
++    // Navigate back to the specific step that needs editing
++    if (!draft) return;
++
++    // Determine which step group contains the step we want to edit
++    const groupIndex = STEP_GROUPS.findIndex((group) =>
++      group.steps.includes(stepToEdit as any)
++    );
++
++    if (groupIndex >= 0) {
++      // Go back to that step
++      const nextDraft = mergeAIProgramDraft(draft, {
++        currentStep: stepToEdit as any,
++        generationStatus: "idle",
++        validationCodes: [],
++        cautionCodes: [],
++      });
++      setDraft(nextDraft);
++      setNoMatchExplanation(null);
++      setRecommendations(null);
++      setSelectedRecommendation(null);
++      setProcessingIndex(-1);
++    }
++  }, [draft]);
++
+   const openExercisePicker = useCallback((mode: "preferred" | "avoided") => {
+     setExercisePickerMode(mode);
+     setExercisePickerQuery("");
+@@ -1013,7 +1104,25 @@ export default function AIProgramBuilderScreen() {
+             </View>
+           </GlassCard>
+         ) : isReady ? (
+-          generatedPlan ? (
++          noMatchExplanation ? (
++            <NoMatchResultCard
++              explanation={noMatchExplanation}
++              t={t}
++              colors={colors}
++              onEditStep={handleEditFromNoMatch}
++              onReset={handleResetBuilder}
++            />
++          ) : recommendations ? (
++            <RecommendationSelectionCard
++              recommendations={recommendations}
++              selectedRecommendation={selectedRecommendation}
++              t={t}
++              colors={colors}
++              onSelect={handleSelectRecommendation}
++              onReset={handleResetBuilder}
++              equipmentSpecified={draft?.answers ? draft.answers.equipment.length > 0 || draft.answers.location !== undefined : false}
++            />
++          ) : generatedPlan ? (
+             <ProgramReadyCard
+               plan={generatedPlan}
+               t={t}
+@@ -2214,6 +2323,266 @@ function SummaryBlock({
+   );
+ }
+ 
++function RecommendationSelectionCard({
++  recommendations,
++  selectedRecommendation,
++  t,
++  colors,
++  onSelect,
++  onReset,
++  equipmentSpecified,
++}: {
++  recommendations: ProgramRecommendations;
++  selectedRecommendation: RecommendationMatch | null;
++  t: (key: string | { tr: string; en: string }) => string;
++  colors: ReturnType<typeof useAppTheme>["colors"];
++  onSelect: (recommendation: RecommendationMatch) => void;
++  onReset: () => void;
++  equipmentSpecified: boolean;
++}) {
++  const allRecommendations = [recommendations.bestMatch, ...recommendations.alternatives];
++
++  return (
++    <ScrollView style={styles.recommendationContainer}>
++      {!equipmentSpecified && (
++        <View style={[styles.equipmentNote, { backgroundColor: `${colors.tertiary}12`, borderColor: colors.tertiary }]}>
++          <Ionicons name="information-circle-outline" size={18} color={colors.tertiary} />
++          <Text style={[styles.equipmentNoteText, { color: colors.onSurface }]}>
++            {t({
++              tr: "Ekipman seçmediğin için programlar, ihtiyaç duydukları ekipman ve diğer tercihlerine yakınlıklarına göre sıralandı.",
++              en: "Since you didn't specify equipment, programs are ranked by their equipment requirements and proximity to your other preferences.",
++            })}
++          </Text>
++        </View>
++      )}
++
++      <Text style={[styles.recommendationTitle, { color: colors.onSurface }]}>
++        {t({ tr: "Sana en uygun program", en: "Best Match for You" })}
++      </Text>
++
++      {allRecommendations.map((recommendation, index) => {
++        const isBestMatch = index === 0;
++        const isSelected = selectedRecommendation?.templateId === recommendation.templateId;
++
++        return (
++          <TouchableOpacity
++            key={recommendation.templateId}
++            onPress={() => onSelect(recommendation)}
++            style={[
++              styles.recommendationCard,
++              {
++                backgroundColor: colors.surface,
++                borderColor: isSelected ? colors.primary : colors.outlineVariant,
++              },
++            ]}
++          >
++            {isBestMatch && (
++              <View style={[styles.bestMatchBadge, { backgroundColor: colors.primary }]}>
++                <Text style={[styles.bestMatchBadgeText, { color: colors.onPrimary }]}>
++                  {t({ tr: "En uygun", en: "Best Match" })}
++                </Text>
++              </View>
++            )}
++
++            <Text style={[styles.recommendationCardTitle, { color: colors.onSurface }]}>
++              {recommendation.title}
++            </Text>
++
++            <View style={styles.recommendationMeta}>
++              <Text style={[styles.recommendationScore, { color: colors.primary }]}>
++                %{Math.round(recommendation.matchScore)}
++              </Text>
++              <Text style={[styles.recommendationMetaText, { color: colors.onSurfaceVariant }]}>
++                {recommendation.daysPerWeek} {t({ tr: "gün", en: "days"})} • {recommendation.estimatedSessionMinutes} {t({ tr: "dk", en: "min" })}
++              </Text>
++              <Text style={[styles.recommendationMetaText, { color: colors.onSurfaceVariant }]}>
++                {recommendation.level} • {recommendation.split}
++              </Text>
++            </View>
++
++            <View style={styles.recommendationDetails}>
++              <Text style={[styles.recommendationDetailLabel, { color: colors.onSurfaceVariant }]}>
++                {t({ tr: "Ekipman", en: "Equipment" })}:
++              </Text>
++              <Text style={[styles.recommendationDetailValue, { color: colors.onSurface }]}>
++                {recommendation.requiredEquipment.length > 0
++                  ? recommendation.requiredEquipment.join(", ")
++                  : t({ tr: "Vücut ağırlığı", en: "Bodyweight" })}
++              </Text>
++            </View>
++
++            {recommendation.matchingReasons.length > 0 && (
++              <View style={styles.recommendationReasons}>
++                <Text style={[styles.recommendationDetailLabel, { color: colors.onSurfaceVariant }]}>
++                  {t({ tr: "Eşleşen", en: "Matches" })}:
++                </Text>
++                {recommendation.matchingReasons.slice(0, 3).map((reason, i) => (
++                  <Text key={i} style={[styles.recommendationReasonText, { color: colors.onSurface }]}>
++                    • {reason}
++                  </Text>
++                ))}
++              </View>
++            )}
++
++            {recommendation.compromises.length > 0 && (
++              <View style={styles.recommendationCompromises}>
++                <Text style={[styles.recommendationDetailLabel, { color: colors.tertiary }]}>
++                  {t({ tr: "Yaklaşık", en: "Approximate" })}:
++                </Text>
++                {recommendation.compromises.slice(0, 2).map((compromise, i) => (
++                  <Text key={i} style={[styles.recommendationCompromiseText, { color: colors.onSurface }]}>
++                    • {compromise}
++                  </Text>
++                ))}
++              </View>
++            )}
++
++            {recommendation.assumptions.length > 0 && (
++              <View style={styles.recommendationAssumptions}>
++                <Text style={[styles.recommendationDetailLabel, { color: colors.tertiary }]}>
++                  {t({ tr: "Varsayım", en: "Assumption" })}:
++                </Text>
++                {recommendation.assumptions.map((assumption, i) => (
++                  <Text key={i} style={[styles.recommendationAssumptionText, { color: colors.onSurfaceVariant }]}>
++                    • {assumption}
++                  </Text>
++                ))}
++              </View>
++            )}
++
++            <TouchableOpacity
++              style={[styles.recommendationSelectButton, { backgroundColor: colors.primary }]}
++              onPress={() => onSelect(recommendation)}
++            >
++              <Text style={[styles.recommendationSelectButtonText, { color: colors.onPrimary }]}>
++                {isSelected
++                  ? t({ tr: "Seçili", en: "Selected" })
++                  : t({ tr: "Bu programı seç", en: "Select This Program" })}
++              </Text>
++            </TouchableOpacity>
++          </TouchableOpacity>
++        );
++      })}
++
++      <TouchableOpacity
++        style={[styles.recommendationResetButton, { borderColor: colors.outlineVariant }]}
++        onPress={onReset}
++      >
++        <Text style={[styles.recommendationResetButtonText, { color: colors.onSurfaceVariant }]}>
++          {t({ tr: "Yeni program ara", en: "Start Over" })}
++        </Text>
++      </TouchableOpacity>
++    </ScrollView>
++  );
++}
++
++function NoMatchResultCard({
++  explanation,
++  t,
++  colors,
++  onEditStep,
++  onReset,
++}: {
++  explanation: NoMatchExplanation;
++  t: (key: string | { tr: string; en: string }) => string;
++  colors: ReturnType<typeof useAppTheme>["colors"];
++  onEditStep: (step: string) => void;
++  onReset: () => void;
++}) {
++  const stepLabels: Record<string, string> = {
++    goal: t({ tr: "Hedef", en: "Goal" }),
++    days: t({ tr: "Gün sayısı", en: "Days" }),
++    duration: t({ tr: "Süre", en: "Duration" }),
++    location: t({ tr: "Konum", en: "Location" }),
++    equipment: t({ tr: "Ekipman", en: "Equipment" }),
++    experience: t({ tr: "Deneyim", en: "Experience" }),
++  };
++
++  return (
++    <ScrollView style={styles.noMatchContainer}>
++      <View style={[styles.noMatchIcon, { backgroundColor: `${colors.error}12` }]}>
++        <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
++      </View>
++
++      <Text style={[styles.noMatchTitle, { color: colors.onSurface }]}>
++        {t({ tr: "Uyumlu program bulunamadı", en: "No Compatible Program Found" })}
++      </Text>
++
++      <Text style={[styles.noMatchSubtitle, { color: colors.onSurfaceVariant }]}>
++        {t({
++          tr: "Seçtiğin hedef, gün sayısı, ekipman veya kısıtlamalarla uyumlu reviewed bir program bulamadık.",
++          en: "We couldn't find a reviewed program compatible with your selections.",
++        })}
++      </Text>
++
++      {explanation.blockingConstraints.length > 0 && (
++        <View style={styles.noMatchSection}>
++          <Text style={[styles.noMatchSectionTitle, { color: colors.onSurface }]}>
++            {t({ tr: "Engelleyen kısıtlamalar", en: "Blocking Constraints" })}
++          </Text>
++          {explanation.blockingConstraints.map((constraint) => (
++            <View key={constraint} style={styles.noMatchConstraint}>
++              <Ionicons name="close-circle" size={16} color={colors.error} />
++              <Text style={[styles.noMatchConstraintText, { color: colors.onSurface }]}>
++                {constraint}
++              </Text>
++            </View>
++          ))}
++        </View>
++      )}
++
++      {Object.keys(explanation.rejectionCounts).length > 0 && (
++        <View style={styles.noMatchSection}>
++          <Text style={[styles.noMatchSectionTitle, { color: colors.onSurface }]}>
++            {t({ tr: "Reddedilme nedenleri", en: "Rejection Reasons" })}
++          </Text>
++          {Object.entries(explanation.rejectionCounts).map(([reason, count]) => (
++            <Text key={reason} style={[styles.noMatchRejectionText, { color: colors.onSurfaceVariant }]}>
++              {reason}: {count}
++            </Text>
++          ))}
++        </View>
++      )}
++
++      {explanation.suggestedChanges.length > 0 && (
++        <View style={styles.noMatchSection}>
++          <Text style={[styles.noMatchSectionTitle, { color: colors.onSurface }]}>
++            {t({ tr: "Önerilen değişiklikler", en: "Suggested Changes" })}
++          </Text>
++          {explanation.suggestedChanges.map((suggestion, index) => {
++            // Parse suggestion to extract step name
++            const stepKey = Object.keys(stepLabels).find(key =>
++              suggestion.toLowerCase().includes(stepLabels[key].toLowerCase())
++            );
++
++            return (
++              <TouchableOpacity
++                key={index}
++                style={[styles.noMatchSuggestion, { borderColor: colors.outlineVariant }]}
++                onPress={() => stepKey && onEditStep(stepKey)}
++              >
++                <Text style={[styles.noMatchSuggestionText, { color: colors.onSurface }]}>
++                  {suggestion}
++                </Text>
++                <Ionicons name="chevron-forward" size={16} color={colors.primary} />
++              </TouchableOpacity>
++            );
++          })}
++        </View>
++      )}
++
++      <TouchableOpacity
++        style={[styles.noMatchResetButton, { borderColor: colors.outlineVariant }]}
++        onPress={onReset}
++      >
++        <Text style={[styles.noMatchResetButtonText, { color: colors.onSurfaceVariant }]}>
++          {t({ tr: "Baştan başla", en: "Start Over" })}
++        </Text>
++      </TouchableOpacity>
++    </ScrollView>
++  );
++}
++
+ function ProgramReadyCard({
+   plan,
+   t,
+@@ -3123,4 +3492,210 @@ const styles = createDynamicStyles(() => ({
+     justifyContent: "center",
+   },
+   exitSheetDestructiveText: { ...typography.labelMd, textAlign: "center" },
++
++  // Recommendation selection styles
++  recommendationContainer: {
++    width: "100%",
++    maxWidth: layout.maxContentWidth,
++    alignSelf: "center",
++    paddingHorizontal: spacing.containerMargin,
++    paddingVertical: spacing.sm,
++    gap: spacing.md,
++  },
++  equipmentNote: {
++    borderRadius: radius.lg,
++    padding: spacing.smPlus,
++    flexDirection: "row",
++    alignItems: "flex-start",
++    gap: spacing.sm,
++    borderWidth: 1,
++  },
++  equipmentNoteText: {
++    ...typography.bodySm,
++    flex: 1,
++    lineHeight: 18,
++  },
++  recommendationTitle: {
++    ...typography.headlineLg,
++    marginBottom: spacing.sm,
++  },
++  recommendationCard: {
++    borderRadius: radius.xl,
++    padding: spacing.cardPadding,
++    gap: spacing.sm,
++    borderWidth: 1,
++    marginBottom: spacing.sm,
++  },
++  bestMatchBadge: {
++    alignSelf: "flex-start",
++    paddingHorizontal: spacing.sm,
++    paddingVertical: spacing.xs,
++    borderRadius: radius.full,
++    marginBottom: spacing.sm,
++  },
++  bestMatchBadgeText: {
++    ...typography.labelCaps,
++    fontSize: 10,
++  },
++  recommendationCardTitle: {
++    ...typography.headlineMd,
++    marginBottom: spacing.sm,
++  },
++  recommendationMeta: {
++    gap: spacing.xs,
++    marginBottom: spacing.sm,
++  },
++  recommendationScore: {
++    ...typography.labelMd,
++    fontSize: 18,
++    fontWeight: "600",
++  },
++  recommendationMetaText: {
++    ...typography.bodySm,
++    lineHeight: 16,
++  },
++  recommendationDetails: {
++    gap: spacing.xs,
++    marginBottom: spacing.sm,
++  },
++  recommendationDetailLabel: {
++    ...typography.labelMd,
++  },
++  recommendationDetailValue: {
++    ...typography.bodySm,
++    lineHeight: 18,
++  },
++  recommendationReasons: {
++    gap: spacing.xs,
++    marginBottom: spacing.sm,
++  },
++  recommendationReasonText: {
++    ...typography.bodySm,
++    lineHeight: 17,
++    paddingLeft: spacing.sm,
++  },
++  recommendationCompromises: {
++    gap: spacing.xs,
++    marginBottom: spacing.sm,
++  },
++  recommendationCompromiseText: {
++    ...typography.bodySm,
++    lineHeight: 17,
++    paddingLeft: spacing.sm,
++    fontStyle: "italic",
++  },
++  recommendationAssumptions: {
++    gap: spacing.xs,
++    marginBottom: spacing.sm,
++  },
++  recommendationAssumptionText: {
++    ...typography.bodyXs,
++    lineHeight: 16,
++    paddingLeft: spacing.sm,
++  },
++  recommendationSelectButton: {
++    minHeight: 48,
++    borderRadius: radius.lg,
++    flexDirection: "row",
++    alignItems: "center",
++    justifyContent: "center",
++    paddingHorizontal: spacing.md,
++    marginTop: spacing.xs,
++  },
++  recommendationSelectButtonText: {
++    ...typography.buttonSm,
++  },
++  recommendationResetButton: {
++    minHeight: 44,
++    borderRadius: radius.lg,
++    borderWidth: 1,
++    alignItems: "center",
++    justifyContent: "center",
++    paddingHorizontal: spacing.md,
++    marginTop: spacing.md,
++  },
++  recommendationResetButtonText: {
++    ...typography.labelMd,
++  },
++
++  // No-match result styles
++  noMatchContainer: {
++    width: "100%",
++    maxWidth: layout.maxContentWidth,
++    alignSelf: "center",
++    paddingHorizontal: spacing.containerMargin,
++    paddingVertical: spacing.lg,
++    gap: spacing.md,
++  },
++  noMatchIcon: {
++    width: 80,
++    height: 80,
++    borderRadius: 40,
++    alignItems: "center",
++    justifyContent: "center",
++    alignSelf: "center",
++    marginBottom: spacing.md,
++  },
++  noMatchTitle: {
++    ...typography.headlineLg,
++    textAlign: "center",
++    marginBottom: spacing.sm,
++  },
++  noMatchSubtitle: {
++    ...typography.bodyMd,
++    textAlign: "center",
++    lineHeight: 22,
++    marginBottom: spacing.lg,
++  },
++  noMatchSection: {
++    gap: spacing.sm,
++    marginBottom: spacing.md,
++  },
++  noMatchSectionTitle: {
++    ...typography.labelCaps,
++    marginBottom: spacing.xs,
++  },
++  noMatchConstraint: {
++    flexDirection: "row",
++    alignItems: "center",
++    gap: spacing.sm,
++    paddingVertical: spacing.xs,
++  },
++  noMatchConstraintText: {
++    ...typography.bodySm,
++    lineHeight: 18,
++    flex: 1,
++  },
++  noMatchRejectionText: {
++    ...typography.bodySm,
++    lineHeight: 18,
++    paddingVertical: spacing.xs,
++  },
++  noMatchSuggestion: {
++    flexDirection: "row",
++    alignItems: "center",
++    justifyContent: "space-between",
++    borderRadius: radius.lg,
++    borderWidth: 1,
++    padding: spacing.smPlus,
++    marginBottom: spacing.xs,
++  },
++  noMatchSuggestionText: {
++    ...typography.bodySm,
++    lineHeight: 18,
++    flex: 1,
++    paddingRight: spacing.sm,
++  },
++  noMatchResetButton: {
++    minHeight: 44,
++    borderRadius: radius.lg,
++    borderWidth: 1,
++    alignItems: "center",
++    justifyContent: "center",
++    paddingHorizontal: spacing.md,
++    marginTop: spacing.lg,
++  },
++  noMatchResetButtonText: {
++    ...typography.labelMd,
++  },
+ }));
+diff --git a/src/services/programRecommendationEngine.ts b/src/services/programRecommendationEngine.ts
+index bf75187..7f9b410 100644
+--- a/src/services/programRecommendationEngine.ts
++++ b/src/services/programRecommendationEngine.ts
+@@ -6,9 +6,12 @@ import { normalizeProgramRequest } from '@/workout-programming/selection/normali
+ import {
+   USE_TEMPLATE_PROGRAM_ENGINE,
+   matchTemplatesWithRelaxation,
++  recommendPrograms as getRecommendations,
+   type ProgramRequest,
+   type TemplateEngineResult,
+   type TemplateMatchResult,
++  type ProgramRecommendations,
++  type NoMatchExplanation,
+ } from './templateProgramEngine';
+ 
+ export type ProgramRecommendation = {
+@@ -32,6 +35,7 @@ type RecommendationInput = {
+   physiqueSummary?: AIProgramPhysiqueSummary;
+   forceNewVariation?: boolean;
+   previousTemplateId?: string;
++  selectedTemplateId?: string;
+ };
+ 
+ function buildRequest(input: Omit<RecommendationInput, 'basePlan'>): ProgramRequest {
+@@ -41,9 +45,15 @@ function buildRequest(input: Omit<RecommendationInput, 'basePlan'>): ProgramRequ
+     physiqueSummary: input.physiqueSummary,
+     forceNewVariation: input.forceNewVariation,
+     previousTemplateId: input.previousTemplateId,
++    selectedTemplateId: input.selectedTemplateId,
+   });
+ }
+ 
++export function getTopProgramRecommendations(input: Omit<RecommendationInput, 'basePlan' | 'draftId'>): ProgramRecommendations | NoMatchExplanation {
++  const request = buildRequest(input);
++  return getRecommendations(request);
++}
++
+ export function recommendPrograms(input: Omit<RecommendationInput, 'basePlan' | 'draftId'>): ProgramRecommendation[] {
+   const request = buildRequest(input);
+   const { compatible, relaxationsApplied } = matchTemplatesWithRelaxation(request);
+diff --git a/src/services/templateProgramEngine.ts b/src/services/templateProgramEngine.ts
+index fd21af0..7d21256 100644
+--- a/src/services/templateProgramEngine.ts
++++ b/src/services/templateProgramEngine.ts
+@@ -82,6 +82,7 @@ export type ProgramRequest = {
+   preferredSessionMinutes: number;
+   equipmentProfile: TemplateEquipmentProfile;
+   availableEquipment: string[];
++  equipmentSpecified: boolean; // Distinguishes unspecified equipment from explicit empty selection
+   focusMuscles: string[];
+   physiqueFocus: ForgePhysiqueFocus[];
+   restrictedExerciseIds: string[];
+@@ -89,6 +90,7 @@ export type ProgramRequest = {
+   preferredSplit?: TemplateSplit;
+   forceNewVariation?: boolean;
+   previousTemplateId?: string;
++  selectedTemplateId?: string; // Force this specific template to be used (for recommendation selection)
+ };
+ 
+ export type TemplateMatchResult = {
+@@ -170,6 +172,51 @@ export type SupportedProgramOptions = {
+   compatibleTemplateCount: number;
+ };
+ 
++export type ExactMatches = {
++  goal: boolean;
++  modality: boolean;
++  daysPerWeek: boolean;
++  level: boolean;
++  equipment: boolean;
++  duration: boolean;
++  split: boolean;
++  focusMuscles: boolean;
++};
++
++export type RecommendationMatch = {
++  templateId: string;
++  title: string;
++  matchScore: number; // 0-100
++  exactMatches: ExactMatches;
++  approximateMatches: string[];
++  matchingReasons: string[];
++  compromises: string[];
++  assumptions: string[];
++  requiredEquipment: string[];
++  estimatedSessionMinutes: number;
++  daysPerWeek: number;
++  goal: TemplateGoal;
++  modality: TemplateModality;
++  level: TemplateLevel;
++  equipmentProfile: TemplateEquipmentProfile;
++  split: TemplateSplit;
++  durationWeeks: number;
++};
++
++export type ProgramRecommendations = {
++  bestMatch: RecommendationMatch;
++  alternatives: RecommendationMatch[];
++  totalCompatible: number;
++  totalRejected: number;
++};
++
++export type NoMatchExplanation = {
++  blockingConstraints: string[];
++  rejectionCounts: Record<string, number>;
++  suggestedChanges: string[];
++  hasAnyTemplates: boolean;
++};
++
+ type MutableExercise = ForgeGeneratedExercise & {
+   adaptedFromExerciseId?: string;
+ };
+@@ -231,6 +278,164 @@ export function getSupportedProgramOptions(input: SupportedProgramOptionsInput =
+   };
+ }
+ 
++export function recommendPrograms(request: ProgramRequest): ProgramRecommendations | NoMatchExplanation {
++  // Score all templates
++  const allScores = PROGRAM_TEMPLATES.map((template) => scoreTemplate(template, request));
++
++  // Separate compatible and rejected
++  const compatible = allScores.filter((result) => !result.rejectionReasons?.length);
++  const rejected = allScores.filter((result) => result.rejectionReasons?.length);
++
++  // Handle zero-result case
++  if (compatible.length === 0) {
++    const rejectionCounts: Record<string, number> = {};
++    rejected.forEach((result) => {
++      result.rejectionReasons?.forEach((code) => {
++        rejectionCounts[code] = (rejectionCounts[code] || 0) + 1;
++      });
++    });
++
++    const blockingConstraints = Object.keys(rejectionCounts);
++    const suggestedChanges: string[] = [];
++
++    // Generate suggested changes based on rejection reasons
++    if (rejectionCounts['DAY_COUNT_MISMATCH']) {
++      const availableDays = [...new Set(PROGRAM_TEMPLATES.map((t) => t.daysPerWeek))].sort((a, b) => a - b);
++      suggestedChanges.push(`Try training days: ${availableDays.slice(0, 3).join(', ')}`);
++    }
++    if (rejectionCounts['LEVEL_MISMATCH']) {
++      suggestedChanges.push('Consider adjusting your experience level');
++    }
++    if (rejectionCounts['EQUIPMENT_MISMATCH'] || rejectionCounts['NO_VALID_SUBSTITUTION']) {
++      suggestedChanges.push('Review your equipment selections or try "bodyweight only"');
++    }
++    if (rejectionCounts['MODALITY_MISMATCH']) {
++      suggestedChanges.push('Try a different training style or modality');
++    }
++    if (rejectionCounts['LIMITATION_CONFLICT']) {
++      suggestedChanges.push('Some limitations may restrict available programs');
++    }
++
++    return {
++      blockingConstraints,
++      rejectionCounts,
++      suggestedChanges,
++      hasAnyTemplates: PROGRAM_TEMPLATES.length > 0,
++    };
++  }
++
++  // Sort compatible templates by score (descending)
++  const sorted = compatible.sort((a, b) => {
++    // Primary: total score
++    if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
++
++    // Secondary: fewer assumptions (better for unspecified fields)
++    const aAssumptions = a.breakdown.adaptationCostPenalty ?? 0;
++    const bAssumptions = b.breakdown.adaptationCostPenalty ?? 0;
++    if (aAssumptions !== bAssumptions) return bAssumptions - aAssumptions; // Higher (less negative) is better
++
++    // Tertiary: template ID for deterministic ordering
++    return a.templateId.localeCompare(b.templateId);
++  });
++
++  // Take top 3
++  const top3 = sorted.slice(0, 3);
++
++  // Convert to RecommendationMatch format
++  const recommendations = top3.map((match): RecommendationMatch => {
++    const template = PROGRAM_TEMPLATES.find((t) => t.id === match.templateId)!;
++    const exactMatches: ExactMatches = {
++      goal: template.goal === request.goal,
++      modality: WORKOUT_LIBRARY_VERSION === '300' && request.modality
++        ? (template.modality ?? template.goal) === request.modality
++        : template.goal === request.goal,
++      daysPerWeek: template.daysPerWeek === request.daysPerWeek,
++      level: template.level === request.level,
++      equipment: request.equipmentSpecified
++        ? template.equipmentProfile === request.equipmentProfile
++        : true, // When unspecified, all are "compatible"
++      duration: Math.abs(request.preferredSessionMinutes - template.sessionMinutes.target) <= 15,
++      split: request.preferredSplit === template.split,
++      focusMuscles: request.focusMuscles.length > 0 &&
++        request.focusMuscles.some((m) => template.compatibleFocusMuscles.includes(m)),
++    };
++
++    const matchingReasons: string[] = [];
++    const compromises: string[] = [];
++    const assumptions: string[] = [];
++    const approximateMatches: string[] = [];
++
++    // Build matching reasons and compromises
++    if (exactMatches.goal) matchingReasons.push(`Goal: ${template.goal}`);
++    else if (template.goal !== request.goal) approximateMatches.push(`Goal: ${request.goal} → ${template.goal}`);
++
++    if (exactMatches.modality && WORKOUT_LIBRARY_VERSION === '300') {
++      matchingReasons.push(`Modality: ${template.modality ?? template.goal}`);
++    } else if (WORKOUT_LIBRARY_VERSION === '300' && request.modality && (template.modality ?? template.goal) !== request.modality) {
++      compromises.push(`Modality: ${request.modality} → ${template.modality ?? template.goal}`);
++    }
++
++    if (exactMatches.daysPerWeek) matchingReasons.push(`${template.daysPerWeek} days/week`);
++    else compromises.push(`${request.daysPerWeek} → ${template.daysPerWeek} days/week`);
++
++    if (exactMatches.level) matchingReasons.push(`Level: ${template.level}`);
++    else compromises.push(`Level: ${request.level} → ${template.level}`);
++
++    if (request.equipmentSpecified) {
++      if (exactMatches.equipment) matchingReasons.push(`Equipment: ${template.equipmentProfile}`);
++      else compromises.push(`Equipment: ${request.equipmentProfile} (may require substitutions)`);
++    } else {
++      assumptions.push(`Equipment unspecified: ${template.equipmentProfile} program shown as option`);
++    }
++
++    if (exactMatches.duration) matchingReasons.push(`Duration: ~${template.sessionMinutes.target} min`);
++    else approximateMatches.push(`Duration: ${template.sessionMinutes.target} min (preferred: ${request.preferredSessionMinutes} min)`);
++
++    if (exactMatches.split) matchingReasons.push(`Split: ${template.split}`);
++    else if (request.preferredSplit) approximateMatches.push(`Split: ${template.split} (preferred: ${request.preferredSplit})`);
++
++    if (exactMatches.focusMuscles) matchingReasons.push(`Focus muscles match`);
++    else if (request.focusMuscles.length > 0) {
++      assumptions.push(`Focus muscles may be adapted`);
++    }
++
++    // Determine required equipment from template exercises
++    const requiredEquipment = new Set<string>();
++    template.workouts.forEach((workout) => {
++      workout.exercises.forEach((exercise) => {
++        exercise.equipment.forEach((eq) => requiredEquipment.add(eq));
++      });
++    });
++
++    return {
++      templateId: template.id,
++      title: template.name,
++      matchScore: match.totalScore,
++      exactMatches,
++      approximateMatches,
++      matchingReasons,
++      compromises,
++      assumptions,
++      requiredEquipment: Array.from(requiredEquipment),
++      estimatedSessionMinutes: template.sessionMinutes.target,
++      daysPerWeek: template.daysPerWeek,
++      goal: template.goal,
++      modality: (template.modality ?? template.goal) as TemplateModality,
++      level: template.level,
++      equipmentProfile: template.equipmentProfile as TemplateEquipmentProfile,
++      split: template.split as TemplateSplit,
++      durationWeeks: template.durationWeeks,
++    };
++  });
++
++  return {
++    bestMatch: recommendations[0],
++    alternatives: recommendations.slice(1),
++    totalCompatible: compatible.length,
++    totalRejected: rejected.length,
++  };
++}
++
+ function stableStringify(value: unknown): string {
+   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+   if (value && typeof value === 'object') {
+@@ -356,6 +561,12 @@ function exerciseEquipmentFits(equipment: string[], request: ProgramRequest): bo
+ }
+ 
+ function equipmentProfileFits(template: ProgramTemplate, request: ProgramRequest): boolean {
++  // When equipment is not specified, don't reject templates based on equipment
++  // Equipment accessibility becomes a ranking factor instead
++  if (!request.equipmentSpecified) {
++    return true;
++  }
++
+   const available = requestEquipmentSet(request);
+   if (template.equipmentProfile === 'resistance_band_bodyweight') return available.has('bodyweight') && available.has('resistance_band');
+   if (template.equipmentProfile === 'bodyweight_home') return available.has('bodyweight') && (request.equipmentProfile === 'bodyweight_home' || available.has('resistance_band'));
+@@ -373,6 +584,12 @@ function equipmentProfileScore(template: ProgramTemplate, request: ProgramReques
+ }
+ 
+ function requiredExerciseFitsOrCanSubstitute(exercise: ForgeGeneratedExercise, request: ProgramRequest): boolean {
++  // When equipment is not specified, allow all exercises
++  // They can be substituted during adaptation if needed
++  if (!request.equipmentSpecified) {
++    return true;
++  }
++
+   if (
+     request.goal === 'strength'
+     && exercise.required
+@@ -493,6 +710,7 @@ export function createProgramRequestFromAnswers(input: {
+   physiqueSummary?: AIProgramPhysiqueSummary;
+   forceNewVariation?: boolean;
+   previousTemplateId?: string;
++  selectedTemplateId?: string;
+ }): ProgramRequest {
+   const { answers, physiqueSummary } = input;
+   const physiqueFocus = answers.useLatestPhysiqueAnalysis ? physiqueFocusFromSummary(physiqueSummary) : [];
+@@ -500,6 +718,8 @@ export function createProgramRequestFromAnswers(input: {
+     ...answers.equipment.map(normalizeEquipmentKey),
+     answers.location === 'home' ? 'bodyweight' : '',
+   ]);
++  // Equipment is considered "specified" when user explicitly selected equipment OR location
++  const equipmentSpecified = answers.equipment.length > 0 || answers.location !== undefined;
+   return {
+     userId: input.userId ?? 'local_user',
+     goal: goalFromAnswers(answers),
+@@ -509,6 +729,7 @@ export function createProgramRequestFromAnswers(input: {
+     preferredSessionMinutes: Math.min(120, Math.max(20, answers.sessionDurationMin ?? 60)),
+     equipmentProfile: equipmentProfileFromAnswers(answers, availableEquipment),
+     availableEquipment,
++    equipmentSpecified,
+     focusMuscles: normalizeList(answers.priorityMuscles.map((item) => normalizeFocusMuscleValue(item) ?? item)),
+     physiqueFocus,
+     restrictedExerciseIds: normalizeList([...(answers.avoidedExerciseIds ?? [])]),
+@@ -516,6 +737,7 @@ export function createProgramRequestFromAnswers(input: {
+     preferredSplit: splitFromAnswers(answers),
+     forceNewVariation: !!input.forceNewVariation,
+     previousTemplateId: input.previousTemplateId?.trim() || undefined,
++    selectedTemplateId: input.selectedTemplateId?.trim() || undefined,
+   };
+ }
+ 
+@@ -620,24 +842,88 @@ function scoreTemplate(template: ProgramTemplate, request: ProgramRequest): Temp
+   const rejections = templateRejections(template, request);
+   const focusHits = request.focusMuscles.filter((muscle) => template.compatibleFocusMuscles.includes(muscle)).length;
+   const durationDistance = Math.abs(request.preferredSessionMinutes - template.sessionMinutes.target);
+-  const adaptationCostPenalty = template.workouts.flatMap((workout) => workout.exercises).reduce((penalty, exercise) => {
+-    const equipmentPenalty = exercise.required && !exerciseEquipmentFits(exercise.equipment, request) ? -5 : 0;
+-    const limitationPenalty = exercise.required && getExerciseLimitationConflicts(exercise, request.limitations).length > 0 ? -6 : 0;
++
++  // Goal/Modality scoring (30 points max)
++  let goalScore = 0;
++  if (template.goal === request.goal) {
++    goalScore = 30;
++    // Bonus for modality match in 300-library
++    if (WORKOUT_LIBRARY_VERSION === '300' && request.modality && (template.modality ?? template.goal) === request.modality) {
++      goalScore = 30; // Already max for exact goal match
++    }
++  } else {
++    // Partial score for goal proximity
++    const goalHierarchy: Record<TemplateGoal, number> = { strength: 3, powerbuilding: 2, hypertrophy: 2, general_fitness: 1 };
++    const requestLevel = goalHierarchy[request.goal] ?? 1;
++    const templateLevel = goalHierarchy[template.goal] ?? 1;
++    goalScore = Math.max(0, 15 - Math.abs(requestLevel - templateLevel) * 5);
++  }
++
++  // Days per week scoring (25 points max)
++  const daysScore = template.daysPerWeek === request.daysPerWeek ? 25 : Math.max(0, 25 - Math.abs(template.daysPerWeek - request.daysPerWeek) * 8);
++
++  // Equipment compatibility/accessibility scoring (20 points max)
++  let equipmentScore = 0;
++  if (request.equipmentSpecified) {
++    // When equipment is specified, exact match gets max score
++    equipmentScore = equipmentProfileScore(template, request);
++    // Scale up to 20 points max
++    if (equipmentScore === 10) equipmentScore = 20;
++    else if (equipmentScore === 6) equipmentScore = 12;
++    else equipmentScore = 0;
++  } else {
++    // When equipment is unspecified, score based on accessibility
++    // Fewer equipment requirements = more accessible = higher score
++    const equipmentComplexity: Record<TemplateEquipmentProfile, number> = {
++      bodyweight_home: 20,
++      resistance_band_bodyweight: 18,
++      dumbbell_only: 15,
++      full_gym: 10,
++      custom: 5,
++    };
++    equipmentScore = equipmentComplexity[template.equipmentProfile as TemplateEquipmentProfile] ?? 5;
++  }
++
++  // Level proximity scoring (10 points max)
++  const levelHierarchy: Record<TemplateLevel, number> = { beginner: 1, intermediate: 2, advanced: 3 };
++  const requestLevel = levelHierarchy[request.level] ?? 1;
++  const templateLevel = levelHierarchy[template.level] ?? 1;
++  const levelDistance = Math.abs(requestLevel - templateLevel);
++  const levelScore = levelDistance === 0 ? 10 : levelDistance === 1 ? 6 : 2;
++
++  // Duration proximity scoring (10 points max)
++  let durationScore = 0;
++  if (durationDistance === 0) durationScore = 10;
++  else if (durationDistance <= 10) durationScore = 8;
++  else if (durationDistance <= 20) durationScore = 5;
++  else if (durationDistance <= 30) durationScore = 3;
++  else durationScore = 1;
++
++  // Split and focus muscle preference scoring (5 points max)
++  const splitScore = request.preferredSplit && request.preferredSplit === template.split ? 3 : 0;
++  const focusScore = Math.min(2, focusHits); // Max 2 points for focus muscles
++
++  // Adaptation cost penalty (only when equipment is specified)
++  const adaptationCostPenalty = request.equipmentSpecified ? template.workouts.flatMap((workout) => workout.exercises).reduce((penalty, exercise) => {
++    const equipmentPenalty = exercise.required && !exerciseEquipmentFits(exercise.equipment, request) ? -3 : 0;
++    const limitationPenalty = exercise.required && getExerciseLimitationConflicts(exercise, request.limitations).length > 0 ? -4 : 0;
+     return penalty + equipmentPenalty + limitationPenalty;
+-  }, 0);
++  }, 0) : 0;
++
+   const breakdown = {
+-    goal: template.goal === request.goal ? 35 : 0,
+-    days: template.daysPerWeek === request.daysPerWeek ? 25 : 0,
+-    level: template.level === request.level ? 15 : 0,
+-    equipment: equipmentProfileScore(template, request),
+-    duration: durationDistance <= 10 ? 5 : durationDistance <= 20 ? 3 : 1,
+-    focus: Math.min(5, focusHits * 2),
+-    split: request.preferredSplit && request.preferredSplit === template.split ? 5 : 0,
++    goal: goalScore,
++    days: daysScore,
++    level: levelScore,
++    equipment: equipmentScore,
++    duration: durationScore,
++    focus: focusScore,
++    split: splitScore,
+     adaptationCostPenalty,
+   };
++
+   return {
+     templateId: template.id,
+-    totalScore: Object.values(breakdown).reduce((sum, item) => sum + item, 0),
++    totalScore: Object.values(breakdown).reduce((sum, item) => sum + (typeof item === 'number' ? item : 0), 0),
+     matchMode: 'strict_match',
+     relaxationsApplied: [],
+     breakdown,
+@@ -694,6 +980,7 @@ function cloneRequest(request: ProgramRequest): ProgramRequest {
+     physiqueFocus: request.physiqueFocus.map((item) => ({ ...item })),
+     restrictedExerciseIds: [...request.restrictedExerciseIds],
+     limitations: [...request.limitations],
++    equipmentSpecified: request.equipmentSpecified,
+   };
+ }
+ 
+@@ -869,6 +1156,29 @@ function selectTemplateWithRelaxation(request: ProgramRequest): {
+   matchMode: 'strict_match' | 'relaxed_match' | 'no_safe_match';
+   relaxationsApplied: string[];
+ } {
++  // If a specific template is selected, use it directly
++  if (request.selectedTemplateId) {
++    const template = PROGRAM_TEMPLATES.find((item) => item.id === request.selectedTemplateId);
++    if (!template) throw new Error(`Selected template ${request.selectedTemplateId} is missing.`);
++
++    // Score the selected template for consistent match result
++    const match = scoreTemplate(template, request);
++    if (match.rejectionReasons?.length) {
++      throw new Error(`Selected template ${request.selectedTemplateId} is incompatible: ${match.rejectionReasons.join(', ')}`);
++    }
++
++    const allMatches = matchTemplatesWithRelaxation(request);
++    return {
++      template,
++      match,
++      rejected: allMatches.matchMode === 'relaxed_match' ? allMatches.strictRejected : allMatches.rejected,
++      compatible: allMatches.compatible,
++      effectiveRequest: allMatches.effectiveRequest,
++      matchMode: 'strict_match',
++      relaxationsApplied: [],
++    };
++  }
++
+   const matches = matchTemplatesWithRelaxation(request);
+   let pool = matches.compatible;
+   if (matches.effectiveRequest.forceNewVariation && matches.effectiveRequest.previousTemplateId && matches.compatible.length > 1) {
+@@ -878,10 +1188,10 @@ function selectTemplateWithRelaxation(request: ProgramRequest): {
+   }
+   const match = pool[0];
+   if (!match) throw new Error(`No compatible FORGE CSV template found: ${matches.rejected.map((item) => `${item.templateId}:${item.rejectionReasons?.join('/')}`).join(', ')}`);
+-  const template = PROGRAM_TEMPLATES.find((item) => item.id === match.templateId);
+-  if (!template) throw new Error(`Selected template ${match.templateId} is missing.`);
++  const selectedTemplate = PROGRAM_TEMPLATES.find((item) => item.id === match.templateId);
++  if (!selectedTemplate) throw new Error(`Selected template ${match.templateId} is missing.`);
+   return {
+-    template,
++    template: selectedTemplate,
+     match,
+     rejected: matches.matchMode === 'relaxed_match' ? matches.strictRejected : matches.rejected,
+     compatible: matches.compatible,
+diff --git a/src/services/workoutEngineFeatureFlags.ts b/src/services/workoutEngineFeatureFlags.ts
+index 1796478..cf61b10 100644
+--- a/src/services/workoutEngineFeatureFlags.ts
++++ b/src/services/workoutEngineFeatureFlags.ts
+@@ -10,47 +10,102 @@ export type WorkoutLibraryVersionState = {
+   reason: string;
+ };
+ 
+-function readFlag(name: string): string | undefined {
+-  return process.env[name]?.trim().toLowerCase();
++function normalizeFlag(value: string | undefined): string | undefined {
++  return value?.trim().toLowerCase();
+ }
+ 
+-function resolveBooleanFlag(name: string, developmentOverrideName?: string): WorkoutEngineFeatureState {
+-  const value = readFlag(name);
+-  if (value === 'true') {
+-    return { enabled: true, source: 'environment', reason: `${name}=true` };
++function resolveBooleanFlag(
++  value: string | undefined,
++  name: string,
++  developmentOverrideValue?: string,
++  developmentOverrideName?: string,
++): WorkoutEngineFeatureState {
++  const normalizedValue = normalizeFlag(value);
++
++  if (normalizedValue === 'true') {
++    return {
++      enabled: true,
++      source: 'environment',
++      reason: `${name}=true`,
++    };
+   }
+-  if (value === 'false') {
+-    return { enabled: false, source: 'environment', reason: `${name}=false` };
++
++  if (normalizedValue === 'false') {
++    return {
++      enabled: false,
++      source: 'environment',
++      reason: `${name}=false`,
++    };
+   }
+-  if (developmentOverrideName && process.env.NODE_ENV !== 'production') {
+-    const override = readFlag(developmentOverrideName);
+-    if (override === 'true') {
+-      return { enabled: true, source: 'development_override', reason: `${developmentOverrideName}=true` };
+-    }
++
++  const normalizedOverride = normalizeFlag(developmentOverrideValue);
++
++  if (
++    developmentOverrideName &&
++    process.env.NODE_ENV !== 'production' &&
++    normalizedOverride === 'true'
++  ) {
++    return {
++      enabled: true,
++      source: 'development_override',
++      reason: `${developmentOverrideName}=true`,
++    };
+   }
+-  return { enabled: false, source: 'disabled_default', reason: value ? `${name} has invalid value` : `${name} is not set` };
++
++  return {
++    enabled: false,
++    source: 'disabled_default',
++    reason: normalizedValue
++      ? `${name} has invalid value`
++      : `${name} is not set`,
++  };
+ }
+ 
+ export function getTemplateProgramEngineFeatureState(): WorkoutEngineFeatureState {
+-  return resolveBooleanFlag('EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE', 'EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE_DEV_OVERRIDE');
++  return resolveBooleanFlag(
++    process.env.EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE,
++    'EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE',
++    process.env.EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE_DEV_OVERRIDE,
++    'EXPO_PUBLIC_TEMPLATE_PROGRAM_ENGINE_DEV_OVERRIDE',
++  );
+ }
+ 
+ export function getPhysiqueAdaptationFeatureState(): WorkoutEngineFeatureState {
+-  return resolveBooleanFlag('EXPO_PUBLIC_PHYSIQUE_ADAPTATION_WRITES', 'EXPO_PUBLIC_PHYSIQUE_ADAPTATION_DEV_OVERRIDE');
++  return resolveBooleanFlag(
++    process.env.EXPO_PUBLIC_PHYSIQUE_ADAPTATION_WRITES,
++    'EXPO_PUBLIC_PHYSIQUE_ADAPTATION_WRITES',
++    process.env.EXPO_PUBLIC_PHYSIQUE_ADAPTATION_DEV_OVERRIDE,
++    'EXPO_PUBLIC_PHYSIQUE_ADAPTATION_DEV_OVERRIDE',
++  );
+ }
+ 
+ export function getProgressionWritesFeatureState(): WorkoutEngineFeatureState {
+-  return resolveBooleanFlag('EXPO_PUBLIC_PROGRESSION_WRITES', 'EXPO_PUBLIC_PROGRESSION_WRITES_DEV_OVERRIDE');
++  return resolveBooleanFlag(
++    process.env.EXPO_PUBLIC_PROGRESSION_WRITES,
++    'EXPO_PUBLIC_PROGRESSION_WRITES',
++    process.env.EXPO_PUBLIC_PROGRESSION_WRITES_DEV_OVERRIDE,
++    'EXPO_PUBLIC_PROGRESSION_WRITES_DEV_OVERRIDE',
++  );
+ }
+ 
+ export function getWorkoutLibraryVersionState(): WorkoutLibraryVersionState {
+-  const value = readFlag('EXPO_PUBLIC_WORKOUT_LIBRARY_VERSION');
++  const value = normalizeFlag(
++    process.env.EXPO_PUBLIC_WORKOUT_LIBRARY_VERSION,
++  );
++
+   if (value === '300') {
+-    return { version: '300', source: 'environment', reason: 'EXPO_PUBLIC_WORKOUT_LIBRARY_VERSION=300' };
++    return {
++      version: '300',
++      source: 'environment',
++      reason: 'EXPO_PUBLIC_WORKOUT_LIBRARY_VERSION=300',
++    };
+   }
++
+   return {
+     version: 'stable',
+     source: value ? 'environment' : 'disabled_default',
+-    reason: value ? `Unsupported workout library version: ${value}` : 'EXPO_PUBLIC_WORKOUT_LIBRARY_VERSION is not set',
++    reason: value
++      ? `Unsupported workout library version: ${value}`
++      : 'EXPO_PUBLIC_WORKOUT_LIBRARY_VERSION is not set',
+   };
+-}
++}
+\ No newline at end of file
+diff --git a/src/workout-programming/selection/normalizeProgramRequest.ts b/src/workout-programming/selection/normalizeProgramRequest.ts
+index ff0f20f..664f2f0 100644
+--- a/src/workout-programming/selection/normalizeProgramRequest.ts
++++ b/src/workout-programming/selection/normalizeProgramRequest.ts
+@@ -10,6 +10,7 @@ export type NormalizeProgramRequestInput = {
+   physiqueSummary?: AIProgramPhysiqueSummary;
+   forceNewVariation?: boolean;
+   previousTemplateId?: string;
++  selectedTemplateId?: string;
+ };
+ 
+ export function normalizeProgramRequest(input: NormalizeProgramRequestInput): ProgramRequest {
